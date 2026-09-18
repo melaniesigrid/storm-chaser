@@ -1,0 +1,533 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Storm Chaser</title>
+<meta name="description" content="A field app for storm chasers. Live conditions, a Chase Index built from CAPE and lifted index, and photo reports stamped with the weather at the moment you pressed the shutter.">
+<link rel="icon" href="icons/thunderstorms-day-rain.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Archivo+Black&family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #14213A;
+    --ink-soft: #3A4761;
+    --bone: #F7F4EC;
+    --sky-1: #6E9AD4;
+    --sky-2: #A9C3E4;
+    --amber: #FFB400;
+    --coral: #FF5A47;
+    --coral-deep: #C4402E;
+    --teal: #4FD1C5;
+    --violet: #8E7CFF;
+    --night-1: #0B1026;
+    --night-2: #1B2347;
+    --night-3: #2A2140;
+    --card: #FFF8EC;
+    --display: 'Bricolage Grotesque', sans-serif;
+    --body: 'Instrument Sans', system-ui, sans-serif;
+    --mono: 'IBM Plex Mono', ui-monospace, monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    font-family: var(--body);
+    color: var(--ink);
+    background: var(--bone);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: var(--coral-deep); }
+  a:hover { color: var(--coral); }
+
+  .wrap { width: min(1120px, 100% - 48px); margin-inline: auto; }
+
+  /* ---------- hero ---------- */
+
+  .hero {
+    position: relative;
+    overflow: hidden;
+    padding: 72px 0 96px;
+    background: linear-gradient(170deg, var(--sky-1) 0%, var(--sky-2) 38%, #E8E4DA 74%, var(--bone) 100%);
+  }
+
+  .hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(60% 40% at 78% 8%, rgba(255, 255, 255, 0.55), transparent 70%),
+      radial-gradient(40% 30% at 12% 4%, rgba(255, 255, 255, 0.35), transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero .wrap { position: relative; z-index: 1; }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #22304D;
+  }
+
+  .wordmark { margin: 26px 0 0; position: relative; display: inline-block; }
+
+  .wordmark .light {
+    display: block;
+    font-family: var(--display);
+    font-weight: 200;
+    font-size: clamp(56px, 11vw, 116px);
+    line-height: 0.92;
+    letter-spacing: -0.04em;
+    color: var(--ink);
+  }
+
+  .wordmark .heavy {
+    display: block;
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: clamp(56px, 11vw, 116px);
+    line-height: 0.92;
+    letter-spacing: -0.04em;
+    color: var(--ink);
+  }
+
+  .ray {
+    height: 11px;
+    border-radius: 6px;
+    margin-top: 14px;
+    background: linear-gradient(90deg, var(--amber) 0%, var(--coral) 62%, var(--coral-deep) 100%);
+    transform-origin: left center;
+    animation: ray-draw 2.8s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+  }
+
+  @keyframes ray-draw {
+    0%   { transform: scaleX(0); }
+    45%  { transform: scaleX(1); }
+    100% { transform: scaleX(1); }
+  }
+
+  .bolt {
+    position: absolute;
+    right: -76px;
+    top: 4px;
+    width: 64px;
+    animation: bolt-drop 2.8s cubic-bezier(0.34, 1.56, 0.64, 1) infinite;
+  }
+
+  @keyframes bolt-drop {
+    0%, 26% { transform: translateY(-44px) scale(0.7); opacity: 0; }
+    44%     { transform: translateY(0) scale(1.14); opacity: 1; }
+    54%,100%{ transform: translateY(0) scale(1); opacity: 1; }
+  }
+
+  .lede {
+    margin: 32px 0 0;
+    max-width: 52ch;
+    font-size: clamp(19px, 2.2vw, 24px);
+    line-height: 1.5;
+    color: #22304D;
+  }
+
+  .cta-row { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 36px; }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 56px;
+    padding: 0 28px;
+    border-radius: 28px;
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 18px;
+    text-decoration: none;
+    border: 2px solid var(--ink);
+    transition: transform 120ms ease, box-shadow 120ms ease;
+  }
+
+  .btn-primary { background: var(--ink); color: #fff; }
+  .btn-primary:hover { color: #fff; transform: translateY(-2px); box-shadow: 0 10px 22px rgba(20, 33, 58, 0.25); }
+  .btn-ghost { background: transparent; color: var(--ink); }
+  .btn-ghost:hover { color: var(--ink); transform: translateY(-2px); }
+
+  .specs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 28px;
+    margin-top: 48px;
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #22304D;
+  }
+
+  .specs b { font-weight: 600; color: var(--ink); }
+
+  /* ---------- sections ---------- */
+
+  section { padding: 96px 0; }
+
+  h2 {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: clamp(34px, 5vw, 56px);
+    line-height: 1.02;
+    letter-spacing: -0.035em;
+    margin: 0 0 18px;
+  }
+
+  .section-lede {
+    max-width: 60ch;
+    font-size: 19px;
+    line-height: 1.6;
+    color: var(--ink-soft);
+    margin: 0 0 56px;
+  }
+
+  /* ---------- themes ---------- */
+
+  .themes { background: #ECE8DC; }
+
+  .phones {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 28px;
+  }
+
+  .phone {
+    border-radius: 34px;
+    padding: 24px 20px 26px;
+    min-height: 470px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    box-shadow: 0 22px 50px rgba(20, 33, 58, 0.22);
+  }
+
+  .phone--day   { background: linear-gradient(170deg, var(--sky-1), var(--sky-2) 42%, #E8E4DA 80%, var(--bone)); }
+  .phone--night { background: linear-gradient(170deg, var(--night-1), var(--night-2) 55%, var(--night-3)); }
+  .phone--card  { background: var(--card); border: 3px solid #14140F; }
+
+  .phone-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+
+  .phone-loc { font-family: var(--mono); font-size: 12px; letter-spacing: 1px; text-transform: uppercase; }
+
+  .temp { font-size: 62px; line-height: 1; letter-spacing: -0.04em; }
+  .phone--day .temp, .phone--night .temp { font-family: var(--display); font-weight: 800; }
+  .phone--card .temp { font-family: 'Archivo Black', sans-serif; }
+
+  .cond { font-size: 20px; font-weight: 600; margin-top: 6px; }
+
+  .panel { border-radius: 20px; padding: 16px; }
+  .phone--day .panel   { background: #fff; box-shadow: 0 8px 20px rgba(20, 33, 58, 0.14); }
+  .phone--night .panel { background: #141B33; border: 1px solid #2B3558; }
+  .phone--card .panel  { background: #fff; border: 3px solid #14140F; box-shadow: 4px 4px 0 #14140F; }
+
+  .panel-label { font-family: var(--mono); font-size: 12px; letter-spacing: 1px; text-transform: uppercase; }
+
+  .score { font-size: 46px; line-height: 1; letter-spacing: -0.04em; }
+  .phone--day .score, .phone--night .score { font-family: var(--display); font-weight: 800; }
+  .phone--card .score { font-family: 'Archivo Black', sans-serif; }
+
+  .ladder { display: flex; gap: 4px; margin-top: 12px; }
+  .ladder span { flex: 1; height: 11px; border-radius: 3px; }
+  .phone--card .ladder span { border: 2px solid #14140F; }
+
+  .theme-name { font-family: var(--mono); font-size: 12px; letter-spacing: 2px; text-transform: uppercase; margin-top: auto; }
+
+  .ink-day   { color: var(--ink); }
+  .muted-day { color: var(--ink-soft); }
+  .ink-night { color: #EDF1FA; }
+  .muted-night { color: #98A3C0; }
+  .ink-card  { color: #14140F; }
+  .muted-card { color: #3F3E34; }
+
+  /* ---------- features ---------- */
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+  }
+
+  .feature {
+    background: #fff;
+    border-radius: 24px;
+    padding: 30px 28px;
+    box-shadow: 0 10px 28px rgba(20, 33, 58, 0.09);
+  }
+
+  .feature img { width: 56px; height: 56px; }
+
+  .feature h3 {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 23px;
+    letter-spacing: -0.02em;
+    margin: 16px 0 10px;
+  }
+
+  .feature p { margin: 0; color: var(--ink-soft); line-height: 1.6; }
+
+  /* ---------- chase index ---------- */
+
+  .chase { background: var(--ink); color: var(--bone); }
+  .chase h2 { color: var(--bone); }
+  .chase .section-lede { color: #A9B4CC; }
+
+  .tiers { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; }
+
+  .tier { border-radius: 18px; padding: 22px 20px; background: #1C2540; }
+  .tier .bar { height: 10px; border-radius: 5px; margin-bottom: 16px; }
+  .tier .range { font-family: var(--mono); font-size: 13px; letter-spacing: 1px; color: #A9B4CC; }
+  .tier .name { font-family: var(--display); font-weight: 700; font-size: 21px; margin: 6px 0 0; letter-spacing: -0.02em; }
+
+  /* ---------- footer ---------- */
+
+  footer { padding: 64px 0 80px; background: #ECE8DC; }
+  .foot-row { display: flex; flex-wrap: wrap; gap: 20px; align-items: center; justify-content: space-between; }
+  .foot-note { font-family: var(--mono); font-size: 13px; color: var(--ink-soft); letter-spacing: 0.5px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ray, .bolt { animation: none; transform: none; opacity: 1; }
+  }
+
+  @media (max-width: 620px) {
+    .wrap { width: calc(100% - 32px); }
+    section { padding: 68px 0; }
+    .bolt { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <p class="eyebrow">Field instrument · iOS and Android</p>
+
+    <div class="wordmark">
+      <span class="light">storm</span>
+      <span class="heavy">chaser</span>
+      <div class="ray"></div>
+      <img class="bolt" src="icons/thunderstorms-day-rain.svg" alt="">
+    </div>
+
+    <p class="lede">
+      Read the sky where you stand. Storm Chaser pulls live conditions for your exact
+      position, scores how interesting the atmosphere actually is, and turns a photograph
+      into a timestamped, geotagged, weather-stamped report that never leaves your device.
+    </p>
+
+    <div class="cta-row">
+      <a class="btn btn-primary" href="https://github.com/melaniesigrid/storm-chaser">View the code</a>
+      <a class="btn btn-ghost" href="#themes">See the themes</a>
+    </div>
+
+    <div class="specs">
+      <span><b>React Native</b> Expo SDK 57</span>
+      <span><b>TypeScript</b> strict</span>
+      <span><b>Open-Meteo</b> keyless</span>
+      <span><b>91</b> unit tests</span>
+    </div>
+  </div>
+</header>
+
+<section id="themes" class="themes">
+  <div class="wrap">
+    <h2>Three themes, one token contract</h2>
+    <p class="section-lede">
+      No screen knows which theme is active. Every colour, typeface and radius resolves
+      through a named token, so a third theme is a data change rather than a UI change.
+      Pick one during onboarding; it stays put even when your phone flips to dark at sunset.
+    </p>
+
+    <div class="phones">
+
+      <article class="phone phone--day">
+        <div class="phone-top">
+          <span class="phone-loc ink-day">43.6532&deg;N 79.3832&deg;W</span>
+          <img src="icons/clear-day.svg" alt="" width="40" height="40">
+        </div>
+        <div>
+          <div class="temp ink-day">24&deg;</div>
+          <div class="cond ink-day">Thunderstorms</div>
+          <div class="muted-day" style="margin-top:4px;font-size:15px;">Feels like 27&deg;</div>
+        </div>
+        <div class="panel">
+          <div class="panel-label muted-day">Chase index</div>
+          <div style="display:flex;align-items:flex-end;gap:12px;margin-top:8px;">
+            <span class="score" style="color:#C4402E;">72</span>
+            <span class="muted-day" style="font-size:15px;padding-bottom:6px;">Severe potential</span>
+          </div>
+          <div class="ladder">
+            <span style="background:#5B6472"></span><span style="background:#4FD1C5"></span>
+            <span style="background:#F5C242"></span><span style="background:#FF5A47"></span>
+            <span style="background:#8E7CFF"></span>
+          </div>
+        </div>
+        <div class="theme-name ink-day">Skyward Day</div>
+      </article>
+
+      <article class="phone phone--night">
+        <div class="phone-top">
+          <span class="phone-loc ink-night">43.6532&deg;N 79.3832&deg;W</span>
+          <img src="icons/starry-night.svg" alt="" width="40" height="40">
+        </div>
+        <div>
+          <div class="temp ink-night">18&deg;</div>
+          <div class="cond ink-night">Thunderstorms</div>
+          <div class="muted-night" style="margin-top:4px;font-size:15px;">Feels like 16&deg;</div>
+        </div>
+        <div class="panel">
+          <div class="panel-label muted-night">Chase index</div>
+          <div style="display:flex;align-items:flex-end;gap:12px;margin-top:8px;">
+            <span class="score" style="color:#FF6B57;">72</span>
+            <span class="muted-night" style="font-size:15px;padding-bottom:6px;">Severe potential</span>
+          </div>
+          <div class="ladder">
+            <span style="background:#4A5470"></span><span style="background:#4FD1C5"></span>
+            <span style="background:#FFC24D"></span><span style="background:#FF6B57"></span>
+            <span style="background:#A78BFF"></span>
+          </div>
+        </div>
+        <div class="theme-name ink-night">Skyward Night</div>
+      </article>
+
+      <article class="phone phone--card">
+        <div class="phone-top">
+          <span class="phone-loc ink-card">43.65N 79.38W</span>
+          <img src="icons/thunderstorms-day-rain.svg" alt="" width="40" height="40">
+        </div>
+        <div>
+          <div class="temp ink-card">24&deg;</div>
+          <div class="cond ink-card" style="font-family:'Archivo Black',sans-serif;font-size:17px;">THUNDERSTORMS</div>
+          <div class="muted-card" style="margin-top:4px;font-size:15px;">Feels like 27&deg;</div>
+        </div>
+        <div class="panel">
+          <div class="panel-label muted-card">Chase index</div>
+          <div style="display:flex;align-items:flex-end;gap:12px;margin-top:8px;">
+            <span class="score ink-card">72</span>
+            <span class="muted-card" style="font-size:15px;padding-bottom:6px;">Severe potential</span>
+          </div>
+          <div class="ladder">
+            <span style="background:#5B6472"></span><span style="background:#4FD1C5"></span>
+            <span style="background:#F5C242"></span><span style="background:#FF5A47"></span>
+            <span style="background:#8E7CFF"></span>
+          </div>
+        </div>
+        <div class="theme-name ink-card">Field Card</div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Built for the moment you are standing in a field</h2>
+    <p class="section-lede">
+      Everything here answers a question a chaser actually has, at the moment they have it.
+    </p>
+
+    <div class="grid">
+
+      <article class="feature">
+        <img src="icons/thermometer-celsius.svg" alt="">
+        <h3>The numbers that matter</h3>
+        <p>
+          Temperature and wind, plus the two variables generic weather apps leave out:
+          CAPE and lifted index. Those are what tell you whether the atmosphere can
+          actually build something.
+        </p>
+      </article>
+
+      <article class="feature">
+        <img src="icons/tornado.svg" alt="">
+        <h3>A Chase Index, not a forecast</h3>
+        <p>
+          A 0 to 100 score blending the observed weather code, gust strength, rainfall rate
+          and both convective indices, with a ranked list of what drove it. Pure, tested,
+          and honest about being a judgement aid.
+        </p>
+      </article>
+
+      <article class="feature">
+        <img src="icons/compass.svg" alt="">
+        <h3>Photo first, record second</h3>
+        <p>
+          If the image cannot be copied into permanent storage, the report is never written.
+          The log can never contain an entry pointing at a file that is not there.
+        </p>
+      </article>
+
+      <article class="feature">
+        <img src="icons/raindrops.svg" alt="">
+        <h3>Weather frozen onto the report</h3>
+        <p>
+          No forecast API serves historical conditions for an arbitrary past timestamp, so
+          the snapshot is copied onto the record at capture time. A report stays readable
+          years later.
+        </p>
+      </article>
+
+      <article class="feature">
+        <img src="icons/windsock.svg" alt="">
+        <h3>Works with no signal</h3>
+        <p>
+          A persisted query cache, an explicit offline banner over the last good reading,
+          and a bundled sample dataset that is always labelled as sample data.
+        </p>
+      </article>
+
+      <article class="feature">
+        <img src="icons/barometer.svg" alt="">
+        <h3>Legible in daylight</h3>
+        <p>
+          Nothing renders below 12px, every tappable control clears 44px, and contrast is a
+          unit test: WCAG AA is asserted across all three themes on every build.
+        </p>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<section class="chase">
+  <div class="wrap">
+    <h2>Five tiers, one meaning</h2>
+    <p class="section-lede">
+      The same ladder colours the index meter, the map pins and the report cards. A colour
+      means the same thing everywhere in the app, and each theme only changes its values.
+    </p>
+
+    <div class="tiers">
+      <div class="tier"><div class="bar" style="background:#5B6472"></div><div class="range">0 &ndash; 14</div><p class="name">Dormant</p></div>
+      <div class="tier"><div class="bar" style="background:#4FD1C5"></div><div class="range">15 &ndash; 34</div><p class="name">Unsettled</p></div>
+      <div class="tier"><div class="bar" style="background:#F5C242"></div><div class="range">35 &ndash; 59</div><p class="name">Active</p></div>
+      <div class="tier"><div class="bar" style="background:#FF5A47"></div><div class="range">60 &ndash; 79</div><p class="name">Severe</p></div>
+      <div class="tier"><div class="bar" style="background:#8E7CFF"></div><div class="range">80 &ndash; 100</div><p class="name">Extreme</p></div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot-row">
+    <div>
+      <div style="font-family:var(--display);font-weight:800;font-size:26px;letter-spacing:-0.03em;">stormchaser</div>
+      <p class="foot-note" style="margin:8px 0 0;">Built for the Speer Technologies mobile assessment.</p>
+    </div>
+    <a class="btn btn-ghost" href="https://github.com/melaniesigrid/storm-chaser">GitHub</a>
+  </div>
+</footer>
+
+</body>
+</html>
