@@ -68,6 +68,8 @@ export interface HourlyPoint {
   windGustKmh: number;
   capeJkg: number | null;
   condition: WeatherCondition;
+  /** Drives day vs night weather icons across the forecast strip. */
+  isDay: boolean;
 }
 
 export interface DailyPoint {

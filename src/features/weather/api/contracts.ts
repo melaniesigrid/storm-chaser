@@ -31,6 +31,7 @@ export interface OpenMeteoResponse {
     wind_gusts_10m?: (number | null)[];
     cape?: (number | null)[];
     lifted_index?: (number | null)[];
+    is_day?: (number | null)[];
   };
   daily?: {
     time: string[];
@@ -67,6 +68,7 @@ export const HOURLY_FIELDS = [
   'wind_gusts_10m',
   'cape',
   'lifted_index',
+  'is_day',
 ].join(',');
 
 export const DAILY_FIELDS = [

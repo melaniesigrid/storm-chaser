@@ -1,6 +1,7 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Alert, Image, ScrollView, View } from 'react-native';
 
+import { useAppTheme } from '@/core/theme/useAppTheme';
 import { Button, Panel, Skeleton, Text } from '@/core/ui';
 import {
   formatBearing,
@@ -21,12 +22,13 @@ import { describeStormType } from '@/features/storms/model/stormTypes';
 export default function StormDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const { theme } = useAppTheme();
   const { data: report, isLoading, isError } = useStormReport(id);
   const deleteReport = useDeleteStormReport();
 
   if (isLoading) {
     return (
-      <View className="flex-1 bg-bone-50 p-4 dark:bg-ink-800">
+      <View style={{ flex: 1, backgroundColor: theme.colors.background, padding: 16 }}>
         <Skeleton height={240} />
       </View>
     );
@@ -34,11 +36,11 @@ export default function StormDetailScreen() {
 
   if (isError || !report) {
     return (
-      <View className="flex-1 items-center justify-center bg-bone-50 p-6 dark:bg-ink-800">
-        <Text variant="title" className="mb-2">
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: theme.colors.background, padding: 24 }}>
+        <Text variant="title" style={{ marginBottom: 8 }}>
           Report not found
         </Text>
-        <Text variant="caption" className="mb-6 text-center">
+        <Text variant="body" tone="muted" style={{ marginBottom: 24, textAlign: 'center' }}>
           It may have been deleted from this device.
         </Text>
         <Button title="Back to log" tone="secondary" onPress={() => router.replace('/log')} />
@@ -63,31 +65,31 @@ export default function StormDetailScreen() {
 
   return (
     <ScrollView
-      className="flex-1 bg-bone-50 dark:bg-ink-800"
-      contentContainerClassName="p-4 pb-12"
+      style={{ flex: 1, backgroundColor: theme.colors.background }}
+      contentContainerStyle={{ padding: 16, paddingBottom: 48 }}
     >
       <Image
         source={{ uri: report.photoUri }}
-        className="mb-4 h-72 w-full rounded-panel"
+        style={{ marginBottom: 16, height: 288, width: '100%', borderRadius: theme.radius.panel }}
         resizeMode="cover"
         accessibilityIgnoresInvertColors
         accessibilityLabel={`Photograph of a ${type.label.toLowerCase()}`}
       />
 
-      <Panel className="mb-3">
-        <Text variant="display" className="mb-1">
+      <Panel style={{ marginBottom: 12 }}>
+        <Text variant="display" style={{ marginBottom: 4 }}>
           {type.label}
         </Text>
         <Text variant="caption">{formatTimestamp(report.capturedAt)}</Text>
       </Panel>
 
       {report.notes ? (
-        <Panel label="Field notes" className="mb-3">
+        <Panel label="Field notes" style={{ marginBottom: 12 }}>
           <Text variant="body">{report.notes}</Text>
         </Panel>
       ) : null}
 
-      <Panel label="Position" className="mb-3">
+      <Panel label="Position" style={{ marginBottom: 12 }}>
         <Row
           label="Coordinates"
           value={
@@ -107,7 +109,7 @@ export default function StormDetailScreen() {
       </Panel>
 
       {report.conditions ? (
-        <Panel label="Conditions at capture" className="mb-3">
+        <Panel label="Conditions at capture" style={{ marginBottom: 12 }}>
           <Row label="Observed" value={report.conditions.conditionLabel} />
           <Row label="Temperature" value={formatTemperature(report.conditions.temperatureC)} />
           <Row label="Wind" value={formatSpeed(report.conditions.windSpeedKmh)} />
@@ -131,7 +133,7 @@ export default function StormDetailScreen() {
         </Panel>
       ) : null}
 
-      <Panel label="Record" className="mb-4">
+      <Panel label="Record" style={{ marginBottom: 16 }}>
         <Row label="Sync" value={report.syncState} />
         <Row label="Id" value={report.id} />
       </Panel>
@@ -147,10 +149,24 @@ export default function StormDetailScreen() {
 }
 
 function Row({ label, value }: { label: string; value: string }) {
+  const { theme } = useAppTheme();
+
   return (
-    <View className="flex-row items-center justify-between border-b border-bone-200 py-2 dark:border-ink-600">
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        borderBottomWidth: 1,
+        borderBottomColor: theme.colors.border,
+        paddingVertical: 10,
+      }}
+    >
       <Text variant="label">{label}</Text>
-      <Text className="ml-4 flex-1 text-right font-mono text-[12px] text-ink-800 dark:text-bone-50">
+      <Text
+        variant="body"
+        style={{ marginLeft: 16, flex: 1, textAlign: 'right', fontFamily: theme.type.mono, fontSize: 14 }}
+      >
         {value}
       </Text>
     </View>

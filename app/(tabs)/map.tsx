@@ -24,7 +24,7 @@ export default function MapScreen() {
 
   if (!located.length) {
     return (
-      <View className="flex-1 bg-bone-50 dark:bg-ink-800">
+      <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
         <EmptyState
           illustration={<WeatherIcon name="compass" size={96} />}
           title="Nothing to plot"

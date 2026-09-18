@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import { useRef, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 
+import { useAppTheme } from '@/core/theme/useAppTheme';
 import { Button, Panel, Text } from '@/core/ui';
 import { useDeviceLocation } from '@/features/location/useDeviceLocation';
 import {
@@ -18,6 +19,7 @@ type Phase = { name: 'camera' } | { name: 'metadata'; photoUri: string; captured
 
 export default function CaptureScreen() {
   const router = useRouter();
+  const { theme } = useAppTheme();
   const cameraRef = useRef<CameraView>(null);
 
   const [permission, requestPermission] = useCameraPermissions();
@@ -78,12 +80,12 @@ export default function CaptureScreen() {
 
   if (!permission.granted) {
     return (
-      <View className="flex-1 justify-center bg-bone-50 p-6 dark:bg-ink-800">
+      <View style={{ flex: 1, justifyContent: 'center', backgroundColor: theme.colors.background, padding: 24 }}>
         <Panel label="Camera access">
-          <Text variant="title" className="mb-2">
+          <Text variant="title" style={{ marginBottom: 8 }}>
             Storm Chaser needs the camera
           </Text>
-          <Text variant="caption" className="mb-6">
+          <Text variant="body" tone="muted" style={{ marginBottom: 24 }}>
             Photographs are the core of a field report. Nothing is uploaded: images stay
             on this device unless you enable cloud sync.
           </Text>
@@ -95,20 +97,20 @@ export default function CaptureScreen() {
 
   if (phase.name === 'camera') {
     return (
-      <View className="flex-1 bg-ink-900">
+      <View style={{ flex: 1, backgroundColor: '#05070B' }}>
         <CameraView ref={cameraRef} style={{ flex: 1 }} facing="back" />
 
-        <View className="absolute left-0 right-0 top-4 px-5">
-          <Text variant="label" className="text-bone-100">
+        <View style={{ position: 'absolute', left: 0, right: 0, top: 16, paddingHorizontal: 20 }}>
+          <Text variant="label" color="#F2F6FA">
             {location.coordinates
               ? `FIX ACQUIRED · ${location.coordinates.latitude.toFixed(3)}, ${location.coordinates.longitude.toFixed(3)}`
               : 'NO POSITION FIX'}
           </Text>
         </View>
 
-        <View className="absolute bottom-0 left-0 right-0 items-center pb-12">
+        <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, alignItems: 'center', paddingBottom: 48 }}>
           {errorMessage ? (
-            <Text variant="caption" className="mb-3 text-supercell">
+            <Text variant="message" color="#FF6B57" style={{ marginBottom: 12 }}>
               {errorMessage}
             </Text>
           ) : null}
@@ -117,7 +119,7 @@ export default function CaptureScreen() {
             accessibilityLabel="Capture photo"
             disabled={shooting}
             onPress={() => void takePhoto()}
-            className={`h-20 w-20 items-center justify-center rounded-full border-4 border-bone-50 ${shooting ? 'bg-ink-500' : 'bg-lightning'}`}
+            style={{ height: 84, width: 84, alignItems: 'center', justifyContent: 'center', borderRadius: 42, borderWidth: 5, borderColor: '#F2F6FA', backgroundColor: shooting ? '#3A4553' : theme.colors.accent }}
           />
         </View>
       </View>
@@ -126,8 +128,8 @@ export default function CaptureScreen() {
 
   return (
     <ScrollView
-      className="flex-1 bg-bone-50 dark:bg-ink-800"
-      contentContainerClassName="p-4"
+      style={{ flex: 1, backgroundColor: theme.colors.background }}
+      contentContainerStyle={{ padding: 16 }}
       keyboardShouldPersistTaps="handled"
     >
       <StormMetadataForm
@@ -145,9 +147,20 @@ export default function CaptureScreen() {
 }
 
 function Centered({ message }: { message: string }) {
+  const { theme } = useAppTheme();
+
   return (
-    <View className="flex-1 items-center justify-center bg-bone-50 dark:bg-ink-800">
-      <Text variant="caption">{message}</Text>
+    <View
+      style={{
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: theme.colors.background,
+      }}
+    >
+      <Text variant="body" tone="muted">
+        {message}
+      </Text>
     </View>
   );
 }

@@ -1,39 +1,62 @@
 import { ScrollView, View } from 'react-native';
 
+import { WeatherIcon } from '@/core/icons/WeatherIcon';
+import { useAppTheme } from '@/core/theme/useAppTheme';
 import { Panel, Text } from '@/core/ui';
 import { formatHourLabel, formatPercent, formatTemperature } from '@/core/utils/format';
 
+import { iconForCondition } from '../model/weatherIcons';
 import type { HourlyPoint } from '../model/types';
 
 export function ForecastStrip({ hours }: { hours: HourlyPoint[] }) {
+  const { theme } = useAppTheme();
+
   if (!hours.length) return null;
 
   return (
-    <Panel label="Next 12 hours" className="mb-3">
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerClassName="gap-5 pr-2"
-      >
-        {hours.map((hour, index) => (
-          <View key={hour.time} className="items-center">
-            <Text variant="label">{index === 0 ? 'Now' : formatHourLabel(hour.time)}</Text>
-            <Text className="my-2 text-[18px] text-lightning">{hour.condition.glyph}</Text>
-            <Text className="font-monoMedium text-[15px] text-ink-800 dark:text-bone-50">
-              {formatTemperature(hour.temperatureC)}
-            </Text>
-            <Text variant="caption" className="mt-1 font-mono text-[11px] text-radar">
-              {formatPercent(hour.precipitationProbabilityPct)}
-            </Text>
-            {hour.capeJkg !== null ? (
-              <Text variant="caption" className="mt-1 font-mono text-[10px]">
-                {Math.round(hour.capeJkg)}
+    <Panel label="Next 12 hours" style={{ marginBottom: 12 }}>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+        <View style={{ flexDirection: 'row', gap: 18, paddingRight: 8 }}>
+          {hours.map((hour, index) => (
+            <View key={hour.time} style={{ alignItems: 'center', minWidth: 52 }}>
+              <Text variant="label">{index === 0 ? 'Now' : formatHourLabel(hour.time)}</Text>
+
+              <View style={{ marginVertical: 8 }}>
+                <WeatherIcon
+                  name={iconForCondition(hour.condition, !hour.isDay)}
+                  size={38}
+                />
+              </View>
+
+              <Text
+                variant="body"
+                style={{ fontFamily: theme.type.monoMedium, fontSize: 16 }}
+              >
+                {formatTemperature(hour.temperatureC)}
               </Text>
-            ) : null}
-          </View>
-        ))}
+
+              <Text
+                variant="caption"
+                color={theme.colors.tierText.unsettled}
+                style={{ marginTop: 4, fontFamily: theme.type.mono, fontSize: 13 }}
+              >
+                {formatPercent(hour.precipitationProbabilityPct)}
+              </Text>
+
+              {hour.capeJkg !== null ? (
+                <Text
+                  variant="caption"
+                  style={{ marginTop: 3, fontFamily: theme.type.mono, fontSize: 12 }}
+                >
+                  {Math.round(hour.capeJkg)}
+                </Text>
+              ) : null}
+            </View>
+          ))}
+        </View>
       </ScrollView>
-      <Text variant="caption" className="mt-3 text-[11px]">
+
+      <Text variant="caption" style={{ marginTop: 12 }}>
         Rows: temperature, precipitation probability, CAPE (J/kg).
       </Text>
     </Panel>

@@ -2,19 +2,21 @@ import { useRouter } from 'expo-router';
 import { FlatList, Pressable, View } from 'react-native';
 
 import { WeatherIcon } from '@/core/icons/WeatherIcon';
+import { useAppTheme } from '@/core/theme/useAppTheme';
 import { EmptyState, Panel, Skeleton, Text } from '@/core/ui';
 import { StormCard } from '@/features/storms/components/StormCard';
 import { useStormReports } from '@/features/storms/hooks/useStormLog';
 
 export default function FieldLogScreen() {
   const router = useRouter();
+  const { theme } = useAppTheme();
   const { data, isLoading, refetch, isRefetching } = useStormReports();
 
   if (isLoading) {
     return (
-      <View className="flex-1 bg-bone-50 p-4 dark:bg-ink-800">
+      <View style={{ flex: 1, backgroundColor: theme.colors.background, padding: 16 }}>
         {[0, 1, 2].map((key) => (
-          <Panel key={key} className="mb-3">
+          <Panel key={key} style={{ marginBottom: 12 }}>
             <Skeleton height={72} />
           </Panel>
         ))}
@@ -25,16 +27,16 @@ export default function FieldLogScreen() {
   const reports = data ?? [];
 
   return (
-    <View className="flex-1 bg-bone-50 dark:bg-ink-800">
+    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <FlatList
         data={reports}
         keyExtractor={(report) => report.id}
-        contentContainerClassName="p-4 pb-28"
+        contentContainerStyle={{ padding: 16, paddingBottom: 112 }}
         refreshing={isRefetching}
         onRefresh={() => void refetch()}
         ListHeaderComponent={
           reports.length ? (
-            <Text variant="label" className="mb-3">
+            <Text variant="label" style={{ marginBottom: 12 }}>
               {`${reports.length} report${reports.length === 1 ? '' : 's'} on this device`}
             </Text>
           ) : null
@@ -58,9 +60,9 @@ export default function FieldLogScreen() {
           accessibilityRole="button"
           accessibilityLabel="Document a storm"
           onPress={() => router.push('/capture')}
-          className="absolute bottom-6 right-5 h-14 w-14 items-center justify-center rounded-full bg-lightning active:opacity-80"
+          style={{ position: 'absolute', bottom: 24, right: 20, height: 60, width: 60, alignItems: 'center', justifyContent: 'center', borderRadius: 30, backgroundColor: theme.colors.accent, borderWidth: theme.borderWidth, borderColor: theme.colors.border }}
         >
-          <Text className="text-[26px] leading-[28px] text-ink-900">+</Text>
+          <Text variant="title" color={theme.colors.onAccent} style={{ fontSize: 30, lineHeight: 34 }}>+</Text>
         </Pressable>
       ) : null}
     </View>

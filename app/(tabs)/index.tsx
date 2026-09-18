@@ -2,7 +2,9 @@ import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { RefreshControl, ScrollView, View } from 'react-native';
 
-import { Button, Panel, StatusBanner, Text } from '@/core/ui';
+import { WeatherIcon } from '@/core/icons/WeatherIcon';
+import { useAppTheme } from '@/core/theme/useAppTheme';
+import { Button, Panel, Screen, StatusBanner, Text } from '@/core/ui';
 import {
   formatBearing,
   formatCoordinates,
@@ -22,12 +24,14 @@ import { OutlookList } from '@/features/weather/components/OutlookList';
 import { WeatherSkeleton } from '@/features/weather/components/WeatherSkeleton';
 import { WeatherUnavailable } from '@/features/weather/components/WeatherUnavailable';
 import { useWeatherSnapshot } from '@/features/weather/hooks/useWeather';
+import { iconForCondition } from '@/features/weather/model/weatherIcons';
 import { useNetworkStatus } from '@/services/net/useNetworkStatus';
 
 const STALE_AFTER_MS = 10 * 60 * 1000;
 
 export default function ConditionsScreen() {
   const router = useRouter();
+  const { theme } = useAppTheme();
   const location = useDeviceLocation();
   const network = useNetworkStatus();
   const [useSample, setUseSample] = useState(false);
@@ -65,20 +69,38 @@ export default function ConditionsScreen() {
 
   const metrics: Metric[] = snapshot
     ? [
-        { label: 'Wind', value: formatSpeed(snapshot.current.windSpeedKmh) },
+        { label: 'Wind', value: formatSpeed(snapshot.current.windSpeedKmh), icon: 'windsock' },
         {
           label: 'Gusts',
           value: formatSpeed(snapshot.current.windGustKmh),
           emphasis: snapshot.current.windGustKmh >= 60,
+          icon: 'windsock',
         },
-        { label: 'Direction', value: formatBearing(snapshot.current.windDirectionDeg) },
-        { label: 'Pressure', value: formatPressure(snapshot.current.pressureHpa) },
+        {
+          label: 'Direction',
+          value: formatBearing(snapshot.current.windDirectionDeg),
+          icon: 'compass',
+        },
+        {
+          label: 'Pressure',
+          value: formatPressure(snapshot.current.pressureHpa),
+          icon: 'barometer',
+        },
         {
           label: 'Precipitation',
           value: formatPrecipitation(snapshot.current.precipitationMm),
+          icon: 'raindrops',
         },
-        { label: 'Humidity', value: formatPercent(snapshot.current.humidityPct) },
-        { label: 'Cloud cover', value: formatPercent(snapshot.current.cloudCoverPct) },
+        {
+          label: 'Humidity',
+          value: formatPercent(snapshot.current.humidityPct),
+          icon: 'raindrops',
+        },
+        {
+          label: 'Cloud cover',
+          value: formatPercent(snapshot.current.cloudCoverPct),
+          icon: 'partly-cloudy-day',
+        },
         {
           label: 'CAPE',
           value:
@@ -86,98 +108,106 @@ export default function ConditionsScreen() {
               ? 'n/a'
               : `${Math.round(snapshot.current.convective.capeJkg)}`,
           emphasis: (snapshot.current.convective.capeJkg ?? 0) >= 1500,
+          icon: 'thermometer-celsius',
         },
       ]
     : [];
 
   return (
-    <ScrollView
-      className="flex-1 bg-bone-50 dark:bg-ink-800"
-      contentContainerClassName="p-4 pb-12"
-      refreshControl={
-        <RefreshControl refreshing={query.isRefetching} onRefresh={refresh} tintColor="#F5C242" />
-      }
-    >
-      {!network.isInternetReachable ? (
-        <StatusBanner tone="offline" message="Offline. Showing the last saved reading." />
-      ) : null}
-
-      {isStale ? (
-        <StatusBanner
-          tone="stale"
-          message={`Reading is ${formatRelativeTime(new Date(query.dataUpdatedAt).toISOString())}. Pull to refresh.`}
-        />
-      ) : null}
-
-      {useSample ? (
-        <StatusBanner
-          tone="alert"
-          message="Sample data. Not a live observation. Pull to refresh for live conditions."
-        />
-      ) : null}
-
-      {isInitialLoading ? <WeatherSkeleton /> : null}
-
-      {!isInitialLoading && !snapshot ? (
-        <WeatherUnavailable
-          title={location.status === 'denied' ? 'Location is off' : 'No weather data found'}
-          reason={
-            location.error?.message ??
-            (query.error instanceof Error
-              ? query.error.message
-              : 'The weather service did not return conditions for this position.')
-          }
-          onRetry={() => void refresh()}
-          onUseSample={() => setUseSample(true)}
-        />
-      ) : null}
-
-      {snapshot ? (
-        <>
-          <Panel className="mb-3">
-            <View className="flex-row items-start justify-between">
-              <View className="flex-1">
-                <Text variant="label" className="mb-2">
-                  {location.coordinates
-                    ? formatCoordinates(
-                        location.coordinates.latitude,
-                        location.coordinates.longitude,
-                        3,
-                      )
-                    : 'Position unknown'}
-                </Text>
-                <Text className="font-bold text-[56px] leading-[58px] text-ink-800 dark:text-bone-50">
-                  {formatTemperature(snapshot.current.temperatureC)}
-                </Text>
-                <Text variant="body" className="mt-1">
-                  {snapshot.current.condition.label}
-                </Text>
-                <Text variant="caption" className="mt-0.5">
-                  {`Feels like ${formatTemperature(snapshot.current.apparentTemperatureC)} · updated ${formatRelativeTime(snapshot.fetchedAt)}`}
-                </Text>
-              </View>
-              <Text className="text-[44px] leading-[48px] text-lightning">
-                {snapshot.current.condition.glyph}
-              </Text>
-            </View>
-          </Panel>
-
-          <ChaseIndexPanel chase={snapshot.current.chase} />
-
-          <Panel label="Instruments" className="mb-3">
-            <MetricGrid metrics={metrics} />
-          </Panel>
-
-          <ForecastStrip hours={snapshot.hourly} />
-          <OutlookList days={snapshot.daily} />
-
-          <Button
-            title="Document this storm"
-            onPress={() => router.push('/capture')}
-            className="mt-2"
+    <Screen edgeToEdge>
+      <ScrollView
+        contentContainerStyle={{ padding: 16, paddingBottom: 48 }}
+        refreshControl={
+          <RefreshControl
+            refreshing={query.isRefetching}
+            onRefresh={refresh}
+            tintColor={theme.colors.accent}
           />
-        </>
-      ) : null}
-    </ScrollView>
+        }
+      >
+        {!network.isInternetReachable ? (
+          <StatusBanner tone="offline" message="Offline. Showing the last saved reading." />
+        ) : null}
+
+        {isStale ? (
+          <StatusBanner
+            tone="stale"
+            message={`Reading is ${formatRelativeTime(new Date(query.dataUpdatedAt).toISOString())}. Pull to refresh.`}
+          />
+        ) : null}
+
+        {useSample ? (
+          <StatusBanner
+            tone="alert"
+            message="Sample data. Not a live observation. Pull to refresh for live conditions."
+          />
+        ) : null}
+
+        {isInitialLoading ? <WeatherSkeleton /> : null}
+
+        {!isInitialLoading && !snapshot ? (
+          <WeatherUnavailable
+            title={location.status === 'denied' ? 'Location is off' : 'No weather data found'}
+            reason={
+              location.error?.message ??
+              (query.error instanceof Error
+                ? query.error.message
+                : 'The weather service did not return conditions for this position.')
+            }
+            onRetry={() => void refresh()}
+            onUseSample={() => setUseSample(true)}
+          />
+        ) : null}
+
+        {snapshot ? (
+          <>
+            <Panel style={{ marginBottom: 12 }}>
+              <View style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+                <View style={{ flex: 1 }}>
+                  <Text variant="label" style={{ marginBottom: 10 }}>
+                    {location.coordinates
+                      ? formatCoordinates(
+                          location.coordinates.latitude,
+                          location.coordinates.longitude,
+                          3,
+                        )
+                      : 'Position unknown'}
+                  </Text>
+
+                  <Text variant="hero">{formatTemperature(snapshot.current.temperatureC)}</Text>
+
+                  <Text variant="title" style={{ marginTop: 6 }}>
+                    {snapshot.current.condition.label}
+                  </Text>
+                  <Text variant="caption" style={{ marginTop: 6 }}>
+                    {`Feels like ${formatTemperature(snapshot.current.apparentTemperatureC)} · updated ${formatRelativeTime(snapshot.fetchedAt)}`}
+                  </Text>
+                </View>
+
+                <WeatherIcon
+                  name={iconForCondition(snapshot.current.condition, !snapshot.current.isDay)}
+                  size={104}
+                />
+              </View>
+            </Panel>
+
+            <ChaseIndexPanel chase={snapshot.current.chase} />
+
+            <Panel label="Instruments" style={{ marginBottom: 12 }}>
+              <MetricGrid metrics={metrics} />
+            </Panel>
+
+            <ForecastStrip hours={snapshot.hourly} />
+            <OutlookList days={snapshot.daily} />
+
+            <Button
+              title="Document this storm"
+              onPress={() => router.push('/capture')}
+              style={{ marginTop: 8 }}
+            />
+          </>
+        ) : null}
+      </ScrollView>
+    </Screen>
   );
 }

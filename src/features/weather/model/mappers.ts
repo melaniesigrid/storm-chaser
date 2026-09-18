@@ -100,6 +100,9 @@ function toHourlyPoints(raw: OpenMeteoResponse, startIndex: number): HourlyPoint
       windGustKmh: numberOr(pick(hourly.wind_gusts_10m, index), 0),
       capeJkg: pick(hourly.cape, index),
       condition: describeWeatherCode(pick(hourly.weather_code, index)),
+      // Open-Meteo omits is_day for some models; daylight is the safer default
+      // because a wrongly-lit sun reads as a glitch, a wrongly-lit moon as night.
+      isDay: pick(hourly.is_day, index) !== 0,
     });
   }
 

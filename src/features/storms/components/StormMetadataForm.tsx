@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Image, TextInput, View } from 'react-native';
 
+import { useAppTheme } from '@/core/theme/useAppTheme';
 import { Button, Chip, Panel, Text } from '@/core/ui';
 import {
   formatCoordinates,
@@ -11,7 +12,7 @@ import {
 } from '@/core/utils/format';
 import type { Coordinates } from '@/features/weather/model/types';
 
-import { STORM_TYPES } from '../model/stormTypes';
+import { chaseLevelForTier, STORM_TYPES } from '../model/stormTypes';
 import type { CapturedConditions, StormTypeId } from '../model/types';
 
 export interface StormMetadataFormValues {
@@ -45,25 +46,27 @@ export function StormMetadataForm({
   onSubmit,
   onCancel,
 }: StormMetadataFormProps) {
+  const { theme } = useAppTheme();
   const [stormType, setStormType] = useState<StormTypeId>('supercell');
   const [notes, setNotes] = useState('');
 
   return (
-    <View className="gap-3">
+    <View style={{ gap: 12 }}>
       <Image
         source={{ uri: photoUri }}
-        className="h-56 w-full rounded-panel"
+        style={{ height: 224, width: '100%', borderRadius: theme.radius.panel }}
         resizeMode="cover"
         accessibilityIgnoresInvertColors
       />
 
       <Panel label="Classification">
-        <View className="flex-row flex-wrap gap-2">
+        <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
           {STORM_TYPES.map((type) => (
             <Chip
               key={type.id}
               label={type.label}
               selected={stormType === type.id}
+              accent={theme.colors.tier[chaseLevelForTier(type.tier)]}
               onPress={() => setStormType(type.id)}
             />
           ))}
@@ -78,12 +81,18 @@ export function StormMetadataForm({
           numberOfLines={4}
           maxLength={500}
           placeholder="Structure, rotation, hail size, road and bearing..."
-          placeholderTextColor="#6B7280"
+          placeholderTextColor={theme.colors.textMuted}
           textAlignVertical="top"
           accessibilityLabel="Field notes"
-          className="min-h-[90px] font-sans text-[15px] text-ink-800 dark:text-bone-50"
+          style={{
+            minHeight: 96,
+            fontFamily: theme.type.body,
+            fontSize: 17,
+            lineHeight: 24,
+            color: theme.colors.text,
+          }}
         />
-        <Text variant="label" className="mt-2 text-right">
+        <Text variant="label" style={{ marginTop: 8, textAlign: 'right' }}>
           {`${notes.length}/500`}
         </Text>
       </Panel>
@@ -110,17 +119,17 @@ export function StormMetadataForm({
             />
           </>
         ) : (
-          <Row label="Conditions" value="Not available at capture time" />
+          <Row label="Conditions" value="Not available at capture time" last />
         )}
       </Panel>
 
       {errorMessage ? (
-        <Text variant="caption" className="text-supercell">
+        <Text variant="message" color={theme.colors.tierText.severe}>
           {errorMessage}
         </Text>
       ) : null}
 
-      <View className="gap-3 pb-10">
+      <View style={{ gap: 12, paddingBottom: 40 }}>
         <Button
           title="Save to log"
           loading={saving}
@@ -132,11 +141,28 @@ export function StormMetadataForm({
   );
 }
 
-function Row({ label, value }: { label: string; value: string }) {
+function Row({ label, value, last = false }: { label: string; value: string; last?: boolean }) {
+  const { theme } = useAppTheme();
+
   return (
-    <View className="flex-row items-center justify-between border-b border-bone-200 py-2 last:border-b-0 dark:border-ink-600">
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: 12,
+        paddingVertical: 10,
+        borderBottomWidth: last ? 0 : 1,
+        borderBottomColor: theme.colors.border,
+      }}
+    >
       <Text variant="label">{label}</Text>
-      <Text className="font-mono text-[12px] text-ink-800 dark:text-bone-50">{value}</Text>
+      <Text
+        variant="body"
+        style={{ flex: 1, textAlign: 'right', fontFamily: theme.type.mono, fontSize: 14 }}
+      >
+        {value}
+      </Text>
     </View>
   );
 }

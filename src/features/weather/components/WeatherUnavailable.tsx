@@ -1,5 +1,6 @@
 import { View } from 'react-native';
 
+import { WeatherIcon } from '@/core/icons/WeatherIcon';
 import { Button, Panel, Text } from '@/core/ui';
 
 export interface WeatherUnavailableProps {
@@ -20,15 +21,17 @@ export function WeatherUnavailable({
   onUseSample,
 }: WeatherUnavailableProps) {
   return (
-    <Panel className="items-center px-5 py-10">
-      <Text className="mb-4 text-[40px] leading-[44px] text-supercell">⌁</Text>
-      <Text variant="title" className="mb-2 text-center">
+    <Panel style={{ alignItems: 'center', paddingHorizontal: 20, paddingVertical: 36 }}>
+      <WeatherIcon name="not-available" size={84} />
+
+      <Text variant="title" style={{ marginTop: 18, marginBottom: 8, textAlign: 'center' }}>
         {title}
       </Text>
-      <Text variant="caption" className="mb-6 text-center">
+      <Text variant="body" tone="muted" style={{ marginBottom: 24, textAlign: 'center' }}>
         {reason}
       </Text>
-      <View className="w-full gap-3">
+
+      <View style={{ width: '100%', gap: 12 }}>
         <Button title="Try again" onPress={onRetry} />
         {onUseSample ? (
           <Button title="Use sample data" tone="secondary" onPress={onUseSample} />
