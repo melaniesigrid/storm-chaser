@@ -1,5 +1,5 @@
-import { Tabs } from 'expo-router';
-import { Text, type ColorValue } from 'react-native';
+import { Tabs, useRouter } from 'expo-router';
+import { Pressable, Text, type ColorValue } from 'react-native';
 
 import { useAppTheme } from '@/core/theme/useAppTheme';
 
@@ -8,6 +8,7 @@ function TabGlyph({ glyph, color }: { glyph: string; color: ColorValue }) {
 }
 
 export default function TabsLayout() {
+  const router = useRouter();
   const { theme } = useAppTheme();
   const { colors, type } = theme;
 
@@ -17,6 +18,27 @@ export default function TabsLayout() {
         headerStyle: { backgroundColor: colors.background },
         headerTintColor: colors.text,
         headerTitleStyle: { fontFamily: type.display, fontSize: 20 },
+        headerRight: () => (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Appearance settings"
+            onPress={() => router.push('/settings')}
+            hitSlop={12}
+            style={{ paddingHorizontal: 16, minHeight: 44, justifyContent: 'center' }}
+          >
+            <Text
+              style={{
+                color: colors.text,
+                fontFamily: type.monoMedium,
+                fontSize: 12,
+                letterSpacing: 0.5,
+                textTransform: 'uppercase',
+              }}
+            >
+              Theme
+            </Text>
+          </Pressable>
+        ),
         tabBarStyle: {
           backgroundColor: colors.tabBar,
           borderTopColor: colors.border,

@@ -1,9 +1,11 @@
-import { useRouter } from 'expo-router';
+import * as Haptics from 'expo-haptics';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
 import { FlatList, Pressable, View } from 'react-native';
 
 import { WeatherIcon } from '@/core/icons/WeatherIcon';
 import { useAppTheme } from '@/core/theme/useAppTheme';
-import { EmptyState, Panel, Skeleton, Text } from '@/core/ui';
+import { Confetti, EmptyState, Panel, Skeleton, Text } from '@/core/ui';
 import { StormCard } from '@/features/storms/components/StormCard';
 import { useStormReports } from '@/features/storms/hooks/useStormLog';
 
@@ -11,6 +13,21 @@ export default function FieldLogScreen() {
   const router = useRouter();
   const { theme } = useAppTheme();
   const { data, isLoading, refetch, isRefetching } = useStormReports();
+
+  // The capture flow redirects here with ?celebrate=1 after a successful save.
+  // Celebrating on the destination rather than inside the modal means the burst
+  // lands over the list the new report just joined.
+  const { celebrate } = useLocalSearchParams<{ celebrate?: string }>();
+  const [celebrating, setCelebrating] = useState(false);
+
+  useEffect(() => {
+    if (celebrate !== '1') return;
+
+    setCelebrating(true);
+    void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    // Clear the flag so a re-render or a back navigation cannot re-fire it.
+    router.setParams({ celebrate: undefined });
+  }, [celebrate, router]);
 
   if (isLoading) {
     return (
@@ -60,11 +77,31 @@ export default function FieldLogScreen() {
           accessibilityRole="button"
           accessibilityLabel="Document a storm"
           onPress={() => router.push('/capture')}
-          style={{ position: 'absolute', bottom: 24, right: 20, height: 60, width: 60, alignItems: 'center', justifyContent: 'center', borderRadius: 30, backgroundColor: theme.colors.accent, borderWidth: theme.borderWidth, borderColor: theme.colors.border }}
+          style={{
+            position: 'absolute',
+            bottom: 24,
+            right: 20,
+            height: 60,
+            width: 60,
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: 30,
+            backgroundColor: theme.colors.accent,
+            borderWidth: theme.borderWidth,
+            borderColor: theme.colors.border,
+          }}
         >
-          <Text variant="title" color={theme.colors.onAccent} style={{ fontSize: 30, lineHeight: 34 }}>+</Text>
+          <Text
+            variant="title"
+            color={theme.colors.onAccent}
+            style={{ fontSize: 30, lineHeight: 34 }}
+          >
+            +
+          </Text>
         </Pressable>
       ) : null}
+
+      <Confetti active={celebrating} onDone={() => setCelebrating(false)} />
     </View>
   );
 }

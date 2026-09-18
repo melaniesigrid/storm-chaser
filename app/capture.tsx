@@ -65,7 +65,9 @@ export default function CaptureScreen() {
         conditions: toCapturedConditions(weather.data),
       },
       {
-        onSuccess: () => router.replace('/log'),
+        // The log screen owns the celebration; it fires over the list the
+        // new report just joined.
+        onSuccess: () => router.replace('/log?celebrate=1'),
         onError: (error) =>
           setErrorMessage(
             error instanceof Error ? error.message : 'The report could not be saved.',

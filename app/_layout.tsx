@@ -18,13 +18,14 @@ import {
   useFonts,
 } from '@expo-google-fonts/instrument-sans';
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
-import { Stack } from 'expo-router';
+import { Stack, useRouter } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { onboardingStore } from '@/core/onboarding/onboardingStore';
 import { ThemeProvider } from '@/core/theme/ThemeProvider';
 import { useAppTheme } from '@/core/theme/useAppTheme';
 import {
@@ -80,8 +81,34 @@ export default function RootLayout() {
 }
 
 function AppStack() {
-  const { theme } = useAppTheme();
+  const router = useRouter();
+  const { theme, ready } = useAppTheme();
   const { colors, type } = theme;
+  const [checkedOnboarding, setCheckedOnboarding] = useState(false);
+
+  /**
+   * First launch goes through the welcome flow. Waits for the theme to load so
+   * onboarding never paints in one theme and then snaps to another, and a
+   * storage failure falls through to the app rather than trapping someone in
+   * onboarding forever.
+   */
+  useEffect(() => {
+    if (!ready || checkedOnboarding) return;
+
+    let cancelled = false;
+
+    void (async () => {
+      const result = await onboardingStore.hasCompleted();
+      if (cancelled) return;
+
+      setCheckedOnboarding(true);
+      if (result.ok && !result.value) router.replace('/onboarding');
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [ready, checkedOnboarding, router]);
 
   return (
     <>
@@ -100,6 +127,11 @@ function AppStack() {
           options={{ presentation: 'modal', title: 'Document a storm' }}
         />
         <Stack.Screen name="storm/[id]" options={{ title: 'Storm report' }} />
+        <Stack.Screen
+          name="settings"
+          options={{ presentation: 'modal', title: 'Appearance' }}
+        />
+        <Stack.Screen name="onboarding" options={{ headerShown: false }} />
       </Stack>
     </>
   );
