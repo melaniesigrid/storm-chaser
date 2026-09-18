@@ -1,3 +1,5 @@
+import { clamp } from '@/core/utils/clamp';
+
 import type {
   ChaseIndex,
   ChaseLevel,
@@ -114,8 +116,4 @@ export function toLevel(score: number): ChaseLevel {
   if (score >= 35) return 'active';
   if (score >= 15) return 'unsettled';
   return 'dormant';
-}
-
-function clamp(value: number, min: number, max: number): number {
-  return Math.min(max, Math.max(min, value));
 }

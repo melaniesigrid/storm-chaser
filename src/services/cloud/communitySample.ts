@@ -1,3 +1,5 @@
+import { clamp } from '@/core/utils/clamp';
+
 import type { CommunityReport } from '@/features/storms/model/community';
 import type { Coordinates } from '@/features/weather/model/types';
 
@@ -55,7 +57,7 @@ export function sampleCommunityReports(
 
 /** Keeps a generated point on the globe rather than past the poles. */
 function clampLatitude(value: number): number {
-  return Math.min(85, Math.max(-85, value));
+  return clamp(value, -85, 85);
 }
 
 /** Wraps past the antimeridian instead of producing an invalid longitude. */

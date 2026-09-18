@@ -1,22 +1,41 @@
+import { useMemo } from 'react';
 import { View } from 'react-native';
 
+import { RangeBar } from '@/core/charts/RangeBar';
 import { WeatherIcon } from '@/core/icons/WeatherIcon';
 import { useAppTheme } from '@/core/theme/useAppTheme';
 import { Panel, Text } from '@/core/ui';
 import { formatSpeed, formatTemperature } from '@/core/utils/format';
 
+import { dayLabel } from '../model/dayLabel';
 import { iconForCondition } from '../model/weatherIcons';
 import type { DailyPoint } from '../model/types';
 
-function dayLabel(date: string, index: number): string {
-  if (index === 0) return 'Today';
-  const parsed = new Date(date);
-  if (Number.isNaN(parsed.getTime())) return date;
-  return parsed.toLocaleDateString(undefined, { weekday: 'short' });
-}
+const BAR_WIDTH = 108;
 
 export function OutlookList({ days }: { days: DailyPoint[] }) {
   const { theme } = useAppTheme();
+
+  /**
+   * One domain across all seven rows. Scaling each bar to its own day would
+   * make every day look equally variable, which is the opposite of what an
+   * outlook is for.
+   *
+   * Memoised because every row's bar is positioned against it: recomputing two
+   * spreads over the week on each parent render re-renders seven bars that did
+   * not move.
+   */
+  const { domainMin, domainMax } = useMemo(() => {
+    if (!days.length) return { domainMin: 0, domainMax: 0 };
+
+    const lows = days.map((day) => day.minTempC);
+    const highs = days.map((day) => day.maxTempC);
+
+    return {
+      domainMin: Math.floor(Math.min(...lows) - 1),
+      domainMax: Math.ceil(Math.max(...highs) + 1),
+    };
+  }, [days]);
 
   if (!days.length) return null;
 
@@ -34,38 +53,57 @@ export function OutlookList({ days }: { days: DailyPoint[] }) {
             borderBottomColor: theme.colors.border,
           }}
         >
-          <Text variant="heading" style={{ width: 52 }}>
+          <Text variant="heading" style={{ width: 48 }}>
             {dayLabel(day.date, index)}
           </Text>
 
           {/* Daily rows are always the day variant: a 7 day outlook has no hour. */}
           <WeatherIcon name={iconForCondition(day.condition, false)} size={30} />
 
-          <Text variant="caption" style={{ flex: 1 }} numberOfLines={1}>
-            {day.condition.label}
-          </Text>
-
+          {/* `figure`, not `label`: label uppercases, and a formatted reading
+              is "45 km/h", not an instrument name. Widened from 62 to hold a
+              three figure gust at the larger mono size without truncating. */}
           <Text
-            variant="caption"
+            variant="figure"
+            tone={day.maxWindGustKmh >= 60 ? undefined : 'muted'}
             color={day.maxWindGustKmh >= 60 ? theme.colors.tierText.severe : undefined}
-            style={{ width: 82, textAlign: 'right', fontFamily: theme.type.mono, fontSize: 13 }}
+            style={{ width: 70 }}
+            numberOfLines={1}
           >
             {formatSpeed(day.maxWindGustKmh)}
           </Text>
 
-          <Text
-            variant="body"
-            style={{
-              width: 78,
-              textAlign: 'right',
-              fontFamily: theme.type.monoMedium,
-              fontSize: 14,
-            }}
-          >
-            {`${formatTemperature(day.maxTempC)} / ${formatTemperature(day.minTempC)}`}
-          </Text>
+          <View style={{ flex: 1, alignItems: 'flex-end', gap: 6 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+              {/* Both ends of the bar are one size now; the low keeps its muted
+                  tone, which is what carried the hierarchy here anyway. Width
+                  is up from 38 to fit the larger mono glyphs. */}
+              <Text variant="figure" tone="muted" style={{ width: 44, textAlign: 'right' }}>
+                {formatTemperature(day.minTempC)}
+              </Text>
+
+              <RangeBar
+                low={day.minTempC}
+                high={day.maxTempC}
+                domainMin={domainMin}
+                domainMax={domainMax}
+                width={BAR_WIDTH}
+                coldColor={theme.colors.tier.unsettled}
+                warmColor={theme.colors.tier.severe}
+                trackColor={theme.colors.surfaceSunken}
+              />
+
+              <Text variant="figure" style={{ width: 44, textAlign: 'right' }}>
+                {formatTemperature(day.maxTempC)}
+              </Text>
+            </View>
+          </View>
         </View>
       ))}
+
+      <Text variant="caption" style={{ marginTop: 12 }}>
+        {`Bars share one scale, ${formatTemperature(domainMin)} to ${formatTemperature(domainMax)}, so a short bar really is a steady day.`}
+      </Text>
     </Panel>
   );
 }

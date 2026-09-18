@@ -13,9 +13,11 @@ export interface ScreenProps extends ViewProps {
 /**
  * Every screen's ground.
  *
- * Skyward paints a three-stop vertical gradient, which is most of why it reads
- * as sky rather than as a page; Field Card repeats one value, so the same
- * component renders flat without branching at the call site.
+ * Skyward paints a four-stop vertical gradient, which is most of why it reads
+ * as sky rather than as a page: the third stop is the haze band at the
+ * horizon, and it is what keeps the wash from looking like a CSS demo. Field
+ * Card repeats one value, so the same component renders flat without branching
+ * at the call site.
  */
 export function Screen({ edgeToEdge = false, style, children, ...rest }: ScreenProps) {
   const insets = useSafeAreaInsets();
@@ -25,7 +27,7 @@ export function Screen({ edgeToEdge = false, style, children, ...rest }: ScreenP
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <LinearGradient
         colors={theme.colors.backgroundGradient}
-        locations={[0, 0.45, 1]}
+        locations={theme.colors.backgroundGradientLocations}
         style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
       />
       <View

@@ -1,0 +1,18 @@
+<!--
+  Splash mark. Sits on the splash backgroundColor declared in app.json, which
+  is skyward-day's gradient top stop, so the launch image and the first frame
+  of the app agree on the colour of the sky.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="512" height="512">
+  <defs>
+    <linearGradient id="ray" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFB400"/>
+      <stop offset="0.62" stop-color="#FF5A47"/>
+      <stop offset="1" stop-color="#C4402E"/>
+    </linearGradient>
+  </defs>
+
+  <g transform="translate(19.1 20.3) scale(0.594)">
+    <polygon points="56,-14 20,44 46,44 33,114 84,32 54,32 73,-14" fill="url(#ray)"/>
+  </g>
+</svg>

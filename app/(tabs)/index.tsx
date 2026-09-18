@@ -15,7 +15,9 @@ import {
   formatSpeed,
   formatTemperature,
 } from '@/core/utils/format';
+import { usePublishLastKnownPosition } from '@/features/location/lastKnownPosition';
 import { useDeviceLocation } from '@/features/location/useDeviceLocation';
+import { StormLoreCard } from '@/features/storms/components/StormLoreCard';
 import { mockSnapshot } from '@/features/weather/api/weatherClient';
 import { ChaseIndexPanel } from '@/features/weather/components/ChaseIndexPanel';
 import { ForecastStrip } from '@/features/weather/components/ForecastStrip';
@@ -33,6 +35,10 @@ export default function ConditionsScreen() {
   const router = useRouter();
   const { theme } = useAppTheme();
   const location = useDeviceLocation();
+  // Conditions is the root tab and holds the lore card that opens the legend
+  // screen, so it publishes too. Without this, tapping through from the card
+  // showed "Position unknown" on the same data the card had just measured.
+  usePublishLastKnownPosition(location.coordinates);
   const network = useNetworkStatus();
   const [useSample, setUseSample] = useState(false);
 
@@ -199,6 +205,8 @@ export default function ConditionsScreen() {
 
             <ForecastStrip hours={snapshot.hourly} />
             <OutlookList days={snapshot.daily} />
+
+            <StormLoreCard origin={location.coordinates} />
 
             <Button
               title="Document this storm"
