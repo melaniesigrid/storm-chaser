@@ -1,9 +1,9 @@
 import { Tabs } from 'expo-router';
-import { Text } from 'react-native';
+import { Text, type ColorValue } from 'react-native';
 
 import { useAppTheme } from '@/core/theme/useAppTheme';
 
-function TabGlyph({ glyph, color }: { glyph: string; color: string }) {
+function TabGlyph({ glyph, color }: { glyph: string; color: ColorValue }) {
   return <Text style={{ color, fontSize: 18, lineHeight: 22 }}>{glyph}</Text>;
 }
 

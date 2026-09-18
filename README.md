@@ -8,7 +8,7 @@ Built for the Speer Technologies mobile assessment.
 
 | | |
 |---|---|
-| Stack | React Native, Expo SDK 53, TypeScript (strict), Expo Router |
+| Stack | React Native, Expo SDK 57, TypeScript (strict), Expo Router |
 | Data | TanStack Query with an AsyncStorage persister |
 | Styling | NativeWind (Tailwind) with a token driven theme |
 | Storage | AsyncStorage for records, app document directory for photos |
@@ -27,9 +27,9 @@ npx expo start
 Camera, location and maps need a real device or a development build. Expo Go works
 for everything except a custom map provider on Android.
 
-`query-string` and `expo-asset` are declared as direct dependencies on purpose:
-Expo Router and `expo-font` both require them at runtime without declaring them,
-so on a clean install Metro cannot resolve them unless they are named here.
+`expo-asset` is declared as a direct dependency on purpose: `expo-font` requires
+it at runtime, and without the explicit entry npm can leave it nested where Metro
+cannot resolve it.
 
 ```bash
 npm test          # unit tests

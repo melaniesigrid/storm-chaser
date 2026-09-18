@@ -1,8 +1,13 @@
-import * as FileSystem from 'expo-file-system';
+import { Directory, File, Paths } from 'expo-file-system';
 
 import { err, ok, type Result } from '@/core/utils/result';
 
-const PHOTO_DIRECTORY = `${FileSystem.documentDirectory}storm-photos/`;
+const PHOTO_DIRECTORY_NAME = 'storm-photos';
+
+/** The permanent home for captured photos, inside the app document directory. */
+function photoDirectory(): Directory {
+  return new Directory(Paths.document, PHOTO_DIRECTORY_NAME);
+}
 
 /**
  * Camera output lands in the OS cache directory, which the system is free to
@@ -14,13 +19,14 @@ export async function persistPhoto(
   reportId: string,
 ): Promise<Result<string>> {
   try {
-    await FileSystem.makeDirectoryAsync(PHOTO_DIRECTORY, { intermediates: true });
+    const directory = photoDirectory();
+    directory.create({ intermediates: true, idempotent: true });
 
     const extension = temporaryUri.split('.').pop()?.split('?')[0] ?? 'jpg';
-    const destination = `${PHOTO_DIRECTORY}${reportId}.${extension}`;
+    const destination = new File(directory, `${reportId}.${extension}`);
 
-    await FileSystem.copyAsync({ from: temporaryUri, to: destination });
-    return ok(destination);
+    await new File(temporaryUri).copy(destination, { overwrite: true });
+    return ok(destination.uri);
   } catch (cause) {
     return err('storage', 'The photo could not be saved to this device', cause);
   }
@@ -28,7 +34,9 @@ export async function persistPhoto(
 
 export async function deletePhoto(uri: string): Promise<Result<true>> {
   try {
-    await FileSystem.deleteAsync(uri, { idempotent: true });
+    const file = new File(uri);
+    // Deleting an absent file throws, and a missing photo is not a failure here.
+    if (file.exists) file.delete();
     return ok(true);
   } catch (cause) {
     return err('storage', 'The photo could not be removed', cause);
@@ -37,8 +45,7 @@ export async function deletePhoto(uri: string): Promise<Result<true>> {
 
 export async function photoExists(uri: string): Promise<boolean> {
   try {
-    const info = await FileSystem.getInfoAsync(uri);
-    return info.exists;
+    return new File(uri).exists;
   } catch {
     return false;
   }

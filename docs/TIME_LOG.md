@@ -5,7 +5,7 @@ Total: **9 h 40 m**, inside the 24 hour window.
 | Block | Duration | Work |
 |---|---|---|
 | Planning | 0 h 30 m | Read the brief, chose the stack, sketched the feature slices and the data model, decided what to cut |
-| Project setup | 0 h 35 m | Expo SDK 53 with Expo Router and TypeScript strict, NativeWind and Metro config, path aliases, Jest |
+| Project setup | 0 h 35 m | Expo SDK 57 with Expo Router and TypeScript strict, NativeWind and Metro config, path aliases, Jest |
 | Design system | 0 h 45 m | Palette and type tokens, shared UI kit (Panel, Button, Text, Chip, Skeleton, EmptyState, StatusBanner) |
 | Weather domain | 1 h 20 m | Open-Meteo contract, mapper, WMO code table, Chase Index heuristic, sample dataset |
 | Weather feature | 1 h 15 m | Location hook, query hook with persistence, Conditions screen, forecast strip, outlook, skeletons, Not found view |
