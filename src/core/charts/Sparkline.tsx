@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import Svg, { Circle, Defs, LinearGradient, Path, Stop } from 'react-native-svg';
 
 import { scaleSeries, toAreaPath, toSmoothPath } from './geometry';
@@ -12,9 +13,6 @@ export interface SparklineProps {
   /** Marks the most recent reading. */
   showLast?: boolean;
   strokeWidth?: number;
-  /** Shared domain, so two charts can be compared against each other. */
-  min?: number;
-  max?: number;
   /** Unique across mounted sparklines: SVG gradient ids are document global. */
   gradientId?: string;
 }
@@ -26,8 +24,12 @@ export interface SparklineProps {
  * shape of the last twelve hours at a glance, which a column of figures cannot
  * do. Curved rather than cornered because temperature is continuous, and the
  * curve is constrained to pass through every measured point.
+ *
+ * Memoised: the props are primitives plus one array the caller memoises, and
+ * every render re-runs the scale and the Catmull-Rom path for a chart that has
+ * not changed.
  */
-export function Sparkline({
+export const Sparkline = memo(function Sparkline({
   values,
   width,
   height,
@@ -35,14 +37,12 @@ export function Sparkline({
   fill = true,
   showLast = true,
   strokeWidth = 2.5,
-  min,
-  max,
   gradientId = 'sparkFill',
 }: SparklineProps) {
   if (values.length < 2 || width <= 0 || height <= 0) return null;
 
   const padding = Math.max(strokeWidth, showLast ? 4 : strokeWidth);
-  const points = scaleSeries(values, { width, height, padding, min, max });
+  const points = scaleSeries(values, { width, height, padding });
   const line = toSmoothPath(points);
   const area = fill ? toAreaPath(points, height) : '';
   const last = points[points.length - 1];
@@ -74,4 +74,4 @@ export function Sparkline({
       ) : null}
     </Svg>
   );
-}
+});

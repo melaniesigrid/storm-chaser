@@ -5,12 +5,14 @@ import type { Theme } from '@/core/theme/themes';
 
 export type TextVariant =
   | 'hero'
+  | 'score'
   | 'display'
   | 'title'
   | 'heading'
   | 'body'
   | 'message'
   | 'caption'
+  | 'figure'
   | 'label'
   | 'readout';
 
@@ -23,9 +25,13 @@ export type TextTone = 'default' | 'muted' | 'onAccent';
  * bottomed out at a 10px uppercase mono label used for whole sentences. The
  * floor is now 12px and long-form copy has its own variant.
  *
- * `hero` and `readout` are always mono so columns of figures line up; `hero`,
- * `display` and `title` take the theme's display face, which is what carries
- * the personality difference between Skyward and Field Card.
+ * `hero` and `readout` are always mono so columns of figures line up.
+ * `score`, `display` and `title` take the theme's display face, which is what
+ * carries the personality difference between Skyward and Field Card.
+ *
+ * `score` exists because a headline number is not a column: the Chase Index is
+ * one figure with nothing to align to, and setting it in the display face is
+ * what makes it read as the app's own number rather than as instrument output.
  */
 function variantStyle(variant: TextVariant, theme: Theme): TextStyle {
   const { type, colors } = theme;
@@ -33,6 +39,8 @@ function variantStyle(variant: TextVariant, theme: Theme): TextStyle {
   switch (variant) {
     case 'hero':
       return { fontFamily: type.monoBold, fontSize: 64, lineHeight: 66, letterSpacing: -2, color: colors.text };
+    case 'score':
+      return { fontFamily: type.display, fontSize: 56, lineHeight: 54, letterSpacing: -2, color: colors.text };
     case 'display':
       return { fontFamily: type.display, fontSize: 40, lineHeight: 44, letterSpacing: -1, color: colors.text };
     case 'title':
@@ -47,6 +55,13 @@ function variantStyle(variant: TextVariant, theme: Theme): TextStyle {
       return { fontFamily: type.bodyMedium, fontSize: 17, lineHeight: 24, color: colors.text };
     case 'caption':
       return { fontFamily: type.body, fontSize: 15, lineHeight: 21, color: colors.textMuted };
+    // Mono readings inside a chart: hourly temperatures, the ends of an
+    // outlook bar. Sized between `label` and `body` on purpose — these are
+    // numbers to be read at a glance in a narrow column, and body-sized mono
+    // digits are wide enough to crowd the chart they annotate. Charts used to
+    // set 13, 14 and 16 inline; this is the one size they share.
+    case 'figure':
+      return { fontFamily: type.monoMedium, fontSize: 16, lineHeight: 20, color: colors.text };
     // Instrument labels only: single words like CAPE or GUSTS.
     case 'label':
       return {

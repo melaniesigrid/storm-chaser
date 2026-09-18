@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { View } from 'react-native';
 
 import { normalise } from './geometry';
@@ -13,9 +14,6 @@ export interface RangeBarProps {
   coldColor: string;
   warmColor: string;
   trackColor: string;
-  /** Marks where the current reading sits inside the day's range. */
-  marker?: number | null;
-  markerColor?: string;
 }
 
 /**
@@ -28,8 +26,11 @@ export interface RangeBarProps {
  *
  * Plain views rather than SVG: it is two nested rectangles, and this keeps it
  * cheap inside a list.
+ *
+ * Memoised: one of these renders per row of the outlook, and none of them
+ * change when the parent re-renders for an unrelated reason.
  */
-export function RangeBar({
+export const RangeBar = memo(function RangeBar({
   low,
   high,
   domainMin,
@@ -38,8 +39,6 @@ export function RangeBar({
   coldColor,
   warmColor,
   trackColor,
-  marker = null,
-  markerColor,
 }: RangeBarProps) {
   const start = normalise(Math.min(low, high), domainMin, domainMax);
   const end = normalise(Math.max(low, high), domainMin, domainMax);
@@ -81,18 +80,6 @@ export function RangeBar({
           opacity: 0.85,
         }}
       />
-
-      {marker !== null && markerColor ? (
-        <View
-          style={{
-            position: 'absolute',
-            left: Math.max(0, Math.min(width - 3, normalise(marker, domainMin, domainMax) * width)),
-            width: 3,
-            height: 10,
-            backgroundColor: markerColor,
-          }}
-        />
-      ) : null}
     </View>
   );
-}
+});

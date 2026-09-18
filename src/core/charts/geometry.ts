@@ -9,6 +9,8 @@
  * the smallest y.
  */
 
+import { clamp } from '@/core/utils/clamp';
+
 export interface Point {
   x: number;
   y: number;
@@ -40,17 +42,21 @@ export function scaleSeries(values: number[], options: ScaleOptions): Point[] {
   const usableWidth = Math.max(0, width - padding * 2);
   const usableHeight = Math.max(0, height - padding * 2);
 
-  const min = options.min ?? Math.min(...values);
-  const max = options.max ?? Math.max(...values);
-  const range = max - min;
+  // The domain comes from the finite readings only. A single null or NaN in the
+  // series would otherwise make Math.min/Math.max NaN, which propagates into
+  // every point and blanks the whole chart rather than losing one reading.
+  const finite = compact(values);
+  const min = options.min ?? (finite.length ? Math.min(...finite) : 0);
+  const max = options.max ?? (finite.length ? Math.max(...finite) : 0);
 
   return values.map((value, index) => {
     const t = values.length === 1 ? 0.5 : index / (values.length - 1);
-    const normalised = range === 0 ? 0.5 : (value - min) / range;
 
     return {
       x: padding + t * usableWidth,
-      y: padding + (1 - normalised) * usableHeight,
+      // `normalise` already centres a flat series, clamps to the box and
+      // refuses to emit NaN, which is exactly the behaviour wanted here.
+      y: padding + (1 - normalise(value, min, max)) * usableHeight,
     };
   });
 }
@@ -122,7 +128,7 @@ export function normalise(value: number, min: number, max: number): number {
   if (!Number.isFinite(value)) return 0;
   if (max === min) return 0.5;
 
-  return Math.min(1, Math.max(0, (value - min) / (max - min)));
+  return clamp((value - min) / (max - min), 0, 1);
 }
 
 /** Drops nulls so a sparse API series can still be charted. */
