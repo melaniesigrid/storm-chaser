@@ -3,6 +3,12 @@
 // The suite targets pure domain logic and the repository layer, both of which
 // take their dependencies by injection. Native modules are only stubbed here so
 // that importing a barrel file never drags a native binding into the test run.
+// Date formatting is asserted in outlook.test.ts. Without a pinned zone,
+// '2026-09-19' (parsed as UTC midnight) and '2026-09-19T00:00' (local midnight)
+// land on different weekdays in any negative-offset zone, and the assertions
+// pass or fail by machine.
+process.env.TZ = 'UTC';
+
 jest.mock('expo-file-system', () => {
   class Directory {
     constructor(...segments) {
