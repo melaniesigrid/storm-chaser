@@ -37,6 +37,32 @@ describe('sampleCommunityReports', () => {
     }
   });
 
+  /**
+   * The pole guard is a hard 85 degrees, not 90: a marker placed at the pole
+   * itself has no meaningful longitude and the map projection stretches it
+   * across the whole top of the screen. This moved to the shared `clamp` in
+   * this change, so the bound is asserted rather than assumed.
+   */
+  it('stops generated pins 5 degrees short of each pole', () => {
+    const northern = sampleCommunityReports({ latitude: 89.9, longitude: 0 });
+    const southern = sampleCommunityReports({ latitude: -89.9, longitude: 0 });
+
+    expect(Math.max(...northern.map((r) => r.coordinates.latitude))).toBe(85);
+    expect(Math.min(...southern.map((r) => r.coordinates.latitude))).toBe(-85);
+  });
+
+  it('wraps a longitude past the antimeridian instead of running off the map', () => {
+    const reports = sampleCommunityReports({ latitude: 0, longitude: 179.6 });
+    const longitudes = reports.map((report) => report.coordinates.longitude);
+
+    // The seed offset by +0.74 lands on 180.34, which belongs just inside the
+    // western half of the map rather than off the eastern edge of it.
+    expect(longitudes).toContainEqual(expect.closeTo(-179.66, 5));
+    for (const longitude of longitudes) {
+      expect(Math.abs(longitude)).toBeLessThanOrEqual(180);
+    }
+  });
+
   it('tags every bundled report as sample, never as remote', () => {
     for (const report of sampleCommunityReports(TORONTO)) {
       expect(report.source).toBe('sample');

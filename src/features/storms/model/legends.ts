@@ -1,4 +1,5 @@
 import type { Coordinates } from '@/features/weather/model/types';
+import { assertNever } from '@/core/utils/exhaustive';
 
 import type { StormTypeId } from './types';
 
@@ -313,6 +314,13 @@ export function describeLegendKind(kind: StormLegend['kind']): string {
       return 'World record';
     case 'event':
       return 'Historic storm';
+    default:
+      // Still a compile error if the kind union grows: `kind` is `never` here
+      // only while the cases above cover it. At runtime a legend stored under
+      // a kind this build no longer knows still gets a label, because callers
+      // lowercase this string and undefined would throw.
+      assertNever(kind);
+      return 'Storm lore';
   }
 }
 

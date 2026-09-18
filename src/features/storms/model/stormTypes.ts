@@ -1,5 +1,6 @@
 import type { WeatherIconName } from '@/core/icons/names';
 import type { ChaseLevel } from '@/features/weather/model/types';
+import { assertNever } from '@/core/utils/exhaustive';
 
 import type { StormTypeId } from './types';
 
@@ -81,6 +82,13 @@ export function iconForStormType(id: StormTypeId): WeatherIconName {
     case 'snow_squall':
       return 'snow';
     case 'other':
+      return 'code-yellow';
+    default:
+      // Still a compile error if StormTypeId gains a member: `id` is `never`
+      // here only while the cases above cover the union. At runtime a report
+      // persisted under a type this build no longer knows falls back to the
+      // same honest glyph as `other`, never to an undefined icon name.
+      assertNever(id);
       return 'code-yellow';
   }
 }

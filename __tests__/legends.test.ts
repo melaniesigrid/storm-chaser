@@ -1,5 +1,6 @@
 import {
   STORM_LEGENDS,
+  type StormLegend,
   describeLegendKind,
   findLegend,
   formatDistanceKm,
@@ -9,6 +10,7 @@ import {
 } from '@/features/storms/model/legends';
 import { describeStormType, iconForStormType } from '@/features/storms/model/stormTypes';
 import { WEATHER_ICON_NAMES } from '@/core/icons/names';
+import { assertNever } from '@/core/utils/exhaustive';
 
 const TORONTO = { latitude: 43.6532, longitude: -79.3832 };
 
@@ -316,5 +318,49 @@ describe('STORM_LEGENDS record entries', () => {
     for (const legend of STORM_LEGENDS) {
       expect(legend.claim.trim()).toMatch(/[.!?]$/);
     }
+  });
+});
+
+/**
+ * `describeLegendKind` grew a `default` branch in this change. It exists for a
+ * legend persisted under a kind this build no longer knows: the lore card
+ * lowercases the returned string for its subtitle, so `undefined` there is a
+ * crash on a screen the user deep-linked into.
+ */
+describe('describeLegendKind fallback', () => {
+  const stale = describeLegendKind('folklore' as StormLegend['kind']);
+
+  it('labels a kind outside the union rather than returning undefined', () => {
+    expect(stale).toBe('Storm lore');
+  });
+
+  it('never throws on a kind outside the union', () => {
+    expect(() => describeLegendKind('folklore' as StormLegend['kind'])).not.toThrow();
+  });
+
+  it('stays safe for the subtitle, which lowercases whatever it is given', () => {
+    expect(stale.toLowerCase()).toBe('storm lore');
+  });
+
+  it('does not collide with any of the three real labels', () => {
+    const real = (['hotspot', 'record', 'event'] as const).map(describeLegendKind);
+
+    expect(real).not.toContain(stale);
+  });
+});
+
+/**
+ * The compile-time exhaustiveness helper both `describeLegendKind` and
+ * `iconForStormType` now call in their default branch. The whole point is that
+ * it does nothing at runtime: if it threw, every fallback above would become
+ * the crash it was added to prevent.
+ */
+describe('assertNever', () => {
+  it('does not throw on a value smuggled past the types', () => {
+    expect(() => assertNever('folklore' as never)).not.toThrow();
+  });
+
+  it('returns nothing, so the fallback on the next line still runs', () => {
+    expect(assertNever('folklore' as never)).toBeUndefined();
   });
 });

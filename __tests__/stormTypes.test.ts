@@ -108,10 +108,11 @@ describe('iconForStormType', () => {
     }
   });
 
-  it('returns undefined rather than throwing on an id outside the union', () => {
-    // The switch is exhaustive over StormTypeId and has no default, so a value
-    // smuggled past the types must not crash the map render.
+  it('falls back to a real glyph on an id outside the union', () => {
+    // A report persisted under a type this build no longer knows still has to
+    // draw something: the default branch returns the same glyph as `other`,
+    // so the map never renders an undefined icon name.
     expect(() => iconForStormType('gustnado' as StormTypeId)).not.toThrow();
-    expect(iconForStormType('gustnado' as StormTypeId)).toBeUndefined();
+    expect(iconForStormType('gustnado' as StormTypeId)).toBe('code-yellow');
   });
 });
