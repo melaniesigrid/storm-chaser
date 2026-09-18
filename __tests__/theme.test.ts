@@ -89,6 +89,25 @@ describe('theme registry', () => {
     expect(themeForColorScheme(null)).toBe('skyward-day');
     expect(themeForColorScheme(undefined)).toBe('skyward-day');
   });
+
+  /**
+   * The reason the parameter is a loose string rather than `ColorSchemeName`.
+   * Android reports `'unspecified'` for a device that has never been given an
+   * appearance, and this is the value that would have slipped through a
+   * `scheme === 'light' ? day : night` reading of the same rule and opened a
+   * daytime phone on the night theme.
+   */
+  it('treats anything that is not an explicit dark as day', () => {
+    expect(themeForColorScheme('unspecified')).toBe('skyward-day');
+    expect(themeForColorScheme('')).toBe('skyward-day');
+    expect(themeForColorScheme('DARK')).toBe('skyward-day');
+  });
+
+  it('only ever names a theme that exists', () => {
+    for (const scheme of ['dark', 'light', 'unspecified', null, undefined]) {
+      expect(THEME_NAMES).toContain(themeForColorScheme(scheme));
+    }
+  });
 });
 
 describe('theme store', () => {
@@ -214,8 +233,155 @@ describe.each(THEME_NAMES)('%s', (name) => {
     expect(contrastRatio(theme.colors.surface, theme.colors.background)).toBeGreaterThan(1);
   });
 
+  it('runs the sky gradient through four ascending stops', () => {
+    const { backgroundGradient: stops, backgroundGradientLocations: at } = theme.colors;
+
+    // Destructured rather than indexed: both are fixed-length tuples, and
+    // indexing them reads as `number | undefined` under the strict index rules
+    // this project compiles with.
+    const [first, second, third, last] = at;
+
+    expect(stops).toHaveLength(4);
+    expect(at).toHaveLength(4);
+    expect(first).toBe(0);
+    expect(last).toBe(1);
+    expect(second).toBeGreaterThan(first);
+    expect(third).toBeGreaterThan(second);
+    expect(last).toBeGreaterThan(third);
+
+    for (const stop of stops) {
+      expect(stop).toMatch(/^#[0-9A-Fa-f]{6}$/);
+    }
+  });
+
+  it('gives the brand layer a full shell and a full ray', () => {
+    expect(theme.brand.voltShell).toHaveLength(3);
+    expect(theme.brand.ray).toHaveLength(3);
+    for (const value of [...theme.brand.voltShell, ...theme.brand.ray]) {
+      expect(value).toMatch(/^#[0-9A-Fa-f]{6}$/);
+    }
+  });
+
+  /**
+   * Volt's idle shell is deliberately NOT the accent. It used to be, which
+   * meant he was rust on Skyward Day and amber on Skyward Night: a different
+   * character per theme, and on Field Card indistinguishable from the primary
+   * button. What has to hold is that idle never collides with a mood, or
+   * changing mood would show nothing at all.
+   */
+  it('keeps the idle shell clear of every mood fill', () => {
+    const idle = theme.brand.voltShell[1].toUpperCase();
+
+    for (const level of ['dormant', 'unsettled', 'severe'] as const) {
+      expect(theme.colors.tier[level].toUpperCase()).not.toBe(idle);
+    }
+  });
+
+  /**
+   * The monogram is a large graphic, so it is held to the 3:1 non-text floor
+   * rather than the 4.5:1 body floor. Below that the bolt disappears into its
+   * own plate at app-icon size.
+   */
+  it('keeps the monogram mark readable on its plate', () => {
+    expect(
+      contrastRatio(theme.brand.monogramMark, theme.brand.monogramPlate),
+    ).toBeGreaterThanOrEqual(AA_NON_TEXT);
+  });
+
   it('keeps the hero readout legible at large sizes on the gradient top stop', () => {
     const [top] = theme.colors.backgroundGradient;
     expect(contrastRatio(theme.colors.text, top)).toBeGreaterThanOrEqual(AA_LARGE_TEXT);
+  });
+  /**
+   * The rest of the brand contract. `voltShell` and `ray` are checked above;
+   * these are the four tokens Volt and the Monogram read that nothing else
+   * validates. A missing one renders as an `undefined` colour, which React
+   * Native draws as transparent rather than throwing, so the mascot simply
+   * loses a feature and no test notices.
+   */
+  it('declares every remaining brand token as a colour a native view accepts', () => {
+    const colour = /^(#[0-9A-Fa-f]{6}|rgba?\([0-9.,\s]+\))$/;
+
+    expect(theme.brand.voltShade).toMatch(colour);
+    expect(theme.brand.voltEye).toMatch(colour);
+    expect(theme.brand.voltGlow).toMatch(colour);
+    expect(theme.brand.monogramPlate).toMatch(colour);
+    expect(theme.brand.monogramMark).toMatch(colour);
+  });
+
+  /**
+   * The radius is a FRACTION of the plate size, so one number works at 24px
+   * and at 512px. Anything above 0.5 is more than half the side and stops
+   * being a rounded square; anything negative is not a radius at all.
+   */
+  it('keeps the monogram radius a usable fraction of the plate', () => {
+    expect(theme.brand.monogramRadius).toBeGreaterThanOrEqual(0);
+    expect(theme.brand.monogramRadius).toBeLessThanOrEqual(0.5);
+  });
+
+  /**
+   * The shell is documented light to deep, and Field Card runs all three as a
+   * gradient. Three equal stops would render that gradient flat, and a stop
+   * out of order would light the shell from the wrong side.
+   */
+  it('orders the shell from light to deep with three distinct stops', () => {
+    const [light, mid, deep] = theme.brand.voltShell;
+
+    expect(new Set([light, mid, deep]).size).toBe(3);
+    expect(relativeLuminance(light)).toBeGreaterThan(relativeLuminance(mid));
+    expect(relativeLuminance(mid)).toBeGreaterThan(relativeLuminance(deep));
+  });
+
+  it('runs the ray through three distinct stops, never a two-colour fade', () => {
+    expect(new Set(theme.brand.ray).size).toBe(3);
+  });
+
+  /**
+   * Pupils have to be visible against whatever they are drawn on. Skyward
+   * draws them straight onto the shell, so there they must not be the shell.
+   */
+  it('never paints the pupils the same colour as the shell they sit on', () => {
+    expect(theme.brand.voltEye.toUpperCase()).not.toBe(theme.brand.voltShell[1].toUpperCase());
+  });
+  /**
+   * Volt's mood shells, as a token contract.
+   *
+   * `Volt` swaps his shell for a tier fill when his mood changes — `alert`
+   * takes `tier.severe`, `logged` takes `tier.unsettled`, `offline` and
+   * `asleep` take `tier.dormant` — and on the Skyward themes his pupils are
+   * drawn straight onto that shell with no visor behind them. The component
+   * itself needs a renderer this project does not configure, but the pairing it
+   * depends on is pure data and is exactly where a palette change breaks him:
+   * a dormant fill that drifts light enough to swallow the pupils leaves a
+   * blank offline mascot, and no existing assertion notices.
+   *
+   * Held to the 3:1 non-text floor, because a pupil is a shape rather than
+   * text. `#14140F` and `#C2C9D4` are the two literals `shellColors` uses for
+   * the bare-shell pupils, restated here as the contract they are.
+   */
+  it('keeps the pupils visible on every mood shell', () => {
+    const inkPupil = '#14140F';
+    const palePupil = '#C2C9D4';
+
+    // alert and logged
+    expect(contrastRatio(inkPupil, theme.colors.tier.severe)).toBeGreaterThanOrEqual(AA_NON_TEXT);
+    expect(contrastRatio(inkPupil, theme.colors.tier.unsettled)).toBeGreaterThanOrEqual(
+      AA_NON_TEXT,
+    );
+    // offline and asleep, which share the dormant fill
+    expect(contrastRatio(palePupil, theme.colors.tier.dormant)).toBeGreaterThanOrEqual(
+      AA_NON_TEXT,
+    );
+  });
+
+  /**
+   * The idle shell is the one Volt wears most of the time, and its pupils
+   * follow the theme rather than a literal: dark ink on a light shell, and the
+   * theme's own `voltEye` on a dark one. Both have to clear the same floor.
+   */
+  it('keeps the pupils visible on the idle shell in either polarity', () => {
+    const pupil = theme.isDark ? theme.brand.voltEye : '#14140F';
+
+    expect(contrastRatio(pupil, theme.brand.voltShell[1])).toBeGreaterThanOrEqual(AA_NON_TEXT);
   });
 });
