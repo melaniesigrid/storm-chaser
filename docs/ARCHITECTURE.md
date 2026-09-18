@@ -80,3 +80,66 @@ orphaned file is recoverable, a record pointing at nothing is not.
 - `stormRepository.test.ts` covers the full CRUD surface, ordering, persistence
   across instances, sync state transitions, corrupt stored data and a failing
   write, using an injected in memory store and a fixed clock.
+
+
+## The theme system
+
+Three themes, one contract. `src/core/theme/themes.ts` is pure data and pure
+types: no React, no I/O, no native modules, which is what makes the whole
+contract unit testable.
+
+```
+themes.ts        the three themes and the token shape (pure)
+contrast.ts      WCAG luminance and ratio maths (pure)
+themeStore.ts    persistence behind the injected KeyValueStore port
+ThemeProvider    owns which theme is active
+useAppTheme      the single read point
+ThemeCard        an option that paints itself in the theme it offers
+```
+
+Three decisions worth calling out:
+
+**Contrast is an assertion, not an opinion.** The previous palette shipped an
+offline banner at 1.22:1 and a muted token at 2.0:1. Both looked fine in a list
+of hex values. `theme.test.ts` now computes the real ratios and fails the build
+if any theme regresses, and keeps those two exact pairs as named guards.
+
+**Tier colour is never the only encoding.** The five level chase ladder has both
+a `tier` fill and a `tierText` value, because a yellow fill that reads well on a
+meter cannot clear 4.5:1 as text on a white card. Tier is always carried by a
+number and a text headline as well as a colour, which is what satisfies WCAG
+1.4.1 rather than bending the palette to a contrast floor that does not apply to
+fills.
+
+**The display typeface is a theme token.** Skyward uses Bricolage Grotesque,
+Field Card uses Archivo Black. Both load up front so switching a theme never
+waits on a font. Monospace stays fixed across all three, because columns of
+figures have to line up whatever the theme is.
+
+## Icons
+
+Meteocons, rendered natively through `react-native-svg` via
+`react-native-svg-transformer`, so a weather glyph is vector at any size.
+
+The animated `@meteocons/svg` package is deliberately unused: its motion is SMIL
+embedded in each SVG, and `react-native-svg` does not implement SMIL, so those
+files render static at a larger payload. `@meteocons/svg-static` is used instead.
+
+Metro needs static imports, so bundling all 475 icons would cost far more than it
+buys. `src/core/icons/names.ts` declares the curated subset as a plain string
+union with no imports, which lets the condition mapping in
+`features/weather/model/weatherIcons.ts` stay pure and testable while the
+component registry lives separately in `WeatherIcon.tsx`.
+
+Day and night variants come from Open-Meteo's `is_day`, requested hourly as well
+as currently, rather than from an hour of day guess.
+
+## Motion
+
+Reanimated 4, which requires `react-native-worklets/plugin` as the last Babel
+plugin. Without it worklets fail at runtime while everything still typechecks,
+so it is the first thing to check if an animation silently does nothing.
+
+Every animation reads `useReducedMotion()`. With Reduce Motion on, the chase
+meter snaps to its final state and the confetti does not mount at all, so the
+information conveyed is identical and only the theatre is dropped.

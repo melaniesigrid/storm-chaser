@@ -1,6 +1,8 @@
 # Time log
 
-Total: **9 h 40 m**, inside the 24 hour window.
+Total: **11 h 20 m**, inside the 24 hour window.
+
+## Session one — build (9 h 40 m)
 
 | Block | Duration | Work |
 |---|---|---|
@@ -17,3 +19,17 @@ Total: **9 h 40 m**, inside the 24 hour window.
 | Cloud integration | 0 h 20 m | Signed upload URL client, no credentials, disabled by default |
 | Tests | 0 h 45 m | 28 unit tests across formatting, severity, mapping and the repository |
 | Documentation and recording | 0 h 40 m | README, architecture notes, AI disclosure, screen recording |
+
+## Session two — themes, identity and accessibility (1 h 40 m)
+
+| Block | Duration | Work |
+|---|---|---|
+| Design exploration | 0 h 35 m | Four design directions compared side by side, then branding: three logo directions with ray animations, the Volt mascot, the theme system and the onboarding flow |
+| Theme system | 0 h 25 m | Three named themes behind one token contract, display face as a theme token, five tier chase ladder, persistence with an injected store, contrast assertions |
+| Visual rebuild | 0 h 20 m | Type scale raised across every variant, UI kit and all seven screens moved onto theme tokens, Meteocons replacing text glyphs |
+| Delight and onboarding | 0 h 10 m | Onboarding flow, theme picker, confetti with haptics, Volt |
+| Landing page | 0 h 10 m | Static showcase page and Vercel deploy |
+
+Session two closed three accessibility defects that shipped in session one: an
+offline banner rendering at 1.22:1 in light mode, a muted token at 2.0:1 in dark
+mode, and a 26px touch target on the storm classification control.

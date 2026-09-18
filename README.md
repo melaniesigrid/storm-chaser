@@ -10,9 +10,12 @@ Built for the Speer Technologies mobile assessment.
 |---|---|
 | Stack | React Native, Expo SDK 57, TypeScript (strict), Expo Router |
 | Data | TanStack Query with an AsyncStorage persister |
-| Styling | NativeWind (Tailwind) with a token driven theme |
+| Styling | Three switchable themes behind one token contract |
+| Icons | Meteocons, rendered natively through `react-native-svg` |
+| Motion | Reanimated 4, with Reduce Motion honoured |
 | Storage | AsyncStorage for records, app document directory for photos |
 | Platforms | iOS and Android from one codebase |
+| Showcase | [stormchaser-field.vercel.app](https://stormchaser-field.vercel.app) |
 
 ---
 
@@ -43,6 +46,25 @@ unless `EXPO_PUBLIC_SYNC_BASE_URL` is set (see `.env.example`).
 
 ## What it does
 
+### Themes
+
+Three themes, switchable in onboarding and in Settings: **Skyward Day**,
+**Skyward Night** and **Field Card**. No screen knows which one is active. Every
+colour, typeface and radius resolves through a named token, so adding a fourth
+is a data change rather than a UI change. The display typeface is itself a theme
+token, which is why Field Card reads as a collectible card and Skyward reads as
+sky.
+
+A user's explicit choice overrides system appearance permanently. A field app
+that flips to a light theme at sunrise while someone is out chasing is wrong,
+so the OS setting only decides the default before a choice has been made.
+
+Contrast is a unit test rather than a judgement call. `theme.test.ts` asserts
+WCAG AA for body text, muted text, both tab states and the primary action across
+all three themes, and carries regression guards for two defects that shipped in
+the first version: an offline banner rendering at **1.22:1** in light mode and a
+muted token at **2.0:1** in dark mode.
+
 ### Conditions
 
 Reads a position fix, then pulls current conditions, a 12 hour hourly series and a
@@ -72,6 +94,17 @@ file that is not there.
 
 Every report with a position fix, plotted and coloured by severity tier, with the
 viewport fitted to the set. Tapping a callout opens the report.
+
+### First run and delight
+
+Onboarding runs once: welcome, location, then theme choice, so someone picks
+their look before they ever see the app. Saving a report fires a confetti burst
+and a success haptic over the field log, which is where the new report just
+landed. Volt, the mascot, is pure geometry with no image assets; his level of
+detail follows the theme rather than a prop.
+
+Every motion respects Reduce Motion. With it on, the confetti and the meter
+animation are skipped entirely and the information is identical.
 
 ---
 
@@ -131,11 +164,11 @@ referenced.
 | Forecast integration | 12 hour hourly strip and 7 day outlook |
 | Map visualisation | `react-native-maps`, severity coloured pins, auto fitted region |
 | Offline functionality | Persisted query cache (24 h), offline and stale banners, bundled sample data |
-| Dark mode | Full light and dark themes, follows the system setting |
+| Dark mode | Three themes including a dedicated night theme, system aware until the user chooses |
 | Skeleton screens | Layout matched skeletons on both data screens |
 | Pull to refresh | Conditions and field log |
 | Cloud integration | Integration code only, no keys, disabled unless configured |
-| Unit tests | 28 tests across formatting, severity, mapping and the repository |
+| Unit tests | 91 tests across formatting, severity, mapping, the repository, the theme contract and the icon mapping |
 
 ### Known limits
 
@@ -144,8 +177,12 @@ referenced.
   when a configured sync target exists.
 - The network probe polls every 15 seconds rather than subscribing to an event
   stream. A production build would use NetInfo and TanStack Query's `onlineManager`.
-- Tests cover the domain and data layers. Component rendering tests were scoped
-  out against the 24 hour limit, which is where I would spend the next hour.
+- Tests cover the domain, data and theme layers. Component rendering tests are
+  still out: the suite has no renderer, which is why contrast and icon mapping
+  are asserted as pure functions instead. That is where I would spend the next
+  hour.
+- Community reports from other chasers are modelled but not shipped. The cloud
+  client is still the client half only, as the brief specifies.
 - One JSON envelope for all reports is right at this scale and wrong past a few
   thousand entries. The migration path is noted in the repository.
 

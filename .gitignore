@@ -12,3 +12,5 @@ coverage/
 expo-env.d.ts
 dist-check/
 dist-android/
+dist-verify/
+landing/.vercel/

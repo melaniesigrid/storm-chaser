@@ -8,6 +8,7 @@ and honest account.
 | Tool | Role |
 |---|---|
 | Claude (Anthropic) | Primary implementation assistant across the whole repository |
+| Claude Code (Anthropic) | Session two: agentic implementation of the theme system, the visual rebuild and the landing page |
 
 No other AI tools were used. No code was copied from a public storm chasing or
 weather app.
@@ -47,10 +48,51 @@ landed.
 - The decision about what to build and what to cut inside the time limit
 - Device testing, the screen recording and the final review pass
 
+## Session two: a larger share of generation
+
+The theme system, the visual rebuild, the onboarding flow and the landing page
+were built in a second session using Claude Code, which writes and runs code
+directly rather than proposing snippets. The share of machine written code is
+materially higher here than in session one, and it would be misleading to
+describe the two sessions the same way.
+
+**Directed by me**
+
+- Approving three themes rather than one, and that the display typeface is a
+  theme token rather than a global constant (Bricolage Grotesque for the two
+  Skyward themes, Archivo Black for Field Card)
+- Choosing the design direction from generated comparison boards, then the logo
+  direction, the mascot brief ("one square, two eyes") and its level of detail
+  per theme
+- That a user's explicit theme choice overrides system appearance permanently
+- That celebration fires on every saved report, and where it fires
+- Adopting Meteocons as the icon set
+
+**Generated with Claude Code, then reviewed and run**
+
+| Area | Notes |
+|---|---|
+| Theme system (`src/core/theme/*`) | Token contract, three themes, persistence and the contrast module. I set the requirement that contrast be a test rather than a judgement call. |
+| Visual rebuild (`src/core/ui`, all screens) | Type scale, every component and screen moved onto theme tokens. Largest share of generated code in the repository. |
+| Icon layer (`src/core/icons`, `weatherIcons.ts`) | Curated Meteocons subset and the day/night condition mapping. |
+| Onboarding, theme picker, confetti, Volt | Drafted end to end, then adjusted: the mascot was made minimal in the Skyward themes and detailed only in Field Card at my direction. |
+| Landing page (`landing/`) | Generated, then deployed to Vercel. |
+
+**A correction worth naming from session two**
+
+The model proposed using `@meteocons/svg`, the animated icon package. Inspecting
+the package showed its motion is SMIL embedded in each SVG, and `react-native-svg`
+does not implement SMIL, so those files would have rendered as static icons at a
+larger payload. The app uses `@meteocons/svg-static` instead. It also wrote a
+contrast assertion requiring tier fill colours to clear 3:1 against the surface,
+which is unachievable for a yellow fill on a white card and is not required when
+the tier is also encoded as a number and a text label; the assertion was wrong
+and was removed rather than the palette being bent to satisfy it.
+
 ## Verification
 
-Generated code was not taken on trust. The domain and data layers are covered by
-28 unit tests run under strict TypeScript, the app was exercised on a device for
+Generated code was not taken on trust. The domain, data and theme layers are
+covered by 91 unit tests run under strict TypeScript, the app was exercised on a device for
 every flow in the brief, and I corrected the model's output where it was wrong.
 Two examples worth naming, since a disclosure that claims the AI got everything
 right is not a useful disclosure:
