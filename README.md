@@ -95,6 +95,14 @@ file that is not there.
 Every report with a position fix, plotted and coloured by severity tier, with the
 viewport fitted to the set. Tapping a callout opens the report.
 
+### Community
+
+Storms other chasers logged, plotted around you as hollow rings so someone
+else's report can never be mistaken for one of your own at a glance. With no
+sync backend configured they come from a bundled sample set, generated relative
+to your position and clearly badged **community · demo data** in the legend.
+They are a separate type from your reports and never enter the repository.
+
 ### First run and delight
 
 Onboarding runs once: welcome, location, then theme choice, so someone picks
@@ -167,8 +175,8 @@ referenced.
 | Dark mode | Three themes including a dedicated night theme, system aware until the user chooses |
 | Skeleton screens | Layout matched skeletons on both data screens |
 | Pull to refresh | Conditions and field log |
-| Cloud integration | Integration code only, no keys, disabled unless configured |
-| Unit tests | 91 tests across formatting, severity, mapping, the repository, the theme contract and the icon mapping |
+| Cloud integration | Upload client plus a community feed; no keys, sample-backed unless configured |
+| Unit tests | 104 tests across formatting, severity, mapping, the repository, the theme contract, the icon mapping and the community layer |
 
 ### Known limits
 
@@ -181,8 +189,11 @@ referenced.
   still out: the suite has no renderer, which is why contrast and icon mapping
   are asserted as pure functions instead. That is where I would spend the next
   hour.
-- Community reports from other chasers are modelled but not shipped. The cloud
-  client is still the client half only, as the brief specifies.
+- Community reports resolve from a bundled sample set, because the brief asks
+  for cloud integration code with no backend and no keys. They travel the same
+  `fetchCommunityReports` signature and the same `Result` boundary a configured
+  build would use, and the map badges them as demo data rather than passing
+  fictional chasers off as real.
 - One JSON envelope for all reports is right at this scale and wrong past a few
   thousand entries. The migration path is noted in the repository.
 

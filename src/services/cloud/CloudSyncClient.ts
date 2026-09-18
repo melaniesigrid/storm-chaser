@@ -1,5 +1,9 @@
 import { err, ok, type Result } from '@/core/utils/result';
+import type { CommunityReport } from '@/features/storms/model/community';
 import type { StormReport } from '@/features/storms/model/types';
+import type { Coordinates } from '@/features/weather/model/types';
+
+import { sampleCommunityReports } from './communitySample';
 
 /**
  * Cloud integration code only, per the brief. No keys are committed and nothing
@@ -13,6 +17,15 @@ import type { StormReport } from '@/features/storms/model/types';
 export interface CloudSyncClient {
   isConfigured(): boolean;
   uploadReport(report: StormReport): Promise<Result<{ remoteId: string }>>;
+  /**
+   * Storms other chasers logged near a position.
+   *
+   * Configured builds hit the real endpoint. Unconfigured builds resolve a
+   * bundled sample set through this same signature, so the calling code, the
+   * Result boundary and the offline handling are identical either way and the
+   * UI decides how to badge the result by reading `source`.
+   */
+  fetchCommunityReports(near: Coordinates): Promise<Result<CommunityReport[]>>;
 }
 
 const BASE_URL = process.env.EXPO_PUBLIC_SYNC_BASE_URL ?? '';
@@ -20,6 +33,36 @@ const BASE_URL = process.env.EXPO_PUBLIC_SYNC_BASE_URL ?? '';
 export const cloudSyncClient: CloudSyncClient = {
   isConfigured() {
     return BASE_URL.length > 0;
+  },
+
+  async fetchCommunityReports(near) {
+    if (!BASE_URL) return ok(sampleCommunityReports(near));
+
+    try {
+      const response = await fetch(
+        `${BASE_URL}/reports/community?lat=${near.latitude}&lon=${near.longitude}`,
+      );
+
+      if (!response.ok) {
+        return err('network', `Community fetch failed with ${response.status}`);
+      }
+
+      const body = (await response.json()) as { reports?: unknown };
+      if (!Array.isArray(body.reports)) {
+        return err('network', 'Community response did not contain a report list');
+      }
+
+      // Anything the server sends is tagged as remote here rather than trusting
+      // a source field off the wire.
+      return ok(
+        body.reports.map((entry) => ({
+          ...(entry as CommunityReport),
+          source: 'remote' as const,
+        })),
+      );
+    } catch (cause) {
+      return err('network', 'Community reports could not be reached', cause);
+    }
   },
 
   async uploadReport(report) {
