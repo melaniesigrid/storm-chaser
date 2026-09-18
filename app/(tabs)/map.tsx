@@ -5,19 +5,13 @@ import MapView, { Marker, PROVIDER_DEFAULT, type Region } from 'react-native-map
 
 import { useAppTheme } from '@/core/theme/useAppTheme';
 import { EmptyState, Panel, Text } from '@/core/ui';
-import { describeStormType } from '@/features/storms/model/stormTypes';
+import { chaseLevelForTier, describeStormType } from '@/features/storms/model/stormTypes';
 import type { StormReport } from '@/features/storms/model/types';
 import { useStormReports } from '@/features/storms/hooks/useStormLog';
 
-const TIER_PIN = {
-  severe: '#FF5A47',
-  notable: '#F5C242',
-  routine: '#4FD1C5',
-} as const;
-
 export default function MapScreen() {
   const router = useRouter();
-  const { palette } = useAppTheme();
+  const { theme } = useAppTheme();
   const { data } = useStormReports();
 
   const located = useMemo(
@@ -56,7 +50,7 @@ export default function MapScreen() {
             <Marker
               key={report.id}
               coordinate={report.coordinates as { latitude: number; longitude: number }}
-              pinColor={TIER_PIN[type.tier]}
+              pinColor={theme.colors.tier[chaseLevelForTier(type.tier)]}
               title={type.label}
               description={report.notes || 'No notes recorded'}
               onCalloutPress={() => router.push(`/storm/${report.id}`)}
@@ -70,9 +64,9 @@ export default function MapScreen() {
           <View className="flex-row items-center justify-between">
             <Text variant="label">{`${located.length} plotted`}</Text>
             <View className="flex-row gap-4">
-              <Legend color={palette.supercell} label="Severe" />
-              <Legend color={palette.lightning} label="Notable" />
-              <Legend color={palette.radar} label="Other" />
+              <Legend color={theme.colors.tier.severe} label="Severe" />
+              <Legend color={theme.colors.tier.active} label="Notable" />
+              <Legend color={theme.colors.tier.unsettled} label="Other" />
             </View>
           </View>
         </Panel>

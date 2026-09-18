@@ -1,4 +1,4 @@
-import { createMemoryStore } from '@/features/storms/data/KeyValueStore';
+import { createMemoryStore } from '@/core/storage/KeyValueStore';
 import {
   createStormRepository,
   STORAGE_KEY,

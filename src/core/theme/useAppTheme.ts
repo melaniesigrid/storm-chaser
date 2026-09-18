@@ -1,20 +1,21 @@
-import { useColorScheme } from 'nativewind';
+import { useContext } from 'react';
 
-import { chrome, palette, type ColorScheme } from './tokens';
+import { ThemeContext, type ThemeContextValue } from './ThemeProvider';
 
 /**
- * Single read point for theme state. Screens use Tailwind `dark:` variants for
- * anything they can; this hook exists for native props (map style, status bar,
- * tab bar) that need a literal colour.
+ * Single read point for theme state.
+ *
+ * Every colour, font family and radius in the app resolves through here, so no
+ * screen ever knows which theme is active: it asks for a named token and gets
+ * whatever the current theme defines. That is what makes a third theme a data
+ * change rather than a UI change.
  */
-export function useAppTheme() {
-  const { colorScheme } = useColorScheme();
-  const scheme: ColorScheme = colorScheme === 'light' ? 'light' : 'dark';
+export function useAppTheme(): ThemeContextValue {
+  const value = useContext(ThemeContext);
 
-  return {
-    scheme,
-    isDark: scheme === 'dark',
-    colors: chrome[scheme],
-    palette,
-  };
+  if (!value) {
+    throw new Error('useAppTheme must be used inside a ThemeProvider');
+  }
+
+  return value;
 }

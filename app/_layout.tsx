@@ -1,5 +1,10 @@
 import '../global.css';
 
+import { ArchivoBlack_400Regular } from '@expo-google-fonts/archivo-black';
+import {
+  BricolageGrotesque_200ExtraLight,
+  BricolageGrotesque_800ExtraBold,
+} from '@expo-google-fonts/bricolage-grotesque';
 import {
   IBMPlexMono_400Regular,
   IBMPlexMono_500Medium,
@@ -20,6 +25,7 @@ import { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { ThemeProvider } from '@/core/theme/ThemeProvider';
 import { useAppTheme } from '@/core/theme/useAppTheme';
 import {
   PERSIST_MAX_AGE_MS,
@@ -38,6 +44,11 @@ export default function RootLayout() {
     IBMPlexMono_400Regular,
     IBMPlexMono_500Medium,
     IBMPlexMono_600SemiBold,
+    // Display faces. Which one is used is a theme decision, so both load up
+    // front: switching theme must not wait on a font.
+    BricolageGrotesque_200ExtraLight,
+    BricolageGrotesque_800ExtraBold,
+    ArchivoBlack_400Regular,
   });
 
   // A font failure should degrade to system faces, never block the app.
@@ -52,31 +63,34 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <PersistQueryClientProvider
-          client={queryClient}
-          persistOptions={{
-            persister: queryPersister,
-            maxAge: PERSIST_MAX_AGE_MS,
-          }}
-        >
-          <AppStack />
-        </PersistQueryClientProvider>
+        <ThemeProvider>
+          <PersistQueryClientProvider
+            client={queryClient}
+            persistOptions={{
+              persister: queryPersister,
+              maxAge: PERSIST_MAX_AGE_MS,
+            }}
+          >
+            <AppStack />
+          </PersistQueryClientProvider>
+        </ThemeProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );
 }
 
 function AppStack() {
-  const { isDark, colors } = useAppTheme();
+  const { theme } = useAppTheme();
+  const { colors, type } = theme;
 
   return (
     <>
-      <StatusBar style={isDark ? 'light' : 'dark'} />
+      <StatusBar style={theme.isDark ? 'light' : 'dark'} />
       <Stack
         screenOptions={{
           headerStyle: { backgroundColor: colors.background },
           headerTintColor: colors.text,
-          headerTitleStyle: { fontFamily: 'InstrumentSans_600SemiBold' },
+          headerTitleStyle: { fontFamily: type.display, fontSize: 20 },
           contentStyle: { backgroundColor: colors.background },
         }}
       >

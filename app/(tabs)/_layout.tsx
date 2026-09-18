@@ -4,28 +4,31 @@ import { Text, type ColorValue } from 'react-native';
 import { useAppTheme } from '@/core/theme/useAppTheme';
 
 function TabGlyph({ glyph, color }: { glyph: string; color: ColorValue }) {
-  return <Text style={{ color, fontSize: 18, lineHeight: 22 }}>{glyph}</Text>;
+  return <Text style={{ color, fontSize: 20, lineHeight: 24 }}>{glyph}</Text>;
 }
 
 export default function TabsLayout() {
-  const { colors, palette } = useAppTheme();
+  const { theme } = useAppTheme();
+  const { colors, type } = theme;
 
   return (
     <Tabs
       screenOptions={{
         headerStyle: { backgroundColor: colors.background },
         headerTintColor: colors.text,
-        headerTitleStyle: { fontFamily: 'InstrumentSans_600SemiBold' },
+        headerTitleStyle: { fontFamily: type.display, fontSize: 20 },
         tabBarStyle: {
           backgroundColor: colors.tabBar,
           borderTopColor: colors.border,
         },
-        tabBarActiveTintColor: palette.lightning,
-        tabBarInactiveTintColor: colors.muted,
+        tabBarActiveTintColor: colors.tabActive,
+        tabBarInactiveTintColor: colors.tabInactive,
         tabBarLabelStyle: {
-          fontFamily: 'IBMPlexMono_500Medium',
-          fontSize: 10,
-          letterSpacing: 1,
+          fontFamily: type.monoMedium,
+          // Was 10px with 1px tracking, which is below the smallest size iOS
+          // recommends and sat on an inactive colour measuring 2.0:1.
+          fontSize: 12,
+          letterSpacing: 0.5,
           textTransform: 'uppercase',
         },
       }}

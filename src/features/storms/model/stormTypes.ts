@@ -1,3 +1,5 @@
+import type { ChaseLevel } from '@/features/weather/model/types';
+
 import type { StormTypeId } from './types';
 
 export interface StormTypeDefinition {
@@ -26,4 +28,24 @@ const BY_ID = new Map(STORM_TYPES.map((type) => [type.id, type]));
 
 export function describeStormType(id: StormTypeId): StormTypeDefinition {
   return BY_ID.get(id) ?? { id: 'other', label: 'Other', tier: 'routine' };
+}
+
+/**
+ * Folds the three storm-type tiers onto the five-level chase ladder.
+ *
+ * The app used to carry two unrelated colour schemes: this three-tier one for
+ * map pins and a separate one for the chase index, which also collapsed severe
+ * and extreme onto the same red. Routing both through `ChaseLevel` means a
+ * colour means the same thing wherever it appears, and a theme only has to
+ * define one ladder.
+ */
+export function chaseLevelForTier(tier: StormTypeDefinition['tier']): ChaseLevel {
+  switch (tier) {
+    case 'severe':
+      return 'severe';
+    case 'notable':
+      return 'active';
+    case 'routine':
+      return 'unsettled';
+  }
 }

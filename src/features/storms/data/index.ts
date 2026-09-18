@@ -1,4 +1,4 @@
-import { asyncStorageStore } from './KeyValueStore';
+import { asyncStorageStore } from '@/core/storage/KeyValueStore';
 import { createStormRepository } from './StormRepository';
 
 /**
@@ -8,5 +8,5 @@ import { createStormRepository } from './StormRepository';
 export const stormRepository = createStormRepository(asyncStorageStore);
 
 export { createStormRepository } from './StormRepository';
-export { createMemoryStore } from './KeyValueStore';
+export { createMemoryStore } from '@/core/storage/KeyValueStore';
 export type { StormRepository } from './StormRepository';

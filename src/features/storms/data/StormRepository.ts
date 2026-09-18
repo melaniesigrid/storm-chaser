@@ -1,7 +1,7 @@
 import { createId } from '@/core/utils/id';
 import { err, ok, type Result } from '@/core/utils/result';
 
-import type { KeyValueStore } from './KeyValueStore';
+import type { KeyValueStore } from '@/core/storage/KeyValueStore';
 import type { StormReport, StormReportDraft, SyncState } from '../model/types';
 
 export const STORAGE_KEY = 'storm-chaser/reports';
