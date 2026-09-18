@@ -1,0 +1,49 @@
+{
+  "expo": {
+    "name": "Storm Chaser",
+    "slug": "storm-chaser",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "stormchaser",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "io.melaniebaratto.stormchaser",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Storm Chaser uses your location to pull live conditions and to stamp coordinates onto storm reports.",
+        "NSCameraUsageDescription": "Storm Chaser uses the camera to photograph storm structure for your field log.",
+        "NSPhotoLibraryAddUsageDescription": "Storm Chaser can save storm photos to your library."
+      }
+    },
+    "android": {
+      "package": "io.melaniebaratto.stormchaser",
+      "edgeToEdgeEnabled": true,
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "CAMERA"
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Storm Chaser uses your location to pull live conditions and to stamp coordinates onto storm reports."
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Storm Chaser uses the camera to photograph storm structure for your field log."
+        }
+      ],
+      "expo-font",
+      "expo-asset"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
