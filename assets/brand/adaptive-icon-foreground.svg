@@ -1,0 +1,22 @@
+<!--
+  Android adaptive-icon foreground.
+
+  Transparent ground and a smaller bolt than icon.svg: Android can mask this
+  layer to a circle, a squircle or a teardrop depending on the launcher, and
+  only the middle ~66% is guaranteed to survive. The plate colour is set as
+  adaptiveIcon.backgroundColor in app.json rather than drawn here, so the two
+  layers can be parallaxed by the launcher.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="1024" height="1024">
+  <defs>
+    <linearGradient id="ray" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFB400"/>
+      <stop offset="0.62" stop-color="#FF5A47"/>
+      <stop offset="1" stop-color="#C4402E"/>
+    </linearGradient>
+  </defs>
+
+  <g transform="translate(26.0 27.4) scale(0.424)">
+    <polygon points="56,-14 20,44 46,44 33,114 84,32 54,32 73,-14" fill="url(#ray)"/>
+  </g>
+</svg>

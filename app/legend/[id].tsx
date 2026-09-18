@@ -5,7 +5,7 @@ import { WeatherIcon } from '@/core/icons/WeatherIcon';
 import { useAppTheme } from '@/core/theme/useAppTheme';
 import { Button, Chip, Panel, Text } from '@/core/ui';
 import { formatCoordinates } from '@/core/utils/format';
-import { useDeviceLocation } from '@/features/location/useDeviceLocation';
+import { useLastKnownPosition } from '@/features/location/lastKnownPosition';
 import {
   describeLegendKind,
   findLegend,
@@ -29,7 +29,14 @@ export default function LegendDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { theme } = useAppTheme();
-  const location = useDeviceLocation();
+  /**
+   * Borrows whatever fix the map (or any screen before this one) already has
+   * rather than acquiring its own. A permission prompt and a satellite fix are
+   * seconds of latency and real battery for a single "From you" line, paid
+   * again for every pin you tap. With no fix published yet the line reads
+   * "Position unknown", which is what it said on a denial anyway.
+   */
+  const coordinates = useLastKnownPosition();
 
   const legend = findLegend(id);
 
@@ -58,9 +65,7 @@ export default function LegendDetailScreen() {
   const type = describeStormType(legend.stormType);
   const tierColor = theme.colors.tier[chaseLevelForTier(type.tier)];
 
-  const distanceKm = location.coordinates
-    ? haversineKm(location.coordinates, legend.coordinates)
-    : null;
+  const distanceKm = coordinates ? haversineKm(coordinates, legend.coordinates) : null;
 
   return (
     <ScrollView

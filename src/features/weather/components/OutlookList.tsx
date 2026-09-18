@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { View } from 'react-native';
 
 import { RangeBar } from '@/core/charts/RangeBar';
@@ -6,32 +7,37 @@ import { useAppTheme } from '@/core/theme/useAppTheme';
 import { Panel, Text } from '@/core/ui';
 import { formatSpeed, formatTemperature } from '@/core/utils/format';
 
+import { dayLabel } from '../model/dayLabel';
 import { iconForCondition } from '../model/weatherIcons';
 import type { DailyPoint } from '../model/types';
 
 const BAR_WIDTH = 108;
 
-function dayLabel(date: string, index: number): string {
-  if (index === 0) return 'Today';
-  const parsed = new Date(date);
-  if (Number.isNaN(parsed.getTime())) return date;
-  return parsed.toLocaleDateString(undefined, { weekday: 'short' });
-}
-
 export function OutlookList({ days }: { days: DailyPoint[] }) {
   const { theme } = useAppTheme();
-
-  if (!days.length) return null;
 
   /**
    * One domain across all seven rows. Scaling each bar to its own day would
    * make every day look equally variable, which is the opposite of what an
    * outlook is for.
+   *
+   * Memoised because every row's bar is positioned against it: recomputing two
+   * spreads over the week on each parent render re-renders seven bars that did
+   * not move.
    */
-  const lows = days.map((day) => day.minTempC);
-  const highs = days.map((day) => day.maxTempC);
-  const domainMin = Math.floor(Math.min(...lows) - 1);
-  const domainMax = Math.ceil(Math.max(...highs) + 1);
+  const { domainMin, domainMax } = useMemo(() => {
+    if (!days.length) return { domainMin: 0, domainMax: 0 };
+
+    const lows = days.map((day) => day.minTempC);
+    const highs = days.map((day) => day.maxTempC);
+
+    return {
+      domainMin: Math.floor(Math.min(...lows) - 1),
+      domainMax: Math.ceil(Math.max(...highs) + 1),
+    };
+  }, [days]);
+
+  if (!days.length) return null;
 
   return (
     <Panel label="7 day outlook" style={{ marginBottom: 12 }}>
@@ -54,10 +60,14 @@ export function OutlookList({ days }: { days: DailyPoint[] }) {
           {/* Daily rows are always the day variant: a 7 day outlook has no hour. */}
           <WeatherIcon name={iconForCondition(day.condition, false)} size={30} />
 
+          {/* `figure`, not `label`: label uppercases, and a formatted reading
+              is "45 km/h", not an instrument name. Widened from 62 to hold a
+              three figure gust at the larger mono size without truncating. */}
           <Text
-            variant="caption"
+            variant="figure"
+            tone={day.maxWindGustKmh >= 60 ? undefined : 'muted'}
             color={day.maxWindGustKmh >= 60 ? theme.colors.tierText.severe : undefined}
-            style={{ width: 62, fontFamily: theme.type.mono, fontSize: 12 }}
+            style={{ width: 70 }}
             numberOfLines={1}
           >
             {formatSpeed(day.maxWindGustKmh)}
@@ -65,10 +75,10 @@ export function OutlookList({ days }: { days: DailyPoint[] }) {
 
           <View style={{ flex: 1, alignItems: 'flex-end', gap: 6 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-              <Text
-                variant="caption"
-                style={{ fontFamily: theme.type.mono, fontSize: 13, width: 38, textAlign: 'right' }}
-              >
+              {/* Both ends of the bar are one size now; the low keeps its muted
+                  tone, which is what carried the hierarchy here anyway. Width
+                  is up from 38 to fit the larger mono glyphs. */}
+              <Text variant="figure" tone="muted" style={{ width: 44, textAlign: 'right' }}>
                 {formatTemperature(day.minTempC)}
               </Text>
 
@@ -83,15 +93,7 @@ export function OutlookList({ days }: { days: DailyPoint[] }) {
                 trackColor={theme.colors.surfaceSunken}
               />
 
-              <Text
-                variant="body"
-                style={{
-                  fontFamily: theme.type.monoMedium,
-                  fontSize: 14,
-                  width: 38,
-                  textAlign: 'right',
-                }}
-              >
+              <Text variant="figure" style={{ width: 44, textAlign: 'right' }}>
                 {formatTemperature(day.maxTempC)}
               </Text>
             </View>

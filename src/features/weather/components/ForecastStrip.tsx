@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { ScrollView, View } from 'react-native';
 
 import { Sparkline } from '@/core/charts/Sparkline';
@@ -16,15 +17,27 @@ const GAP = 14;
 export function ForecastStrip({ hours }: { hours: HourlyPoint[] }) {
   const { theme } = useAppTheme();
 
-  if (!hours.length) return null;
-
-  const temperatures = hours.map((hour) => hour.temperatureC);
-  const capes = compact(hours.map((hour) => hour.capeJkg));
-  const chartWidth = hours.length * COLUMN + (hours.length - 1) * GAP;
+  // Derived once per forecast rather than per parent render: the sparkline
+  // rescales the series and rebuilds a Catmull-Rom path from whatever array it
+  // is handed, so a fresh array every render is a fresh chart every render.
+  // NOT compacted, unlike the CAPE series below: the sparkline spreads points
+  // evenly across a width derived from `hours.length`, so dropping one would
+  // slide every later point off the hour it describes. `scaleSeries` already
+  // refuses to emit NaN for a non-finite reading. The real hazard is upstream:
+  // `mappers.ts` substitutes 0 for a missing temperature, which is finite, so
+  // a null hour still drags the domain down to 0 rather than being skipped.
+  const temperatures = useMemo(() => hours.map((hour) => hour.temperatureC), [hours]);
 
   // CAPE bars share one domain across the strip, so a tall bar means real
   // instability rather than just the tallest value in this particular window.
-  const capeMax = capes.length ? Math.max(1000, Math.max(...capes)) : 0;
+  const capeMax = useMemo(() => {
+    const capes = compact(hours.map((hour) => hour.capeJkg));
+    return capes.length ? Math.max(1000, Math.max(...capes)) : 0;
+  }, [hours]);
+
+  if (!hours.length) return null;
+
+  const chartWidth = hours.length * COLUMN + (hours.length - 1) * GAP;
 
   return (
     <Panel label="Next 12 hours" style={{ marginBottom: 12 }}>
@@ -50,9 +63,7 @@ export function ForecastStrip({ hours }: { hours: HourlyPoint[] }) {
                   <WeatherIcon name={iconForCondition(hour.condition, !hour.isDay)} size={36} />
                 </View>
 
-                <Text variant="body" style={{ fontFamily: theme.type.monoMedium, fontSize: 16 }}>
-                  {formatTemperature(hour.temperatureC)}
-                </Text>
+                <Text variant="figure">{formatTemperature(hour.temperatureC)}</Text>
 
                 {/* Rain chance as a filled column: scannable without reading it. */}
                 <View
@@ -77,10 +88,7 @@ export function ForecastStrip({ hours }: { hours: HourlyPoint[] }) {
                   />
                 </View>
 
-                <Text
-                  variant="caption"
-                  style={{ marginTop: 4, fontFamily: theme.type.mono, fontSize: 12 }}
-                >
+                <Text variant="label" style={{ marginTop: 4 }}>
                   {formatPercent(hour.precipitationProbabilityPct)}
                 </Text>
 

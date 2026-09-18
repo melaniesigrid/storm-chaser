@@ -31,7 +31,7 @@ export function ChaseIndexPanel({ chase }: { chase: ChaseIndex }) {
   return (
     <Panel label="Chase index" style={{ marginBottom: 12 }}>
       <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 14 }}>
-        <Text variant="hero" color={theme.colors.tierText[chase.level]} style={{ fontSize: 56, lineHeight: 58 }}>
+        <Text variant="score" color={theme.colors.tierText[chase.level]}>
           {String(chase.score)}
         </Text>
         <Text variant="body" style={{ flex: 1, paddingBottom: 8 }}>

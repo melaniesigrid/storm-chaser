@@ -15,6 +15,7 @@ import {
   formatSpeed,
   formatTemperature,
 } from '@/core/utils/format';
+import { usePublishLastKnownPosition } from '@/features/location/lastKnownPosition';
 import { useDeviceLocation } from '@/features/location/useDeviceLocation';
 import { StormLoreCard } from '@/features/storms/components/StormLoreCard';
 import { mockSnapshot } from '@/features/weather/api/weatherClient';
@@ -34,6 +35,10 @@ export default function ConditionsScreen() {
   const router = useRouter();
   const { theme } = useAppTheme();
   const location = useDeviceLocation();
+  // Conditions is the root tab and holds the lore card that opens the legend
+  // screen, so it publishes too. Without this, tapping through from the card
+  // showed "Position unknown" on the same data the card had just measured.
+  usePublishLastKnownPosition(location.coordinates);
   const network = useNetworkStatus();
   const [useSample, setUseSample] = useState(false);
 
