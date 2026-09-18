@@ -16,6 +16,7 @@ import {
   formatTemperature,
 } from '@/core/utils/format';
 import { useDeviceLocation } from '@/features/location/useDeviceLocation';
+import { StormLoreCard } from '@/features/storms/components/StormLoreCard';
 import { mockSnapshot } from '@/features/weather/api/weatherClient';
 import { ChaseIndexPanel } from '@/features/weather/components/ChaseIndexPanel';
 import { ForecastStrip } from '@/features/weather/components/ForecastStrip';
@@ -199,6 +200,8 @@ export default function ConditionsScreen() {
 
             <ForecastStrip hours={snapshot.hourly} />
             <OutlookList days={snapshot.daily} />
+
+            <StormLoreCard origin={location.coordinates} />
 
             <Button
               title="Document this storm"

@@ -1,128 +1,489 @@
-# Storm Chaser
+<div align="center">
 
-A field app for storm chasing hobbyists. It pulls live conditions for wherever you
-are standing, scores how interesting the atmosphere is, and turns a photograph into
-a timestamped, geotagged, weather stamped report that lives on the device.
+  <img src="landing/icons/thunderstorms-day-rain.svg" alt="Storm Chaser logo" width="120" height="auto" />
 
-Built for the Speer Technologies mobile assessment.
+  <h1>Storm Chaser</h1>
 
-| | |
-|---|---|
-| Stack | React Native, Expo SDK 57, TypeScript (strict), Expo Router |
-| Data | TanStack Query with an AsyncStorage persister |
-| Styling | Three switchable themes behind one token contract |
-| Icons | Meteocons, rendered natively through `react-native-svg` |
-| Motion | Reanimated 4, with Reduce Motion honoured |
-| Storage | AsyncStorage for records, app document directory for photos |
-| Platforms | iOS and Android from one codebase |
-| Showcase | [stormchaser-field.vercel.app](https://stormchaser-field.vercel.app) |
+  <p>
+    A field app for storm chasing hobbyists. It reads the sky where you are standing,
+    scores how interesting the atmosphere actually is, and turns a photograph into a
+    timestamped, geotagged, weather stamped report that never leaves your device.
+  </p>
 
----
+<p>
+  <img src="https://img.shields.io/badge/Expo_SDK-57-000020?style=flat-square&logo=expo&logoColor=white" alt="Expo SDK 57" />
+  <img src="https://img.shields.io/badge/React_Native-0.86-61DAFB?style=flat-square&logo=react&logoColor=black" alt="React Native 0.86" />
+  <img src="https://img.shields.io/badge/TypeScript-strict-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript strict" />
+  <img src="https://img.shields.io/badge/tests-128_passing-4FD1C5?style=flat-square" alt="128 tests passing" />
+  <img src="https://img.shields.io/badge/API_keys-none_required-F5C242?style=flat-square" alt="No API keys required" />
+  <img src="https://img.shields.io/badge/platforms-iOS_%7C_Android-14213A?style=flat-square" alt="iOS and Android" />
+</p>
 
-## Running it
+<h4>
+    <a href="https://stormchaser-field.vercel.app">View Showcase</a>
+  <span> · </span>
+    <a href="docs/ARCHITECTURE.md">Documentation</a>
+  <span> · </span>
+    <a href="https://github.com/melaniesigrid/storm-chaser/issues">Report Bug</a>
+  <span> · </span>
+    <a href="https://github.com/melaniesigrid/storm-chaser/issues">Request Feature</a>
+  </h4>
+
+  <sub>Built for the Speer Technologies mobile assessment.</sub>
+
+</div>
+
+<br />
+
+<!-- Table of Contents -->
+# :notebook_with_decorative_cover: Table of Contents
+
+- [About the Project](#star2-about-the-project)
+  * [Screenshots](#camera-screenshots)
+  * [Tech Stack](#space_invader-tech-stack)
+  * [Features](#dart-features)
+  * [Branding](#art-branding)
+  * [Environment Variables](#key-environment-variables)
+- [Getting Started](#toolbox-getting-started)
+  * [Prerequisites](#bangbang-prerequisites)
+  * [Installation](#gear-installation)
+  * [Running Tests](#test_tube-running-tests)
+  * [Run Locally](#running-run-locally)
+  * [Deployment](#triangular_flag_on_post-deployment)
+- [Usage](#eyes-usage)
+- [Project Structure](#open_file_folder-project-structure)
+- [Architecture](#building_construction-architecture)
+- [Brief Coverage](#clipboard-brief-coverage)
+- [Roadmap](#compass-roadmap)
+- [Contributing](#wave-contributing)
+- [License](#warning-license)
+- [Contact](#handshake-contact)
+- [Acknowledgements](#gem-acknowledgements)
+
+<!-- About the Project -->
+## :star2: About the Project
+
+Generic weather apps answer "do I need a coat". A chaser needs a different question
+answered: **can this atmosphere build something, and is it worth driving toward.**
+
+Storm Chaser pulls live conditions for the exact position you are standing in, surfaces
+the two variables generic apps leave out — CAPE and lifted index — and folds them into a
+**Chase Index**, a 0 to 100 score with a ranked list of what drove it. When something
+does happen, the camera flow stamps the photograph with the time, the coordinates, the
+position accuracy and the complete weather snapshot, then writes it to a local field log
+that works with no signal and no account.
+
+It is a judgement aid, not a forecast product, and it says so in the UI.
+
+<!-- Screenshots -->
+### :camera: Screenshots
+
+<!--
+Regenerate with:
+  npm i -D playwright && npx playwright install chromium
+  node scripts/capture-screenshots.mjs
+Captures landing/index.html at 1440x900, 820x1180 and 390x844, device scale factor 2.
+Set CAPTURE_URL to point the script at the deployed site instead of the local file.
+-->
+
+> **Note** — Storm Chaser is a native app: the camera, the location fix and the map are
+> native modules with no web equivalent, so these are captures of the project's showcase
+> site rather than a simulator. The three device mockups below are rendered from the real
+> theme tokens in [`src/core/theme/themes.ts`](src/core/theme/themes.ts). **Device
+> captures still to take:** Conditions, Field log, Map, Capture and Onboarding, on an iOS
+> simulator at 1170 × 2532 and an Android emulator at 1080 × 2400.
+
+<div align="center">
+  <img src="docs/screenshots/desktop-landing.png" alt="Storm Chaser showcase site at desktop width, showing the wordmark over a sky gradient and the product summary" width="100%" />
+</div>
+
+<br />
+
+<div align="center">
+  <img src="docs/screenshots/themes.png" alt="The three themes side by side: Skyward Day, Skyward Night and Field Card, each rendering the same Chase Index panel" width="100%" />
+</div>
+
+| Mobile — 390 × 844 | Tablet — 820 × 1180 |
+| :---: | :---: |
+| <img src="docs/screenshots/mobile-landing.png" alt="Showcase site at mobile width, wordmark and summary stacked in a single column" width="280" /> | <img src="docs/screenshots/tablet-landing.png" alt="Showcase site at tablet width, wordmark and summary with the sky gradient filling the upper half" width="380" /> |
+
+<!-- TechStack -->
+### :space_invader: Tech Stack
+
+<details>
+  <summary>App</summary>
+  <ul>
+    <li><a href="https://reactnative.dev/">React Native</a> 0.86, new architecture enabled</li>
+    <li><a href="https://expo.dev/">Expo</a> SDK 57</li>
+    <li><a href="https://www.typescriptlang.org/">TypeScript</a>, strict</li>
+    <li><a href="https://docs.expo.dev/router/introduction/">Expo Router</a> with typed routes</li>
+    <li><a href="https://docs.swmansion.com/react-native-reanimated/">Reanimated</a> 4, Reduce Motion aware</li>
+    <li><a href="https://github.com/software-mansion/react-native-svg">react-native-svg</a> for icon rendering</li>
+    <li><a href="https://github.com/react-native-maps/react-native-maps">react-native-maps</a></li>
+    <li><a href="https://airbnb.io/lottie/">Lottie</a> for the hero condition animation</li>
+  </ul>
+</details>
+
+<details>
+  <summary>Data &amp; state</summary>
+  <ul>
+    <li><a href="https://tanstack.com/query/latest">TanStack Query</a> v5, the only async entry point for UI</li>
+    <li><a href="https://tanstack.com/query/latest/docs/framework/react/plugins/persistQueryClient">persistQueryClient</a> over <a href="https://react-native-async-storage.github.io/async-storage/">AsyncStorage</a>, 24 hour cache</li>
+    <li><a href="https://open-meteo.com/">Open-Meteo</a> for current, hourly and daily forecast — keyless</li>
+    <li>App document directory (<a href="https://docs.expo.dev/versions/latest/sdk/filesystem/">expo-file-system</a>) for photos</li>
+  </ul>
+</details>
+
+<details>
+  <summary>Device</summary>
+  <ul>
+    <li><a href="https://docs.expo.dev/versions/latest/sdk/camera/">expo-camera</a>, <a href="https://docs.expo.dev/versions/latest/sdk/location/">expo-location</a>, <a href="https://docs.expo.dev/versions/latest/sdk/haptics/">expo-haptics</a></li>
+    <li><a href="https://docs.expo.dev/versions/latest/sdk/network/">expo-network</a> for the connectivity probe</li>
+    <li><a href="https://docs.expo.dev/versions/latest/sdk/font/">expo-font</a> + <a href="https://github.com/expo/google-fonts">@expo-google-fonts</a></li>
+  </ul>
+</details>
+
+<details>
+  <summary>Tooling</summary>
+  <ul>
+    <li><a href="https://jestjs.io/">Jest</a> via <a href="https://www.npmjs.com/package/jest-expo">jest-expo</a> — 128 tests, no renderer, no mocking framework</li>
+    <li><a href="https://github.com/kristerkari/react-native-svg-transformer">react-native-svg-transformer</a> so Meteocons import as components</li>
+    <li><a href="https://playwright.dev/">Playwright</a> for the screenshot script (dev-only, not a dependency)</li>
+    <li><a href="https://vercel.com/">Vercel</a> for the static showcase site in <code>landing/</code></li>
+  </ul>
+</details>
+
+<!-- Features -->
+### :dart: Features
+
+**Conditions** — A position fix, then current conditions, a 12 hour hourly series and a
+7 day outlook from Open-Meteo. Temperature, apparent temperature, wind, gusts, bearing,
+pressure, humidity, cloud and precipitation, plus CAPE and lifted index.
+
+**Chase Index** — A 0 to 100 heuristic combining the observed weather code, gust strength,
+rainfall rate and the convective indices, with a ranked list of the factors driving the
+score. The maths is one pure, tested module:
+[`features/weather/model/severity.ts`](src/features/weather/model/severity.ts).
+
+**Field log** — Camera capture, then a metadata form. Classification and notes are typed
+by the user; time, coordinates, accuracy and the full weather snapshot are captured
+automatically and shown read only so they can be verified before saving. Photo first,
+record second: if the image cannot be copied into permanent storage, the report is never
+written, so the log can never point at a file that is not there.
+
+**Map** — Every report with a position fix, plotted and coloured by severity tier, with
+the viewport fitted to the set. Tapping a callout opens the report.
+
+**Community** — Storms other chasers logged, drawn around you as hollow rings so someone
+else's report can never be mistaken for one of your own at a glance. With no sync backend
+configured they come from a bundled sample set, generated relative to your position and
+badged **community · demo data** in the legend. They are a separate type from your reports
+and never enter the repository.
+
+**Offline** — A persisted query cache, an explicit offline banner over the last good
+reading with its age, and a bundled sample dataset you opt into from the Not found view,
+labelled as sample data everywhere it appears. The field log itself needs no network at all.
+
+**Three themes** — Switchable in onboarding and in Settings. No screen knows which one is
+active. An explicit choice overrides system appearance permanently: a field app that flips
+to light at sunrise while someone is out chasing is wrong.
+
+**Accessibility as a test, not a judgement call** —
+[`theme.test.ts`](__tests__/theme.test.ts) asserts WCAG AA for body text, muted text, both
+tab states and the primary action across all three themes, and carries regression guards
+for two defects that shipped in v1.0: an offline banner at **1.22:1** in light mode and a
+muted token at **2.0:1** in dark mode. Nothing renders below 12px; every tappable control
+clears 44px.
+
+**Motion that knows when to stop** — Saving a report fires a confetti burst and a success
+haptic over the field log, where the new report just landed. Volt, the mascot, is pure
+geometry with no image assets. Every motion respects Reduce Motion: with it on, the
+confetti and the meter animation are skipped entirely and the information is identical.
+
+<!-- Branding -->
+### :art: Branding
+
+Everything visual resolves through a named token in
+[`src/core/theme/themes.ts`](src/core/theme/themes.ts). A screen never asks which theme is
+active; it asks the active theme for a token. Adding a fourth theme is a data change.
+
+#### Themes
+
+| Theme | Mood | Surface treatment | Display face |
+| --- | --- | --- | --- |
+| **Skyward Day** | Bright, atmospheric | Soft elevation, 0px borders, 24px panels | Bricolage Grotesque ExtraBold |
+| **Skyward Night** | Low light, night chasing | Glow elevation, 1px borders, 24px panels | Bricolage Grotesque ExtraBold |
+| **Field Card** | Bold, collectible | Hard elevation, 3px outlines, 20px panels | Archivo Black |
+
+#### Color Reference
+
+<details open>
+  <summary><b>Skyward Day</b> — the default, and what an unconfigured light device gets</summary>
+  <br />
+
+| Token | Hex | |
+| --- | --- | --- |
+| `accent` | `#C4402E` | ![#C4402E](https://img.shields.io/badge/-%20-C4402E?style=flat-square) |
+| `text` | `#14213A` | ![#14213A](https://img.shields.io/badge/-%20-14213A?style=flat-square) |
+| `textMuted` | `#3A4761` | ![#3A4761](https://img.shields.io/badge/-%20-3A4761?style=flat-square) |
+| `background` | `#F2F0E8` | ![#F2F0E8](https://img.shields.io/badge/-%20-F2F0E8?style=flat-square) |
+| `surface` | `#FFFFFF` | ![#FFFFFF](https://img.shields.io/badge/-%20-FFFFFF?style=flat-square) |
+| `surfaceSunken` | `#EDEAE0` | ![#EDEAE0](https://img.shields.io/badge/-%20-EDEAE0?style=flat-square) |
+| `border` | `#D6D2C6` | ![#D6D2C6](https://img.shields.io/badge/-%20-D6D2C6?style=flat-square) |
+| `backgroundGradient` | `#6E9AD4` → `#A9C3E4` → `#F7F4EC` | ![](https://img.shields.io/badge/-%20-6E9AD4?style=flat-square) ![](https://img.shields.io/badge/-%20-A9C3E4?style=flat-square) ![](https://img.shields.io/badge/-%20-F7F4EC?style=flat-square) |
+
+</details>
+
+<details>
+  <summary><b>Skyward Night</b> — the only dark theme</summary>
+  <br />
+
+| Token | Hex | |
+| --- | --- | --- |
+| `accent` | `#FFB84D` | ![#FFB84D](https://img.shields.io/badge/-%20-FFB84D?style=flat-square) |
+| `text` | `#EDF1FA` | ![#EDF1FA](https://img.shields.io/badge/-%20-EDF1FA?style=flat-square) |
+| `textMuted` | `#98A3C0` | ![#98A3C0](https://img.shields.io/badge/-%20-98A3C0?style=flat-square) |
+| `background` | `#0B1026` | ![#0B1026](https://img.shields.io/badge/-%20-0B1026?style=flat-square) |
+| `surface` | `#141B33` | ![#141B33](https://img.shields.io/badge/-%20-141B33?style=flat-square) |
+| `surfaceSunken` | `#0D1226` | ![#0D1226](https://img.shields.io/badge/-%20-0D1226?style=flat-square) |
+| `border` | `#2B3558` | ![#2B3558](https://img.shields.io/badge/-%20-2B3558?style=flat-square) |
+| `backgroundGradient` | `#0B1026` → `#1B2347` → `#2A2140` | ![](https://img.shields.io/badge/-%20-0B1026?style=flat-square) ![](https://img.shields.io/badge/-%20-1B2347?style=flat-square) ![](https://img.shields.io/badge/-%20-2A2140?style=flat-square) |
+
+</details>
+
+<details>
+  <summary><b>Field Card</b> — flat by design, hard outlines, no gradient</summary>
+  <br />
+
+| Token | Hex | |
+| --- | --- | --- |
+| `accent` | `#F5C242` | ![#F5C242](https://img.shields.io/badge/-%20-F5C242?style=flat-square) |
+| `text` | `#14140F` | ![#14140F](https://img.shields.io/badge/-%20-14140F?style=flat-square) |
+| `textMuted` | `#3F3E34` | ![#3F3E34](https://img.shields.io/badge/-%20-3F3E34?style=flat-square) |
+| `background` | `#FFF8EC` | ![#FFF8EC](https://img.shields.io/badge/-%20-FFF8EC?style=flat-square) |
+| `surface` | `#FFFFFF` | ![#FFFFFF](https://img.shields.io/badge/-%20-FFFFFF?style=flat-square) |
+| `border` | `#14140F` | ![#14140F](https://img.shields.io/badge/-%20-14140F?style=flat-square) |
+
+</details>
+
+#### The chase ladder
+
+Five tiers, one meaning. The same colours drive the index meter, the map pins and the
+report cards, so a colour means the same thing everywhere in the app; each theme only
+changes its values. Fills and text colours are separate tokens (`tier` and `tierText`)
+because a fill that reads well as a 6px bar does not necessarily clear AA as 13px type.
+
+| Tier | Score | Fill (Skyward Day) | Fill (Skyward Night) |
+| --- | --- | --- | --- |
+| Dormant | 0 – 14 | ![](https://img.shields.io/badge/-%20-5B6472?style=flat-square) `#5B6472` | ![](https://img.shields.io/badge/-%20-4A5470?style=flat-square) `#4A5470` |
+| Unsettled | 15 – 34 | ![](https://img.shields.io/badge/-%20-4FD1C5?style=flat-square) `#4FD1C5` | ![](https://img.shields.io/badge/-%20-4FD1C5?style=flat-square) `#4FD1C5` |
+| Active | 35 – 59 | ![](https://img.shields.io/badge/-%20-F5C242?style=flat-square) `#F5C242` | ![](https://img.shields.io/badge/-%20-FFC24D?style=flat-square) `#FFC24D` |
+| Severe | 60 – 79 | ![](https://img.shields.io/badge/-%20-FF5A47?style=flat-square) `#FF5A47` | ![](https://img.shields.io/badge/-%20-FF6B57?style=flat-square) `#FF6B57` |
+| Extreme | 80 – 100 | ![](https://img.shields.io/badge/-%20-8E7CFF?style=flat-square) `#8E7CFF` | ![](https://img.shields.io/badge/-%20-A78BFF?style=flat-square) `#A78BFF` |
+
+#### Typography
+
+Loaded through `expo-font` and `@expo-google-fonts` in
+[`app/_layout.tsx`](app/_layout.tsx). Both display faces load up front, because switching
+theme must not wait on a font, and a font failure degrades to system faces rather than
+blocking the app.
+
+| Role | Family | Weights | Notes |
+| --- | --- | --- | --- |
+| Display (Skyward) | **Bricolage Grotesque** | 200, 800 | The typeface is itself a theme token — it is what makes Skyward read as sky |
+| Display (Field Card) | **Archivo Black** | 400 | Ships one weight, so the light display role falls back to Instrument Sans 700 rather than pretending a 200 exists |
+| Body | **Instrument Sans** | 400, 500, 600, 700 | |
+| Mono | **IBM Plex Mono** | 400, 500, 600 | Always mono, in every theme: columns of figures have to line up |
+
+#### Icons
+
+[**Meteocons**](https://github.com/basmilius/weather-icons) (flat style), rendered natively
+through `react-native-svg` via `react-native-svg-transformer`, so each icon is a real
+component rather than a font glyph or a bitmap.
+
+Three decisions worth the note, all documented at the source:
+
+- **Flat, not fill.** Flat carries no gradients, which keeps icons crisp at 28px in the
+  forecast strip where a gradient turns to mud.
+- **Static, not animated.** The animated `@meteocons/svg` package embeds its motion as
+  SMIL, which `react-native-svg` does not implement — those files would render static at a
+  larger payload. Motion on the hero condition comes from Lottie instead.
+- **A curated subset, not all 475.** Metro needs every import to be static, so the shipped
+  set is a 25 name string union in [`src/core/icons/names.ts`](src/core/icons/names.ts)
+  with no imports, which keeps the WMO-code-to-icon mapping unit testable without a
+  bundler. [`weatherIcons.test.ts`](__tests__/weatherIcons.test.ts) asserts the registry in
+  [`WeatherIcon.tsx`](src/core/icons/WeatherIcon.tsx) covers every declared name.
+
+Day and night variants are mapped separately: a sun behind a cloud at 2am is the kind of
+detail that makes an app feel like nobody used it.
+
+Tab bar icons are not Meteocons. They are three geometric glyphs — `◬` Conditions, `▤`
+Field log, `◎` Map — tinted with the active tab token, so the bar stays legible at 12px
+where a detailed weather icon would not.
+
+#### Logo and mascot
+
+There is **no dedicated logo asset in this repository.** The mark at the top of this file
+is `landing/icons/thunderstorms-day-rain.svg`, the Meteocons glyph the showcase site also
+uses as its favicon. The wordmark on the showcase site is set in Bricolage Grotesque —
+"storm" at 200, "chaser" at 800 — rather than drawn.
+
+**Volt**, the mascot, is one square and two eyes, built from `View` geometry in
+[`src/core/ui/Volt.tsx`](src/core/ui/Volt.tsx) with no image assets, so he renders from a
+24px badge to a 150px onboarding hero with no export step. His level of detail follows the
+theme rather than a prop: Skyward keeps him to a square and two eyes, Field Card gives him
+the visor, antenna and rivets that match its heavier outlines. He has five moods: `idle`,
+`alert`, `logged`, `offline`, `asleep`.
+
+<!-- Env Variables -->
+### :key: Environment Variables
+
+**No API keys are required to run this project.** Open-Meteo is keyless, and cloud sync
+stays disabled unless you point it somewhere. Both variables live in
+[`.env.example`](.env.example).
+
+| Variable | Description | Required | Default |
+| --- | --- | --- | --- |
+| `EXPO_PUBLIC_WEATHER_BASE_URL` | Open-Meteo forecast endpoint. Exists so it can be pointed at a proxy or a mock server during testing. | No | `https://api.open-meteo.com/v1/forecast` |
+| `EXPO_PUBLIC_SYNC_BASE_URL` | Cloud sync target. The client in `src/services/cloud` is integration code only; sync is off and community reports fall back to the bundled sample set while this is empty. | No | `''` (empty — sync disabled) |
+
+Both are `EXPO_PUBLIC_`, which means they are **inlined into the JavaScript bundle at build
+time**. Never put a credential in either one.
+
+<!-- Getting Started -->
+## :toolbox: Getting Started
+
+### :bangbang: Prerequisites
+
+Node 20 or newer, and npm. Everything else installs from the lockfile.
 
 ```bash
+node --version    # v20+
+```
+
+Camera, location and maps need a **real device or a development build**. Expo Go covers
+everything except a custom map provider on Android.
+
+### :gear: Installation
+
+```bash
+git clone https://github.com/melaniesigrid/storm-chaser.git
+cd storm-chaser
 npm install
-npx expo install --fix     # aligns native module versions with the installed SDK
+```
+
+Then align native module versions with the installed SDK:
+
+```bash
+npx expo install --fix
+```
+
+> `expo-asset` is declared as a direct dependency on purpose: `expo-font` requires it at
+> runtime, and without the explicit entry npm can leave it nested where Metro cannot
+> resolve it.
+
+### :test_tube: Running Tests
+
+```bash
+npm test
+```
+
+128 tests across formatting, severity, mapping, the repository, the theme contract, the
+icon mapping, the community layer and the storm legends. No renderer, no device, no
+mocking framework.
+
+```bash
+npm run typecheck
+```
+
+### :running: Run Locally
+
+```bash
 npx expo start
 ```
 
-Camera, location and maps need a real device or a development build. Expo Go works
-for everything except a custom map provider on Android.
-
-`expo-asset` is declared as a direct dependency on purpose: `expo-font` requires
-it at runtime, and without the explicit entry npm can leave it nested where Metro
-cannot resolve it.
+Then press `i` for iOS or `a` for Android, or scan the QR code with Expo Go. For a native
+build with the full map provider:
 
 ```bash
-npm test          # unit tests
-npm run typecheck # tsc --noEmit
+npm run ios       # expo run:ios
+npm run android   # expo run:android
 ```
 
-No API keys are required. Open-Meteo is keyless, and cloud sync stays disabled
-unless `EXPO_PUBLIC_SYNC_BASE_URL` is set (see `.env.example`).
+### :triangular_flag_on_post: Deployment
 
----
+There is no app store release. The showcase site in `landing/` is a single static HTML
+file deployed to Vercel:
 
-## What it does
+```bash
+npx vercel deploy --prod landing
+```
 
-### Themes
+<!-- Usage -->
+## :eyes: Usage
 
-Three themes, switchable in onboarding and in Settings: **Skyward Day**,
-**Skyward Night** and **Field Card**. No screen knows which one is active. Every
-colour, typeface and radius resolves through a named token, so adding a fourth
-is a data change rather than a UI change. The display typeface is itself a theme
-token, which is why Field Card reads as a collectible card and Skyward reads as
-sky.
+**First run.** Onboarding runs once — welcome, location, then theme choice — so someone
+picks their look before they ever see the app.
 
-A user's explicit choice overrides system appearance permanently. A field app
-that flips to a light theme at sunrise while someone is out chasing is wrong,
-so the OS setting only decides the default before a choice has been made.
+**Reading conditions.** The Conditions tab opens on your position: current conditions, the
+Chase Index with its ranked factors, a 12 hour strip and a 7 day outlook. Pull to refresh.
+If nothing can be retrieved you get an explicit **Not found** view that names the failure
+and offers two ways forward — retry, or fall back to the bundled sample dataset.
 
-Contrast is a unit test rather than a judgement call. `theme.test.ts` asserts
-WCAG AA for body text, muted text, both tab states and the primary action across
-all three themes, and carries regression guards for two defects that shipped in
-the first version: an offline banner rendering at **1.22:1** in light mode and a
-muted token at **2.0:1** in dark mode.
+**Documenting a storm.** Tap capture, take the photo, fill in classification and notes.
+Everything else is stamped automatically and shown read only so you can verify it before
+saving. Saving lands you in the field log, with confetti.
 
-### Conditions
+**Routes** (Expo Router, typed):
 
-Reads a position fix, then pulls current conditions, a 12 hour hourly series and a
-7 day outlook from Open-Meteo. Alongside the usual temperature and wind figures it
-surfaces the two variables a chaser actually cares about: CAPE and lifted index.
+| Route | Screen |
+| --- | --- |
+| `/(tabs)` | Conditions, Field log, Map |
+| `/capture` | Camera and metadata form (modal) |
+| `/storm/[id]` | A single report |
+| `/settings` | Appearance and theme (modal) |
+| `/onboarding` | First run only |
 
-Those feed a **Chase Index**, a 0 to 100 heuristic combining the observed weather
-code, gust strength, rainfall rate and the convective indices, plus a ranked list
-of the factors driving the score. It is a judgement aid, not a forecast product,
-and the maths lives in one pure, tested module (`features/weather/model/severity.ts`).
+**The interesting logic is importable on its own.** `model/` has no React and no I/O:
 
-If nothing can be retrieved the screen shows an explicit **Not found** view that
-names the failure and offers two ways forward: retry, or fall back to the bundled
-sample dataset (clearly labelled as sample data in the UI).
+```ts
+import { computeChaseIndex, toLevel } from '@/features/weather/model/severity';
+import { iconForCondition } from '@/features/weather/model/weatherIcons';
 
-### Field log
+const index = computeChaseIndex({
+  condition,          // { code, group, label }
+  windGustKmh,
+  precipitationMm,
+  convective,         // { capeJkg, liftedIndex }
+});
 
-Camera capture, then a metadata form. Classification and notes are typed by the
-user; time, coordinates, position accuracy and the full weather snapshot are
-captured automatically and shown read only so they can be verified before saving.
+index.score;          // 72
+index.level;          // 'severe'
+index.headline;       // 'Severe potential, stay alert'
+index.drivers;        // ranked list of what pushed the score up
 
-Photo first, record second: if the image cannot be copied into permanent storage
-the report is never written, so the log can never contain an entry pointing at a
-file that is not there.
+toLevel(41);          // 'active'
+iconForCondition(condition, isNight);   // 'thunderstorms-night-rain'
+```
 
-### Map
+Every client and repository method returns a `Result`, never a throw:
 
-Every report with a position fix, plotted and coloured by severity tier, with the
-viewport fitted to the set. Tapping a callout opens the report.
+```ts
+const result = await repository.list();
+if (!result.ok) {
+  // result.error.kind: 'not_found' | 'network' | 'permission' | 'storage' | 'unknown'
+}
+```
 
-### Community
-
-Storms other chasers logged, plotted around you as hollow rings so someone
-else's report can never be mistaken for one of your own at a glance. With no
-sync backend configured they come from a bundled sample set, generated relative
-to your position and clearly badged **community � demo data** in the legend.
-They are a separate type from your reports and never enter the repository.
-
-### First run and delight
-
-Onboarding runs once: welcome, location, then theme choice, so someone picks
-their look before they ever see the app. Saving a report fires a confetti burst
-and a success haptic over the field log, which is where the new report just
-landed. Volt, the mascot, is pure geometry with no image assets; his level of
-detail follows the theme rather than a prop.
-
-Every motion respects Reduce Motion. With it on, the confetti and the meter
-animation are skipped entirely and the information is identical.
-
----
-
-## Architecture
-
-Feature sliced, with a strict dependency direction:
+<!-- Project Structure -->
+## :open_file_folder: Project Structure
 
 ```
 app/                       Expo Router routes. Screens compose, they do not fetch.
 src/core/                  Design tokens, shared UI kit, pure utilities.
+    theme/                 The three themes, the provider, the contrast helpers.
+    icons/                 The Meteocons subset and its registry.
+    ui/                    Button, Panel, Screen, Skeleton, Confetti, Volt.
 src/features/<feature>/
     api/                   Wire contracts and HTTP clients.
     model/                 Domain types and pure logic. No React, no I/O.
@@ -130,35 +491,39 @@ src/features/<feature>/
     hooks/                 TanStack Query bindings. The only async entry point for UI.
     components/            Feature specific presentation.
 src/services/              Cross cutting: query client, network probe, cloud sync.
+landing/                   The static showcase site. One HTML file, no build step.
+scripts/                   Screenshot capture for this README.
+docs/                      Architecture notes, AI disclosure, time log, screenshots.
+__tests__/                 128 tests. Domain, data and theme layers.
 ```
 
-`model/` never imports from `hooks/` or `components/`. That is what makes the
-interesting logic testable without a renderer or a native module.
+`model/` never imports from `hooks/` or `components/`. That is what makes the interesting
+logic testable without a renderer or a native module.
 
-Three decisions worth calling out:
+<!-- Architecture -->
+## :building_construction: Architecture
 
-**Repository pattern over a storage port.** `StormRepository` depends on a three
-method `KeyValueStore` interface, not on AsyncStorage. The clock and the id
-generator are injected too. The result is a data layer with real test coverage and
-no mocking framework, and a one line change to move to SQLite or MMKV when the log
-outgrows a single JSON envelope. Records are stored under one versioned key with a
-migration hook already in place.
+Three decisions worth calling out. The longer version is in
+[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md).
 
-**Result types instead of exceptions at the boundaries.** Every client and
-repository method returns `Result<T, AppError>` with a typed error kind. That is
-what lets the UI distinguish "no data for these coordinates" (a Not found view)
-from "the radio is off" (an offline banner over cached data) rather than showing
-one generic error for both. `unwrap()` converts to a throw at the query boundary,
-where TanStack Query expects one.
+**Repository pattern over a storage port.** `StormRepository` depends on a three method
+`KeyValueStore` interface, not on AsyncStorage. The clock and the id generator are injected
+too. The result is a data layer with real test coverage and no mocking framework, and a one
+line change to move to SQLite or MMKV when the log outgrows a single JSON envelope. Records
+live under one versioned key with a migration hook already in place.
 
-**Weather denormalised onto the report.** A field log entry has to stay readable
-years later, and no forecast API serves historical conditions for an arbitrary past
-timestamp. The snapshot is copied onto the record at capture time rather than
-referenced.
+**Result types instead of exceptions at the boundaries.** Every client and repository
+method returns `Result<T, AppError>` with a typed error kind. That is what lets the UI
+distinguish "no data for these coordinates" (a Not found view) from "the radio is off" (an
+offline banner over cached data) rather than showing one generic error for both. `unwrap()`
+converts to a throw at the query boundary, where TanStack Query expects one.
 
----
+**Weather denormalised onto the report.** A field log entry has to stay readable years
+later, and no forecast API serves historical conditions for an arbitrary past timestamp.
+The snapshot is copied onto the record at capture time rather than referenced.
 
-## Brief coverage
+<!-- Brief coverage -->
+## :clipboard: Brief Coverage
 
 | Requirement | Status |
 |---|---|
@@ -176,26 +541,87 @@ referenced.
 | Skeleton screens | Layout matched skeletons on both data screens |
 | Pull to refresh | Conditions and field log |
 | Cloud integration | Upload client plus a community feed; no keys, sample-backed unless configured |
-| Unit tests | 104 tests across formatting, severity, mapping, the repository, the theme contract, the icon mapping and the community layer |
+| Unit tests | 128, across formatting, severity, mapping, the repository, the theme contract, the icon mapping, the community layer and the storm legends |
 
 ### Known limits
 
-- Cloud sync is the client half only, as the brief specifies. There is no backend,
-  and nothing is uploaded; `syncState` is modelled and stored but only ever moves
-  when a configured sync target exists.
-- The network probe polls every 15 seconds rather than subscribing to an event
-  stream. A production build would use NetInfo and TanStack Query's `onlineManager`.
-- Tests cover the domain, data and theme layers. Component rendering tests are
-  still out: the suite has no renderer, which is why contrast and icon mapping
-  are asserted as pure functions instead. That is where I would spend the next
-  hour.
-- Community reports resolve from a bundled sample set, because the brief asks
-  for cloud integration code with no backend and no keys. They travel the same
-  `fetchCommunityReports` signature and the same `Result` boundary a configured
-  build would use, and the map badges them as demo data rather than passing
-  fictional chasers off as real.
-- One JSON envelope for all reports is right at this scale and wrong past a few
+- **Cloud sync is the client half only**, as the brief specifies. There is no backend and
+  nothing is uploaded; `syncState` is modelled and stored but only ever moves when a
+  configured sync target exists.
+- **The network probe polls every 15 seconds** rather than subscribing to an event stream.
+  A production build would use NetInfo and TanStack Query's `onlineManager`.
+- **No component rendering tests.** The suite has no renderer, which is why contrast and
+  icon mapping are asserted as pure functions instead. That is where the next hour goes.
+- **Community reports resolve from a bundled sample set**, because the brief asks for cloud
+  integration code with no backend and no keys. They travel the same
+  `fetchCommunityReports` signature and the same `Result` boundary a configured build would
+  use, and the map badges them as demo data rather than passing fictional chasers off as
+  real.
+- **One JSON envelope for all reports** is right at this scale and wrong past a few
   thousand entries. The migration path is noted in the repository.
+- **NativeWind and `tailwind.config.js` are configured but unused.** Styling is inline
+  styles resolved from theme tokens; no `className` prop appears in the codebase.
 
-See `docs/ARCHITECTURE.md` for the longer version, `docs/AI_DISCLOSURE.md` for AI
-tool usage, and `docs/TIME_LOG.md` for the time breakdown.
+<!-- Roadmap -->
+## :compass: Roadmap
+
+- [x] Live conditions, Chase Index, forecast strip and outlook
+- [x] Camera capture with a weather stamped field log
+- [x] Map with severity coloured pins
+- [x] Three themes on one token contract, WCAG AA asserted in tests
+- [x] Offline cache, banners and sample data fallback
+- [x] Onboarding, confetti, haptics and Volt
+- [x] Community feed, sample-backed
+- [ ] Component rendering tests
+- [ ] NetInfo and `onlineManager` in place of the 15 second poll
+- [ ] SQLite or MMKV behind `KeyValueStore` once the log outgrows one envelope
+- [ ] Device screenshots for this README, from a simulator and an emulator
+
+<!-- Contributing -->
+## :wave: Contributing
+
+This is an assessment submission rather than an open project, so there is no
+`CONTRIBUTING.md` and no code of conduct. If you are reading it as a reviewer, the two
+files worth opening first are
+[`src/features/weather/model/severity.ts`](src/features/weather/model/severity.ts) for the
+domain logic and [`src/core/theme/themes.ts`](src/core/theme/themes.ts) for the design
+system.
+
+To regenerate the screenshots in this file after a UI change:
+
+```bash
+npm i -D playwright && npx playwright install chromium
+node scripts/capture-screenshots.mjs
+```
+
+<!-- License -->
+## :warning: License
+
+**No license file is present in this repository.** Under default copyright that means all
+rights are reserved — the code can be read and evaluated, but not reused, modified or
+redistributed without permission. Add a `LICENSE` file if that is not the intent.
+
+Third party assets carry their own terms: [Meteocons](https://github.com/basmilius/weather-icons)
+is MIT, and the four typefaces are under the [SIL Open Font License](https://openfontlicense.org/).
+
+<!-- Contact -->
+## :handshake: Contact
+
+Melanie Arellano — [melaniesigridab@gmail.com](mailto:melaniesigridab@gmail.com)
+
+Project: [github.com/melaniesigrid/storm-chaser](https://github.com/melaniesigrid/storm-chaser) ·
+Showcase: [stormchaser-field.vercel.app](https://stormchaser-field.vercel.app)
+
+<!-- Acknowledgements -->
+## :gem: Acknowledgements
+
+- [Open-Meteo](https://open-meteo.com/) — free, keyless weather API including CAPE and lifted index
+- [Meteocons](https://github.com/basmilius/weather-icons) by Bas Milius — the icon set
+- [Bricolage Grotesque](https://fonts.google.com/specimen/Bricolage+Grotesque), [Archivo Black](https://fonts.google.com/specimen/Archivo+Black), [Instrument Sans](https://fonts.google.com/specimen/Instrument+Sans), [IBM Plex Mono](https://fonts.google.com/specimen/IBM+Plex+Mono)
+- [Expo](https://expo.dev/) and [TanStack Query](https://tanstack.com/query/latest)
+- [Shields.io](https://shields.io/) for the badges
+- [Awesome README Template](https://github.com/Louis3797/awesome-readme-template) by Louis3797 — the structure this file follows
+- [Emoji Cheat Sheet](https://github.com/ikatyang/emoji-cheat-sheet)
+
+See [`docs/AI_DISCLOSURE.md`](docs/AI_DISCLOSURE.md) for AI tool usage and
+[`docs/TIME_LOG.md`](docs/TIME_LOG.md) for the time breakdown.

@@ -1,15 +1,16 @@
 import { useRouter } from 'expo-router';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { View } from 'react-native';
 import MapView, { Marker, PROVIDER_DEFAULT, type Region } from 'react-native-maps';
 
 import { WeatherIcon } from '@/core/icons/WeatherIcon';
 import { useAppTheme } from '@/core/theme/useAppTheme';
-import { EmptyState, Panel, Text } from '@/core/ui';
+import { Chip, EmptyState, Panel, Text } from '@/core/ui';
 import { useDeviceLocation } from '@/features/location/useDeviceLocation';
 import { useCommunityReports } from '@/features/storms/hooks/useCommunityReports';
 import { useStormReports } from '@/features/storms/hooks/useStormLog';
 import { isDemoSet } from '@/features/storms/model/community';
+import { STORM_LEGENDS, describeLegendKind } from '@/features/storms/model/legends';
 import { chaseLevelForTier, describeStormType } from '@/features/storms/model/stormTypes';
 import type { StormReport } from '@/features/storms/model/types';
 import { toLevel } from '@/features/weather/model/severity';
@@ -21,6 +22,14 @@ export default function MapScreen() {
   const { data } = useStormReports();
   const { data: community } = useCommunityReports(location.coordinates);
 
+  /**
+   * Lore is on by default: it is what makes the map worth opening on the first
+   * run, before anything has been logged. It is a toggle rather than a fixed
+   * layer because twenty-two pins of other people's weather is noise once you
+   * are actually looking at your own.
+   */
+  const [showLore, setShowLore] = useState(true);
+
   const located = useMemo(
     () => (data ?? []).filter((report) => report.coordinates !== null),
     [data],
@@ -31,8 +40,9 @@ export default function MapScreen() {
 
   const region = useMemo<Region | undefined>(() => boundingRegion(located), [located]);
 
-  // Only fully empty when there is nothing of anyone's to plot.
-  if (!located.length && !others.length) {
+  // Only fully empty when there is nothing of anyone's to plot and the lore
+  // layer is off: with lore on, the map always has the world's storms on it.
+  if (!located.length && !others.length && !showLore) {
     return (
       <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
         <EmptyState
@@ -94,6 +104,38 @@ export default function MapScreen() {
             />
           </Marker>
         ))}
+
+        {/*
+          Storm lore: famous places, not reports. A third shape — a diamond on
+          the accent colour — so the three kinds of pin stay tellable apart
+          without reading a single label, including for anyone who cannot rely
+          on the colour difference.
+        */}
+        {showLore
+          ? STORM_LEGENDS.map((legend) => (
+              <Marker
+                key={legend.id}
+                coordinate={legend.coordinates}
+                title={legend.name}
+                description={`${describeLegendKind(legend.kind)} · ${legend.claim}`}
+                onCalloutPress={() =>
+                  router.push({ pathname: '/legend/[id]', params: { id: legend.id } })
+                }
+                tracksViewChanges={false}
+              >
+                <View
+                  style={{
+                    width: 18,
+                    height: 18,
+                    borderWidth: 3,
+                    borderColor: theme.colors.accent,
+                    backgroundColor: theme.colors.surface,
+                    transform: [{ rotate: '45deg' }],
+                  }}
+                />
+              </Marker>
+            ))
+          : null}
       </MapView>
 
       <View style={{ position: 'absolute', bottom: 24, left: 16, right: 16 }}>
@@ -115,17 +157,7 @@ export default function MapScreen() {
           </View>
 
           {others.length > 0 ? (
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                gap: 8,
-                marginTop: 12,
-                paddingTop: 12,
-                borderTopWidth: 1,
-                borderTopColor: theme.colors.border,
-              }}
-            >
+            <Row>
               <View
                 style={{
                   width: 14,
@@ -141,10 +173,54 @@ export default function MapScreen() {
                   ? `${others.length} community · demo data`
                   : `${others.length} from other chasers`}
               </Text>
-            </View>
+            </Row>
           ) : null}
+
+          <Row>
+            <View
+              style={{
+                width: 12,
+                height: 12,
+                borderWidth: 3,
+                borderColor: theme.colors.accent,
+                backgroundColor: theme.colors.surface,
+                transform: [{ rotate: '45deg' }],
+              }}
+            />
+            <Text variant="label" style={{ flex: 1 }}>
+              {showLore
+                ? `${STORM_LEGENDS.length} storm legends · tap a pin`
+                : 'Storm legends hidden'}
+            </Text>
+            <Chip
+              label={showLore ? 'Hide lore' : 'Show lore'}
+              selected={showLore}
+              onPress={() => setShowLore((value) => !value)}
+            />
+          </Row>
         </Panel>
       </View>
+    </View>
+  );
+}
+
+/** A divided row inside the map legend panel. */
+function Row({ children }: { children: React.ReactNode }) {
+  const { theme } = useAppTheme();
+
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 8,
+        marginTop: 12,
+        paddingTop: 12,
+        borderTopWidth: 1,
+        borderTopColor: theme.colors.border,
+      }}
+    >
+      {children}
     </View>
   );
 }
