@@ -183,3 +183,138 @@ describe('formatDistanceKm', () => {
     expect(formatDistanceKm(Number.POSITIVE_INFINITY)).toBe('--');
   });
 });
+
+describe('describeLegendKind', () => {
+  it('reads as a label a person would accept, not as an enum', () => {
+    expect(describeLegendKind('hotspot')).toBe('Storm hotspot');
+    expect(describeLegendKind('record')).toBe('World record');
+    expect(describeLegendKind('event')).toBe('Historic storm');
+  });
+
+  it('is exercised by real data for all three kinds', () => {
+    const kinds = new Set(STORM_LEGENDS.map((legend) => legend.kind));
+    expect(kinds).toEqual(new Set(['hotspot', 'record', 'event']));
+  });
+
+  it('lowercases cleanly for the lore card subtitle', () => {
+    expect(describeLegendKind('record').toLowerCase()).toBe('world record');
+  });
+});
+
+describe('formatDistanceKm boundaries', () => {
+  it('switches off the decimal at exactly 10 km', () => {
+    expect(formatDistanceKm(9.99)).toBe('10.0 km');
+    expect(formatDistanceKm(10)).toBe('10 km');
+  });
+
+  it('starts grouping at exactly 1000 km', () => {
+    expect(formatDistanceKm(999.4)).toBe('999 km');
+    expect(formatDistanceKm(1000)).toBe('1,000 km');
+  });
+
+  it('handles standing on the pin', () => {
+    expect(formatDistanceKm(0)).toBe('0.0 km');
+  });
+
+  it('degrades on negative infinity too, not just NaN', () => {
+    expect(formatDistanceKm(Number.NEGATIVE_INFINITY)).toBe('--');
+  });
+});
+
+describe('haversineKm extremes', () => {
+  it('clamps at the antipode instead of returning NaN from a rounding overshoot', () => {
+    const north = { latitude: 90, longitude: 0 };
+    const south = { latitude: -90, longitude: 0 };
+    const half = haversineKm(north, south);
+
+    expect(Number.isFinite(half)).toBe(true);
+    // Half the great circle: roughly 20,015 km.
+    expect(half).toBeGreaterThan(19_900);
+    expect(half).toBeLessThan(20_100);
+  });
+
+  it('is finite for every legend measured from every other', () => {
+    for (const a of STORM_LEGENDS) {
+      for (const b of STORM_LEGENDS) {
+        expect(Number.isFinite(haversineKm(a.coordinates, b.coordinates))).toBe(true);
+      }
+    }
+  });
+});
+
+describe('nearestLegend ties and single sets', () => {
+  it('keeps the first entry when two are equally close, rather than flickering', () => {
+    const origin = { latitude: 0, longitude: 0 };
+    const west = { ...STORM_LEGENDS[0]!, id: 'west', coordinates: { latitude: 0, longitude: -5 } };
+    const east = { ...STORM_LEGENDS[0]!, id: 'east', coordinates: { latitude: 0, longitude: 5 } };
+
+    expect(nearestLegend(origin, [west, east])?.legend.id).toBe('west');
+    expect(nearestLegend(origin, [east, west])?.legend.id).toBe('east');
+  });
+
+  it('returns the only candidate when given a set of one', () => {
+    const only = STORM_LEGENDS[3]!;
+    const result = nearestLegend(TORONTO, [only]);
+
+    expect(result?.legend.id).toBe(only.id);
+    expect(result?.distanceKm).toBeCloseTo(haversineKm(TORONTO, only.coordinates), 6);
+  });
+
+  it('reports a distance that matches the legend it picked', () => {
+    const result = nearestLegend(TORONTO);
+    expect(result?.distanceKm).toBeCloseTo(
+      haversineKm(TORONTO, result!.legend.coordinates),
+      6,
+    );
+  });
+});
+
+describe('legendOfTheDay defaults', () => {
+  it('needs no arguments on the conditions screen', () => {
+    const legend = legendOfTheDay();
+    expect(legend).not.toBeNull();
+    expect(STORM_LEGENDS.map((l) => l.id)).toContain(legend!.id);
+  });
+
+  it('returns the single entry every day when given a set of one', () => {
+    const only = STORM_LEGENDS[2]!;
+    expect(legendOfTheDay(new Date(2026, 0, 1), [only])?.id).toBe(only.id);
+    expect(legendOfTheDay(new Date(2026, 6, 17), [only])?.id).toBe(only.id);
+  });
+
+  it('wraps without a gap across a year boundary', () => {
+    const newYearsEve = legendOfTheDay(new Date(2025, 11, 31));
+    const newYearsDay = legendOfTheDay(new Date(2026, 0, 1));
+
+    expect(newYearsEve).not.toBeNull();
+    expect(newYearsDay).not.toBeNull();
+    expect(newYearsEve!.id).not.toBe(newYearsDay!.id);
+  });
+
+  it('is unaffected by the clock time the screen happened to render at', () => {
+    const justAfterMidnight = legendOfTheDay(new Date(2026, 4, 1, 0, 0, 1));
+    const justBeforeMidnight = legendOfTheDay(new Date(2026, 4, 1, 23, 59, 59));
+
+    expect(justAfterMidnight!.id).toBe(justBeforeMidnight!.id);
+  });
+});
+
+describe('STORM_LEGENDS record entries', () => {
+  it('dates a record whenever it claims a specific measurement year', () => {
+    for (const legend of STORM_LEGENDS.filter((l) => l.kind === 'record' && l.year)) {
+      expect(legend.year).toBeGreaterThan(1800);
+      expect(legend.year).toBeLessThanOrEqual(new Date().getFullYear());
+    }
+  });
+
+  it('names each entry distinctly, so two pins never read the same', () => {
+    const names = STORM_LEGENDS.map((legend) => legend.name);
+    expect(new Set(names).size).toBe(names.length);
+  });
+
+  it('writes a claim that ends as a sentence, since the callout shows it raw', () => {
+    for (const legend of STORM_LEGENDS) {
+      expect(legend.claim.trim()).toMatch(/[.!?]$/);
+    }
+  });
+});

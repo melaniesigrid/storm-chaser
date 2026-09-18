@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="day">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -10,175 +10,116 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Archivo+Black&family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root {
+  /* ============================================================
+     Themes. The site wears the same three the app does, resolved
+     through one set of custom properties, so switching is a data
+     change here exactly as it is in the app.
+     ============================================================ */
+
+  :root,
+  html[data-theme="day"] {
+    --bg-1: #6E9AD4;
+    --bg-2: #A9C3E4;
+    --bg-3: #E8E4DA;
+    --bg-4: #F7F4EC;
+    --page: #F2F0E8;
+    --band: #ECE8DC;
+    --surface: #FFFFFF;
     --ink: #14213A;
     --ink-soft: #3A4761;
-    --bone: #F7F4EC;
-    --sky-1: #6E9AD4;
-    --sky-2: #A9C3E4;
-    --amber: #FFB400;
-    --coral: #FF5A47;
-    --coral-deep: #C4402E;
-    --teal: #4FD1C5;
-    --violet: #8E7CFF;
-    --night-1: #0B1026;
-    --night-2: #1B2347;
-    --night-3: #2A2140;
-    --card: #FFF8EC;
+    --line: #D6D2C6;
+    --accent: #C4402E;
+    --on-accent: #FFFFFF;
+    --t-dormant: #5B6472;
+    --t-unsettled: #4FD1C5;
+    --t-active: #F5C242;
+    --t-severe: #FF5A47;
+    --t-extreme: #8E7CFF;
+    --t-severe-text: #C4402E;
     --display: 'Bricolage Grotesque', sans-serif;
-    --body: 'Instrument Sans', system-ui, sans-serif;
-    --mono: 'IBM Plex Mono', ui-monospace, monospace;
+    --display-weight: 800;
+    --radius: 24px;
+    --card-border: 0px;
+    --bolt-core: #FFFFFF;
+    --bolt-glow: #FFD86B;
+    --flash: rgba(255, 255, 255, 0.85);
+  }
+
+  html[data-theme="night"] {
+    --bg-1: #0B1026;
+    --bg-2: #1B2347;
+    --bg-3: #2A2140;
+    --bg-4: #0B1026;
+    --page: #0B1026;
+    --band: #0E1430;
+    --surface: #141B33;
+    --ink: #EDF1FA;
+    --ink-soft: #98A3C0;
+    --line: #2B3558;
+    --accent: #FFB84D;
+    --on-accent: #0B1026;
+    --t-dormant: #4A5470;
+    --t-unsettled: #4FD1C5;
+    --t-active: #FFC24D;
+    --t-severe: #FF6B57;
+    --t-extreme: #A78BFF;
+    --t-severe-text: #FF6B57;
+    --display: 'Bricolage Grotesque', sans-serif;
+    --display-weight: 800;
+    --radius: 24px;
+    --card-border: 0px;
+    --bolt-core: #FFFFFF;
+    --bolt-glow: #9FD4FF;
+    --flash: rgba(190, 220, 255, 0.9);
+  }
+
+  html[data-theme="card"] {
+    --bg-1: #FFF8EC;
+    --bg-2: #FFF8EC;
+    --bg-3: #FFF8EC;
+    --bg-4: #FFF8EC;
+    --page: #FFF8EC;
+    --band: #F6EEDD;
+    --surface: #FFFFFF;
+    --ink: #14140F;
+    --ink-soft: #3F3E34;
+    --line: #14140F;
+    --accent: #F5C242;
+    --on-accent: #14140F;
+    --t-dormant: #5B6472;
+    --t-unsettled: #4FD1C5;
+    --t-active: #F5C242;
+    --t-severe: #FF5A47;
+    --t-extreme: #8E7CFF;
+    --t-severe-text: #C4402E;
+    --display: 'Archivo Black', sans-serif;
+    --display-weight: 400;
+    --radius: 20px;
+    --card-border: 3px;
+    --bolt-core: #FFF8EC;
+    --bolt-glow: #FF5A47;
+    --flash: rgba(255, 220, 120, 0.85);
   }
 
   * { box-sizing: border-box; }
-
   html { scroll-behavior: smooth; }
 
   body {
     margin: 0;
-    font-family: var(--body);
+    font-family: 'Instrument Sans', system-ui, sans-serif;
     color: var(--ink);
-    background: var(--bone);
+    background: var(--page);
     -webkit-font-smoothing: antialiased;
+    transition: background-color 240ms ease, color 240ms ease;
   }
 
-  a { color: var(--coral-deep); }
-  a:hover { color: var(--coral); }
+  a { color: var(--accent); }
 
   .wrap { width: min(1120px, 100% - 48px); margin-inline: auto; }
 
-  /* ---------- hero ---------- */
-
-  .hero {
-    position: relative;
-    overflow: hidden;
-    padding: 72px 0 96px;
-    background: linear-gradient(170deg, var(--sky-1) 0%, var(--sky-2) 38%, #E8E4DA 74%, var(--bone) 100%);
-  }
-
-  .hero::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background:
-      radial-gradient(60% 40% at 78% 8%, rgba(255, 255, 255, 0.55), transparent 70%),
-      radial-gradient(40% 30% at 12% 4%, rgba(255, 255, 255, 0.35), transparent 70%);
-    pointer-events: none;
-  }
-
-  .hero .wrap { position: relative; z-index: 1; }
-
-  .eyebrow {
-    font-family: var(--mono);
-    font-size: 13px;
-    font-weight: 500;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    color: #22304D;
-  }
-
-  .wordmark { margin: 26px 0 0; position: relative; display: inline-block; }
-
-  .wordmark .light {
-    display: block;
-    font-family: var(--display);
-    font-weight: 200;
-    font-size: clamp(56px, 11vw, 116px);
-    line-height: 0.92;
-    letter-spacing: -0.04em;
-    color: var(--ink);
-  }
-
-  .wordmark .heavy {
-    display: block;
-    font-family: var(--display);
-    font-weight: 800;
-    font-size: clamp(56px, 11vw, 116px);
-    line-height: 0.92;
-    letter-spacing: -0.04em;
-    color: var(--ink);
-  }
-
-  .ray {
-    height: 11px;
-    border-radius: 6px;
-    margin-top: 14px;
-    background: linear-gradient(90deg, var(--amber) 0%, var(--coral) 62%, var(--coral-deep) 100%);
-    transform-origin: left center;
-    animation: ray-draw 2.8s cubic-bezier(0.22, 1, 0.36, 1) infinite;
-  }
-
-  @keyframes ray-draw {
-    0%   { transform: scaleX(0); }
-    45%  { transform: scaleX(1); }
-    100% { transform: scaleX(1); }
-  }
-
-  .bolt {
-    position: absolute;
-    right: -76px;
-    top: 4px;
-    width: 64px;
-    animation: bolt-drop 2.8s cubic-bezier(0.34, 1.56, 0.64, 1) infinite;
-  }
-
-  @keyframes bolt-drop {
-    0%, 26% { transform: translateY(-44px) scale(0.7); opacity: 0; }
-    44%     { transform: translateY(0) scale(1.14); opacity: 1; }
-    54%,100%{ transform: translateY(0) scale(1); opacity: 1; }
-  }
-
-  .lede {
-    margin: 32px 0 0;
-    max-width: 52ch;
-    font-size: clamp(19px, 2.2vw, 24px);
-    line-height: 1.5;
-    color: #22304D;
-  }
-
-  .cta-row { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 36px; }
-
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    min-height: 56px;
-    padding: 0 28px;
-    border-radius: 28px;
-    font-family: var(--display);
-    font-weight: 700;
-    font-size: 18px;
-    text-decoration: none;
-    border: 2px solid var(--ink);
-    transition: transform 120ms ease, box-shadow 120ms ease;
-  }
-
-  .btn-primary { background: var(--ink); color: #fff; }
-  .btn-primary:hover { color: #fff; transform: translateY(-2px); box-shadow: 0 10px 22px rgba(20, 33, 58, 0.25); }
-  .btn-ghost { background: transparent; color: var(--ink); }
-  .btn-ghost:hover { color: var(--ink); transform: translateY(-2px); }
-
-  .specs {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 28px;
-    margin-top: 48px;
-    font-family: var(--mono);
-    font-size: 13px;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: #22304D;
-  }
-
-  .specs b { font-weight: 600; color: var(--ink); }
-
-  /* ---------- sections ---------- */
-
-  section { padding: 96px 0; }
-
   h2 {
     font-family: var(--display);
-    font-weight: 800;
+    font-weight: var(--display-weight);
     font-size: clamp(34px, 5vw, 56px);
     line-height: 1.02;
     letter-spacing: -0.035em;
@@ -193,84 +134,303 @@
     margin: 0 0 56px;
   }
 
-  /* ---------- themes ---------- */
+  section { padding: 96px 0; }
 
-  .themes { background: #ECE8DC; }
+  /* ---------- theme switcher ---------- */
 
-  .phones {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 28px;
+  .switch {
+    position: fixed;
+    top: 18px;
+    right: 18px;
+    z-index: 50;
+    display: flex;
+    gap: 6px;
+    padding: 6px;
+    border-radius: 999px;
+    background: var(--surface);
+    border: max(1px, var(--card-border)) solid var(--line);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
   }
+
+  .switch button {
+    min-height: 44px;
+    padding: 0 16px;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--ink-soft);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  .switch button[aria-pressed="true"] {
+    background: var(--accent);
+    color: var(--on-accent);
+  }
+
+  /* ---------- hero ---------- */
+
+  .hero {
+    position: relative;
+    overflow: hidden;
+    padding: 96px 0 100px;
+    background: linear-gradient(170deg, var(--bg-1) 0%, var(--bg-2) 38%, var(--bg-3) 74%, var(--bg-4) 100%);
+    transition: background 240ms ease;
+  }
+
+  /* The white-out. A real strike lights the whole sky, not just the channel. */
+  .skyflash {
+    position: absolute;
+    inset: 0;
+    background: var(--flash);
+    opacity: 0;
+    mix-blend-mode: screen;
+    pointer-events: none;
+    animation: skyflash 6s linear infinite;
+  }
+
+  html[data-theme="card"] .skyflash { mix-blend-mode: multiply; }
+
+  /*
+    Lightning is not a fade in. It is a stepped leader punching down, a return
+    stroke that blows out the exposure, then three or four restrikes down the
+    same ionised channel before it dies. These percentages are that sequence at
+    6s: dark until 42%, then roughly 900ms of violence, then dark again.
+  */
+  @keyframes skyflash {
+    0%, 42%      { opacity: 0; }
+    43%          { opacity: 0.9; }
+    44.5%        { opacity: 0.12; }
+    45.5%        { opacity: 0.75; }
+    47%          { opacity: 0.06; }
+    48.5%        { opacity: 0.55; }
+    51%          { opacity: 0.18; }
+    54%          { opacity: 0.30; }
+    60%, 100%    { opacity: 0; }
+  }
+
+  .hero .wrap { position: relative; z-index: 2; }
+
+  .eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+
+  .lockup { display: flex; align-items: flex-start; gap: clamp(12px, 4vw, 52px); margin-top: 26px; flex-wrap: wrap; }
+
+  .wordmark .light,
+  .wordmark .heavy {
+    display: block;
+    font-family: var(--display);
+    font-size: clamp(54px, 10.5vw, 112px);
+    line-height: 0.92;
+    letter-spacing: -0.04em;
+    color: var(--ink);
+  }
+
+  .wordmark .light { font-weight: 200; }
+  .wordmark .heavy { font-weight: var(--display-weight); }
+
+  html[data-theme="card"] .wordmark .light,
+  html[data-theme="card"] .wordmark .heavy { text-transform: uppercase; }
+
+  .ray {
+    height: 11px;
+    border-radius: 6px;
+    margin-top: 16px;
+    background: linear-gradient(90deg, var(--t-active) 0%, var(--t-severe) 62%, var(--accent) 100%);
+    transform-origin: left center;
+    animation: ray-draw 6s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+  }
+
+  @keyframes ray-draw {
+    0%, 42% { transform: scaleX(0); }
+    52%     { transform: scaleX(1); }
+    100%    { transform: scaleX(1); }
+  }
+
+  /* ---------- the bolt ---------- */
+
+  .bolt-stage {
+    position: relative;
+    width: clamp(120px, 20vw, 200px);
+    flex-shrink: 0;
+    filter: drop-shadow(0 0 var(--bolt-blur, 0px) var(--bolt-glow));
+    animation: bolt-halo 6s linear infinite;
+  }
+
+  @keyframes bolt-halo {
+    0%, 42%   { --bolt-blur: 0px; }
+    43%       { --bolt-blur: 26px; }
+    52%       { --bolt-blur: 14px; }
+    60%, 100% { --bolt-blur: 0px; }
+  }
+
+  .bolt-svg { width: 100%; height: auto; display: block; overflow: visible; }
+
+  /*
+    Channel geometry. The main channel draws top to bottom in 120ms (the
+    stepped leader), the two forks follow a beat later — a branch cannot exist
+    before the channel it grows from.
+  */
+  .channel, .fork {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .channel-glow { stroke: var(--bolt-glow); stroke-width: 15; opacity: 0.55; }
+  .channel-core { stroke: var(--bolt-core); stroke-width: 5; }
+  .fork-glow    { stroke: var(--bolt-glow); stroke-width: 9; opacity: 0.45; }
+  .fork-core    { stroke: var(--bolt-core); stroke-width: 3; }
+
+  .channel { stroke-dasharray: 420; stroke-dashoffset: 420; animation: draw-channel 6s linear infinite; }
+  .fork    { stroke-dasharray: 150; stroke-dashoffset: 150; animation: draw-fork 6s linear infinite; }
+
+  @keyframes draw-channel {
+    0%, 42%   { stroke-dashoffset: 420; opacity: 0; }
+    42.2%     { opacity: 1; }
+    44%       { stroke-dashoffset: 0; opacity: 1; }
+    /* Restrikes: the channel stays drawn and flickers down the same path. */
+    45%       { opacity: 0.15; }
+    46%       { opacity: 1; }
+    47.5%     { opacity: 0.1; }
+    49%       { opacity: 0.9; }
+    52%       { opacity: 0.35; }
+    56%       { opacity: 0.5; }
+    62%       { opacity: 0; stroke-dashoffset: 0; }
+    100%      { opacity: 0; stroke-dashoffset: 420; }
+  }
+
+  @keyframes draw-fork {
+    0%, 43.5% { stroke-dashoffset: 150; opacity: 0; }
+    43.7%     { opacity: 1; }
+    45%       { stroke-dashoffset: 0; opacity: 1; }
+    46%       { opacity: 0.12; }
+    47%       { opacity: 0.85; }
+    49%       { opacity: 0.2; }
+    51%       { opacity: 0.6; }
+    60%       { opacity: 0; stroke-dashoffset: 0; }
+    100%      { opacity: 0; stroke-dashoffset: 150; }
+  }
+
+  .lede {
+    margin: 36px 0 0;
+    max-width: 52ch;
+    font-size: clamp(19px, 2.2vw, 24px);
+    line-height: 1.5;
+    color: var(--ink-soft);
+  }
+
+  .cta-row { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 36px; }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    min-height: 56px;
+    padding: 0 28px;
+    border-radius: 28px;
+    font-family: var(--display);
+    font-weight: var(--display-weight);
+    font-size: 18px;
+    text-decoration: none;
+    border: max(2px, var(--card-border)) solid var(--ink);
+    transition: transform 120ms ease;
+  }
+
+  .btn-primary { background: var(--ink); color: var(--page); }
+  .btn-ghost { background: transparent; color: var(--ink); }
+  .btn:hover { transform: translateY(-2px); }
+  .btn-primary:hover { color: var(--page); }
+  .btn-ghost:hover { color: var(--ink); }
+
+  .specs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 28px;
+    margin-top: 48px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+
+  .specs b { font-weight: 600; color: var(--ink); }
+
+  /* ---------- phones ---------- */
+
+  .themes { background: var(--band); }
+
+  .phones { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 28px; }
 
   .phone {
     border-radius: 34px;
     padding: 24px 20px 26px;
-    min-height: 470px;
+    min-height: 440px;
     display: flex;
     flex-direction: column;
     gap: 16px;
     box-shadow: 0 22px 50px rgba(20, 33, 58, 0.22);
   }
 
-  .phone--day   { background: linear-gradient(170deg, var(--sky-1), var(--sky-2) 42%, #E8E4DA 80%, var(--bone)); }
-  .phone--night { background: linear-gradient(170deg, var(--night-1), var(--night-2) 55%, var(--night-3)); }
-  .phone--card  { background: var(--card); border: 3px solid #14140F; }
+  .phone--day   { background: linear-gradient(170deg, #6E9AD4, #A9C3E4 42%, #E8E4DA 80%, #F7F4EC); color: #14213A; }
+  .phone--night { background: linear-gradient(170deg, #0B1026, #1B2347 55%, #2A2140); color: #EDF1FA; }
+  .phone--card  { background: #FFF8EC; border: 3px solid #14140F; color: #14140F; }
 
   .phone-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .phone-loc { font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; }
 
-  .phone-loc { font-family: var(--mono); font-size: 12px; letter-spacing: 1px; text-transform: uppercase; }
-
-  .temp { font-size: 62px; line-height: 1; letter-spacing: -0.04em; }
-  .phone--day .temp, .phone--night .temp { font-family: var(--display); font-weight: 800; }
+  .temp { font-size: 58px; line-height: 1; letter-spacing: -0.04em; }
+  .phone--day .temp, .phone--night .temp { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; }
   .phone--card .temp { font-family: 'Archivo Black', sans-serif; }
 
-  .cond { font-size: 20px; font-weight: 600; margin-top: 6px; }
+  .cond { font-size: 19px; font-weight: 600; margin-top: 6px; }
 
-  .panel { border-radius: 20px; padding: 16px; }
-  .phone--day .panel   { background: #fff; box-shadow: 0 8px 20px rgba(20, 33, 58, 0.14); }
-  .phone--night .panel { background: #141B33; border: 1px solid #2B3558; }
-  .phone--card .panel  { background: #fff; border: 3px solid #14140F; box-shadow: 4px 4px 0 #14140F; }
+  .pnl { border-radius: 20px; padding: 16px; }
+  .phone--day .pnl   { background: #fff; box-shadow: 0 8px 20px rgba(20, 33, 58, 0.14); }
+  .phone--night .pnl { background: #141B33; border: 1px solid #2B3558; }
+  .phone--card .pnl  { background: #fff; border: 3px solid #14140F; box-shadow: 4px 4px 0 #14140F; }
 
-  .panel-label { font-family: var(--mono); font-size: 12px; letter-spacing: 1px; text-transform: uppercase; }
+  .pnl-label { font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 1px; text-transform: uppercase; opacity: 0.75; }
 
-  .score { font-size: 46px; line-height: 1; letter-spacing: -0.04em; }
-  .phone--day .score, .phone--night .score { font-family: var(--display); font-weight: 800; }
+  .score { font-size: 44px; line-height: 1; letter-spacing: -0.04em; }
+  .phone--day .score, .phone--night .score { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; }
   .phone--card .score { font-family: 'Archivo Black', sans-serif; }
 
   .ladder { display: flex; gap: 4px; margin-top: 12px; }
   .ladder span { flex: 1; height: 11px; border-radius: 3px; }
   .phone--card .ladder span { border: 2px solid #14140F; }
 
-  .theme-name { font-family: var(--mono); font-size: 12px; letter-spacing: 2px; text-transform: uppercase; margin-top: auto; }
-
-  .ink-day   { color: var(--ink); }
-  .muted-day { color: var(--ink-soft); }
-  .ink-night { color: #EDF1FA; }
-  .muted-night { color: #98A3C0; }
-  .ink-card  { color: #14140F; }
-  .muted-card { color: #3F3E34; }
+  .theme-name { font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; margin-top: auto; }
 
   /* ---------- features ---------- */
 
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 24px;
-  }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
 
   .feature {
-    background: #fff;
-    border-radius: 24px;
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: var(--card-border) solid var(--line);
     padding: 30px 28px;
     box-shadow: 0 10px 28px rgba(20, 33, 58, 0.09);
   }
+
+  html[data-theme="card"] .feature { box-shadow: 5px 5px 0 var(--line); }
 
   .feature img { width: 56px; height: 56px; }
 
   .feature h3 {
     font-family: var(--display);
-    font-weight: 700;
+    font-weight: var(--display-weight);
     font-size: 23px;
     letter-spacing: -0.02em;
     margin: 16px 0 10px;
@@ -278,47 +438,116 @@
 
   .feature p { margin: 0; color: var(--ink-soft); line-height: 1.6; }
 
-  /* ---------- chase index ---------- */
+  /* ---------- tiers ---------- */
 
-  .chase { background: var(--ink); color: var(--bone); }
-  .chase h2 { color: var(--bone); }
-  .chase .section-lede { color: #A9B4CC; }
-
+  .chase { background: var(--band); }
   .tiers { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; }
 
-  .tier { border-radius: 18px; padding: 22px 20px; background: #1C2540; }
+  .tier {
+    border-radius: var(--radius);
+    padding: 22px 20px;
+    background: var(--surface);
+    border: var(--card-border) solid var(--line);
+  }
+
+  html[data-theme="card"] .tier { box-shadow: 4px 4px 0 var(--line); }
+
   .tier .bar { height: 10px; border-radius: 5px; margin-bottom: 16px; }
-  .tier .range { font-family: var(--mono); font-size: 13px; letter-spacing: 1px; color: #A9B4CC; }
-  .tier .name { font-family: var(--display); font-weight: 700; font-size: 21px; margin: 6px 0 0; letter-spacing: -0.02em; }
+  .tier .range { font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 1px; color: var(--ink-soft); }
+  .tier .name { font-family: var(--display); font-weight: var(--display-weight); font-size: 21px; margin: 6px 0 0; letter-spacing: -0.02em; }
 
-  /* ---------- footer ---------- */
+  /* ---------- submission ---------- */
 
-  footer { padding: 64px 0 80px; background: #ECE8DC; }
+  .submission { background: var(--surface); }
+
+  .sub-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 12px; }
+
+  .sub-item {
+    border: max(1px, var(--card-border)) solid var(--line);
+    border-radius: var(--radius);
+    padding: 22px 20px;
+    background: var(--page);
+  }
+
+  .sub-item .k {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 8px;
+  }
+
+  .sub-item .v { font-size: 19px; font-weight: 600; line-height: 1.4; word-break: break-word; }
+  .sub-item .v a { text-decoration: none; }
+  .sub-item .v a:hover { text-decoration: underline; }
+
+  .pending {
+    display: inline-block;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: var(--t-active);
+    color: #14140F;
+  }
+
+  table.timelog { width: 100%; border-collapse: collapse; margin-top: 18px; }
+  table.timelog th, table.timelog td { text-align: left; padding: 12px 10px; border-bottom: 1px solid var(--line); font-size: 16px; }
+  table.timelog th { font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--ink-soft); }
+  table.timelog td.num { font-family: 'IBM Plex Mono', monospace; text-align: right; white-space: nowrap; }
+  table.timelog tr.total td { font-weight: 700; border-bottom: 0; }
+
+  footer { padding: 56px 0 72px; background: var(--band); }
   .foot-row { display: flex; flex-wrap: wrap; gap: 20px; align-items: center; justify-content: space-between; }
-  .foot-note { font-family: var(--mono); font-size: 13px; color: var(--ink-soft); letter-spacing: 0.5px; }
+  .foot-note { font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: var(--ink-soft); }
 
   @media (prefers-reduced-motion: reduce) {
-    .ray, .bolt { animation: none; transform: none; opacity: 1; }
+    .skyflash, .bolt-stage, .channel, .fork, .ray { animation: none; }
+    .channel, .fork { stroke-dashoffset: 0; opacity: 1; }
+    .ray { transform: scaleX(1); }
   }
 
   @media (max-width: 620px) {
     .wrap { width: calc(100% - 32px); }
     section { padding: 68px 0; }
-    .bolt { display: none; }
+    .switch { top: auto; bottom: 14px; right: 14px; }
+    .hero { padding-top: 84px; }
   }
 </style>
 </head>
 <body>
 
+<div class="switch" role="group" aria-label="Theme">
+  <button type="button" data-set="day" aria-pressed="true">Day</button>
+  <button type="button" data-set="night" aria-pressed="false">Night</button>
+  <button type="button" data-set="card" aria-pressed="false">Card</button>
+</div>
+
 <header class="hero">
+  <div class="skyflash"></div>
   <div class="wrap">
     <p class="eyebrow">Field instrument · iOS and Android</p>
 
-    <div class="wordmark">
-      <span class="light">storm</span>
-      <span class="heavy">chaser</span>
-      <div class="ray"></div>
-      <img class="bolt" src="icons/thunderstorms-day-rain.svg" alt="">
+    <div class="lockup">
+      <div class="wordmark">
+        <span class="light">storm</span>
+        <span class="heavy">chaser</span>
+        <div class="ray"></div>
+      </div>
+
+      <div class="bolt-stage" aria-hidden="true">
+        <svg class="bolt-svg" viewBox="0 0 120 220" role="img">
+          <path class="channel channel-glow" d="M62 2 L46 68 L70 62 L48 134 L74 124 L40 218" />
+          <path class="fork fork-glow" d="M48 134 L20 180" />
+          <path class="fork fork-glow" d="M70 62 L96 104" />
+          <path class="channel channel-core" d="M62 2 L46 68 L70 62 L48 134 L74 124 L40 218" />
+          <path class="fork fork-core" d="M48 134 L20 180" />
+          <path class="fork fork-core" d="M70 62 L96 104" />
+        </svg>
+      </div>
     </div>
 
     <p class="lede">
@@ -329,14 +558,14 @@
 
     <div class="cta-row">
       <a class="btn btn-primary" href="https://github.com/melaniesigrid/storm-chaser">View the code</a>
-      <a class="btn btn-ghost" href="#themes">See the themes</a>
+      <a class="btn btn-ghost" href="#submission">Submission details</a>
     </div>
 
     <div class="specs">
       <span><b>React Native</b> Expo SDK 57</span>
       <span><b>TypeScript</b> strict</span>
       <span><b>Open-Meteo</b> keyless</span>
-      <span><b>128</b> unit tests</span>
+      <span><b>181</b> unit tests</span>
     </div>
   </div>
 </header>
@@ -347,26 +576,25 @@
     <p class="section-lede">
       No screen knows which theme is active. Every colour, typeface and radius resolves
       through a named token, so a third theme is a data change rather than a UI change.
-      Pick one during onboarding; it stays put even when your phone flips to dark at sunset.
+      This page wears them too — the switcher is up there.
     </p>
 
     <div class="phones">
 
       <article class="phone phone--day">
         <div class="phone-top">
-          <span class="phone-loc ink-day">43.6532&deg;N 79.3832&deg;W</span>
+          <span class="phone-loc">43.6532&deg;N 79.3832&deg;W</span>
           <img src="icons/clear-day.svg" alt="" width="40" height="40">
         </div>
         <div>
-          <div class="temp ink-day">24&deg;</div>
-          <div class="cond ink-day">Thunderstorms</div>
-          <div class="muted-day" style="margin-top:4px;font-size:15px;">Feels like 27&deg;</div>
+          <div class="temp">24&deg;</div>
+          <div class="cond">Thunderstorms</div>
         </div>
-        <div class="panel">
-          <div class="panel-label muted-day">Chase index</div>
+        <div class="pnl">
+          <div class="pnl-label">Chase index</div>
           <div style="display:flex;align-items:flex-end;gap:12px;margin-top:8px;">
             <span class="score" style="color:#C4402E;">72</span>
-            <span class="muted-day" style="font-size:15px;padding-bottom:6px;">Severe potential</span>
+            <span style="font-size:15px;padding-bottom:6px;opacity:0.8;">Severe potential</span>
           </div>
           <div class="ladder">
             <span style="background:#5B6472"></span><span style="background:#4FD1C5"></span>
@@ -374,24 +602,23 @@
             <span style="background:#8E7CFF"></span>
           </div>
         </div>
-        <div class="theme-name ink-day">Skyward Day</div>
+        <div class="theme-name">Skyward Day</div>
       </article>
 
       <article class="phone phone--night">
         <div class="phone-top">
-          <span class="phone-loc ink-night">43.6532&deg;N 79.3832&deg;W</span>
+          <span class="phone-loc">43.6532&deg;N 79.3832&deg;W</span>
           <img src="icons/starry-night.svg" alt="" width="40" height="40">
         </div>
         <div>
-          <div class="temp ink-night">18&deg;</div>
-          <div class="cond ink-night">Thunderstorms</div>
-          <div class="muted-night" style="margin-top:4px;font-size:15px;">Feels like 16&deg;</div>
+          <div class="temp">18&deg;</div>
+          <div class="cond">Thunderstorms</div>
         </div>
-        <div class="panel">
-          <div class="panel-label muted-night">Chase index</div>
+        <div class="pnl">
+          <div class="pnl-label">Chase index</div>
           <div style="display:flex;align-items:flex-end;gap:12px;margin-top:8px;">
             <span class="score" style="color:#FF6B57;">72</span>
-            <span class="muted-night" style="font-size:15px;padding-bottom:6px;">Severe potential</span>
+            <span style="font-size:15px;padding-bottom:6px;opacity:0.8;">Severe potential</span>
           </div>
           <div class="ladder">
             <span style="background:#4A5470"></span><span style="background:#4FD1C5"></span>
@@ -399,24 +626,23 @@
             <span style="background:#A78BFF"></span>
           </div>
         </div>
-        <div class="theme-name ink-night">Skyward Night</div>
+        <div class="theme-name">Skyward Night</div>
       </article>
 
       <article class="phone phone--card">
         <div class="phone-top">
-          <span class="phone-loc ink-card">43.65N 79.38W</span>
+          <span class="phone-loc">43.65N 79.38W</span>
           <img src="icons/thunderstorms-day-rain.svg" alt="" width="40" height="40">
         </div>
         <div>
-          <div class="temp ink-card">24&deg;</div>
-          <div class="cond ink-card" style="font-family:'Archivo Black',sans-serif;font-size:17px;">THUNDERSTORMS</div>
-          <div class="muted-card" style="margin-top:4px;font-size:15px;">Feels like 27&deg;</div>
+          <div class="temp">24&deg;</div>
+          <div class="cond" style="font-family:'Archivo Black',sans-serif;font-size:16px;">THUNDERSTORMS</div>
         </div>
-        <div class="panel">
-          <div class="panel-label muted-card">Chase index</div>
+        <div class="pnl">
+          <div class="pnl-label">Chase index</div>
           <div style="display:flex;align-items:flex-end;gap:12px;margin-top:8px;">
-            <span class="score ink-card">72</span>
-            <span class="muted-card" style="font-size:15px;padding-bottom:6px;">Severe potential</span>
+            <span class="score">72</span>
+            <span style="font-size:15px;padding-bottom:6px;opacity:0.8;">Severe potential</span>
           </div>
           <div class="ladder">
             <span style="background:#5B6472"></span><span style="background:#4FD1C5"></span>
@@ -424,7 +650,7 @@
             <span style="background:#8E7CFF"></span>
           </div>
         </div>
-        <div class="theme-name ink-card">Field Card</div>
+        <div class="theme-name">Field Card</div>
       </article>
 
     </div>
@@ -445,8 +671,8 @@
         <h3>The numbers that matter</h3>
         <p>
           Temperature and wind, plus the two variables generic weather apps leave out:
-          CAPE and lifted index. Those are what tell you whether the atmosphere can
-          actually build something.
+          CAPE and lifted index. Those tell you whether the atmosphere can actually
+          build something.
         </p>
       </article>
 
@@ -510,24 +736,120 @@
     </p>
 
     <div class="tiers">
-      <div class="tier"><div class="bar" style="background:#5B6472"></div><div class="range">0 &ndash; 14</div><p class="name">Dormant</p></div>
-      <div class="tier"><div class="bar" style="background:#4FD1C5"></div><div class="range">15 &ndash; 34</div><p class="name">Unsettled</p></div>
-      <div class="tier"><div class="bar" style="background:#F5C242"></div><div class="range">35 &ndash; 59</div><p class="name">Active</p></div>
-      <div class="tier"><div class="bar" style="background:#FF5A47"></div><div class="range">60 &ndash; 79</div><p class="name">Severe</p></div>
-      <div class="tier"><div class="bar" style="background:#8E7CFF"></div><div class="range">80 &ndash; 100</div><p class="name">Extreme</p></div>
+      <div class="tier"><div class="bar" style="background:var(--t-dormant)"></div><div class="range">0 &ndash; 14</div><p class="name">Dormant</p></div>
+      <div class="tier"><div class="bar" style="background:var(--t-unsettled)"></div><div class="range">15 &ndash; 34</div><p class="name">Unsettled</p></div>
+      <div class="tier"><div class="bar" style="background:var(--t-active)"></div><div class="range">35 &ndash; 59</div><p class="name">Active</p></div>
+      <div class="tier"><div class="bar" style="background:var(--t-severe)"></div><div class="range">60 &ndash; 79</div><p class="name">Severe</p></div>
+      <div class="tier"><div class="bar" style="background:var(--t-extreme)"></div><div class="range">80 &ndash; 100</div><p class="name">Extreme</p></div>
     </div>
+  </div>
+</section>
+
+<section id="submission" class="submission">
+  <div class="wrap">
+    <h2>Made by Melanie Baratto</h2>
+    <p class="section-lede">
+      Submitted as part of my assessment for Speer Technologies.
+    </p>
+
+    <div class="sub-grid">
+      <div class="sub-item">
+        <div class="k">1 · Candidate full name</div>
+        <div class="v">Melanie Baratto</div>
+      </div>
+
+      <div class="sub-item">
+        <div class="k">2 · Assessment completed</div>
+        <div class="v">React Native &mdash; Mobile (iOS and Android)</div>
+      </div>
+
+      <div class="sub-item">
+        <div class="k">3 · GitHub repository</div>
+        <div class="v"><a href="https://github.com/melaniesigrid/storm-chaser">github.com/melaniesigrid/storm-chaser</a></div>
+      </div>
+
+      <div class="sub-item">
+        <div class="k">4 · Screen recording</div>
+        <div class="v"><span class="pending">Link pending</span></div>
+      </div>
+    </div>
+
+    <h3 style="font-family:var(--display);font-weight:var(--display-weight);font-size:26px;letter-spacing:-0.02em;margin:56px 0 0;">
+      5 &middot; Time spent
+    </h3>
+
+    <table class="timelog">
+      <thead>
+        <tr><th>Session</th><th>Work</th><th class="num">Duration</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>One</td>
+          <td>Architecture, weather domain, capture flow, persistence, map, offline, tests, docs</td>
+          <td class="num">9 h 40 m</td>
+        </tr>
+        <tr>
+          <td>Two</td>
+          <td>Design exploration, three-theme system, visual rebuild, Meteocons, onboarding, accessibility fixes</td>
+          <td class="num">1 h 40 m</td>
+        </tr>
+        <tr class="total">
+          <td>Total</td>
+          <td>Inside the 24 hour window</td>
+          <td class="num">11 h 20 m</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p style="margin-top:22px;color:var(--ink-soft);line-height:1.6;">
+      Full breakdown in
+      <a href="https://github.com/melaniesigrid/storm-chaser/blob/main/docs/TIME_LOG.md">docs/TIME_LOG.md</a>,
+      and AI tool usage is disclosed in full in
+      <a href="https://github.com/melaniesigrid/storm-chaser/blob/main/docs/AI_DISCLOSURE.md">docs/AI_DISCLOSURE.md</a>.
+    </p>
   </div>
 </section>
 
 <footer>
   <div class="wrap foot-row">
     <div>
-      <div style="font-family:var(--display);font-weight:800;font-size:26px;letter-spacing:-0.03em;">stormchaser</div>
+      <div style="font-family:var(--display);font-weight:var(--display-weight);font-size:26px;letter-spacing:-0.03em;">stormchaser</div>
       <p class="foot-note" style="margin:8px 0 0;">Built for the Speer Technologies mobile assessment.</p>
     </div>
     <a class="btn btn-ghost" href="https://github.com/melaniesigrid/storm-chaser">GitHub</a>
   </div>
 </footer>
+
+<script>
+  (function () {
+    var root = document.documentElement;
+    var buttons = Array.prototype.slice.call(document.querySelectorAll('.switch button'));
+
+    function apply(name) {
+      root.setAttribute('data-theme', name);
+      buttons.forEach(function (button) {
+        button.setAttribute('aria-pressed', String(button.dataset.set === name));
+      });
+      // Per-viewer convenience only; the page renders correctly without it.
+      try { localStorage.setItem('sc-theme', name); } catch (error) { /* private mode */ }
+    }
+
+    var saved = null;
+    try { saved = localStorage.getItem('sc-theme'); } catch (error) { /* private mode */ }
+
+    if (saved === 'day' || saved === 'night' || saved === 'card') {
+      apply(saved);
+    } else {
+      try {
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) apply('night');
+      } catch (error) { /* no matchMedia */ }
+    }
+
+    buttons.forEach(function (button) {
+      button.addEventListener('click', function () { apply(button.dataset.set); });
+    });
+  })();
+</script>
 
 </body>
 </html>
