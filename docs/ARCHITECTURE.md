@@ -97,7 +97,7 @@ useAppTheme      the single read point
 ThemeCard        an option that paints itself in the theme it offers
 ```
 
-Three decisions worth calling out:
+Four decisions worth calling out:
 
 **Contrast is an assertion, not an opinion.** The previous palette shipped an
 offline banner at 1.22:1 and a muted token at 2.0:1. Both looked fine in a list
@@ -115,6 +115,27 @@ fills.
 Field Card uses Archivo Black. Both load up front so switching a theme never
 waits on a font. Monospace stays fixed across all three, because columns of
 figures have to line up whatever the theme is.
+
+**`brand` is a separate token group from `colors`.** `colors` answers "what does
+a panel look like in this theme"; `brand` answers "what do the mark, the ray and
+the mascot look like in this theme". Keeping them merged is what produced the
+Volt bug: his shell read `colors.accent`, so he was rust on Skyward Day, amber
+on Skyward Night and the same fill as the primary button on Field Card. A mascot
+is a character, not a control, and it needs its own token or it drifts every
+time the accent is retuned. The group carries `voltShell`, `voltShade`,
+`voltEye`, `voltGlow`, `ray`, and the monogram plate, mark and radius.
+
+Two assertions guard it in `theme.test.ts`: the idle shell must not collide with
+any mood fill, or changing mood would show nothing; and the monogram mark must
+clear 3:1 against its plate, which is the non-text floor a large graphic is
+actually held to, not the 4.5:1 body floor.
+
+**The sky gradient has four stops, not three.** The third is the haze band at
+the horizon. Two stops and a midpoint read as a CSS demo; the band is most of
+why Skyward reads as sky. Each theme ships its own `backgroundGradientLocations`
+alongside the colours so the stop positions travel with the palette rather than
+being hardcoded at the one call site that draws them, and Field Card repeats a
+single value four times so the same component renders flat with no branching.
 
 ## Icons
 
