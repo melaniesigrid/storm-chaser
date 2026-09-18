@@ -92,7 +92,7 @@ and was removed rather than the palette being bent to satisfy it.
 ## Verification
 
 Generated code was not taken on trust. The domain, data and theme layers are
-covered by 91 unit tests run under strict TypeScript, the app was exercised on a device for
+covered by 291 unit tests run under strict TypeScript, the app was exercised on a device for
 every flow in the brief, and I corrected the model's output where it was wrong.
 Two examples worth naming, since a disclosure that claims the AI got everything
 right is not a useful disclosure:

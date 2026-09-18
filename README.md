@@ -180,6 +180,21 @@ configured they come from a bundled sample set, generated relative to your posit
 badged **community · demo data** in the legend. They are a separate type from your reports
 and never enter the repository.
 
+**Storm legends** — 22 famous storm places — Catatumbo lightning, Hector the Convector,
+the Tri-State Tornado — plotted as a third pin shape on the map wherever in the world you are, each with a
+detail route at `/legend/[id]` carrying its claim, its fact, its season and the great
+circle distance from you. A legend of the day surfaces on Conditions as a lore card, so
+the map has something worth opening before you have logged anything. They are a separate
+type from reports and from community pins: no photo, no weather snapshot, no owner, and
+they never touch `StormRepository`. The table and its distance maths are one pure module,
+[`features/storms/model/legends.ts`](src/features/storms/model/legends.ts).
+
+**Charts** — `Sparkline` and `RangeBar` over one set of shared scaling geometry in
+[`src/core/charts`](src/core/charts), wired into the 12 hour strip and the 7 day outlook so
+the next half day and the week read as shapes rather than columns of figures. The geometry
+is pure and tested: a non-finite reading is dropped rather than scaled into a spike, and
+every plotted point stays aligned with the hour it describes.
+
 **Offline** — A persisted query cache, an explicit offline banner over the last good
 reading with its age, and a bundled sample dataset you opt into from the Not found view,
 labelled as sample data everywhere it appears. The field log itself needs no network at all.
@@ -521,6 +536,7 @@ saving. Saving lands you in the field log, with confetti.
 | `/(tabs)` | Conditions, Field log, Map |
 | `/capture` | Camera and metadata form (modal) |
 | `/storm/[id]` | A single report |
+| `/legend/[id]` | A single storm legend, with its distance from you |
 | `/settings` | Appearance and theme (modal) |
 | `/onboarding` | First run only |
 
@@ -562,9 +578,12 @@ if (!result.ok) {
 app/                       Expo Router routes. Screens compose, they do not fetch.
 src/core/                  Design tokens, shared UI kit, pure utilities.
     theme/                 The three themes, the provider, the contrast helpers.
+    charts/                Sparkline, RangeBar and the pure scaling geometry.
+    onboarding/            The first-launch gate that holds the permission ask.
     icons/                 The Meteocons subset and its registry.
     brand/                 Wordmark and Monogram: the identity, drawn.
     ui/                    Button, Panel, Screen, Skeleton, Confetti, Volt.
+    utils/                 Result, formatting, clamp, assertNever, id. All pure.
 src/features/<feature>/
     api/                   Wire contracts and HTTP clients.
     model/                 Domain types and pure logic. No React, no I/O.
@@ -704,5 +723,7 @@ Showcase: [stormchaser-field.vercel.app](https://stormchaser-field.vercel.app)
 - [Awesome README Template](https://github.com/Louis3797/awesome-readme-template) by Louis3797 — the structure this file follows
 - [Emoji Cheat Sheet](https://github.com/ikatyang/emoji-cheat-sheet)
 
-See [`docs/AI_DISCLOSURE.md`](docs/AI_DISCLOSURE.md) for AI tool usage and
-[`docs/TIME_LOG.md`](docs/TIME_LOG.md) for the time breakdown.
+See [`docs/AI_DISCLOSURE.md`](docs/AI_DISCLOSURE.md) for AI tool usage,
+[`docs/TIME_LOG.md`](docs/TIME_LOG.md) for the time breakdown,
+[`CHANGELOG.md`](CHANGELOG.md) for what changed in each version, and
+[`TODOS.md`](TODOS.md) for the open work that did not make this cut.

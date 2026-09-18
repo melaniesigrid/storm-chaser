@@ -27,10 +27,34 @@ components; they never build a URL, touch storage, or contain business rules.
 | Server and persisted data | TanStack Query (`weatherKeys`, `stormKeys`) |
 | Device capability state | Purpose built hooks (`useDeviceLocation`, `useNetworkStatus`) |
 | Ephemeral form and flow state | `useState` inside the screen that owns it |
+| Two cross screen facts | Module stores read through `useSyncExternalStore` |
 
-There is no global store. The capture screen reads the weather snapshot straight
-from the query cache that the Conditions tab already populated, so documenting a
-storm never blocks on the network even though the report carries full conditions.
+There is no global store for app data. The capture screen reads the weather
+snapshot straight from the query cache that the Conditions tab already
+populated, so documenting a storm never blocks on the network even though the
+report carries full conditions.
+
+Two facts are genuinely cross screen, and both are single values rather than
+state trees, so each is a module store with a `useSyncExternalStore` hook rather
+than a context:
+
+- `features/location/lastKnownPosition.ts` — the last fix any screen resolved.
+  `useDeviceLocation` acquires a fresh fix on mount, which is right for capture
+  and wrong for a read only screen that just wants to print "420 km away".
+  Opening five legend pins in a row should not mean five permission checks and
+  five trips to the satellites. Readers always handle `null`; a null publish is
+  ignored, because a hook still requesting is not evidence a good fix went
+  stale.
+- `core/onboarding/onboardingGate.ts` — a render time cache of the one
+  onboarding flag `onboardingStore` owns. The Conditions tab mounts before the
+  root layout's redirect to `/onboarding` lands, so without a synchronous read
+  the OS location dialog fires over the welcome copy that explains why the app
+  wants a position at all. `shouldAutoAcquire` gates acquisition on both this
+  flag and the caller's own intent; `unknown` blocks, because guessing wrong is
+  exactly that bug.
+
+A context would have to be mounted in the root layout, and in both cases the
+first screen to ask is mounted alongside it, not under it.
 
 ## Error handling
 
@@ -68,7 +92,7 @@ orphaned file is recoverable, a record pointing at nothing is not.
 
 ## Testing approach
 
-28 tests over four suites, all targeting logic rather than pixels:
+291 tests over 14 suites, all targeting logic rather than pixels:
 
 - `format.test.ts` covers every readout the user sees, including negative zero,
   compass wrapping and missing values.
@@ -80,6 +104,19 @@ orphaned file is recoverable, a record pointing at nothing is not.
 - `stormRepository.test.ts` covers the full CRUD surface, ordering, persistence
   across instances, sync state transitions, corrupt stored data and a failing
   write, using an injected in memory store and a fixed clock.
+- `theme.test.ts` computes real WCAG ratios for every token pair in all three
+  themes, and guards the brand group: the idle Volt shell against every mood
+  fill, the monogram mark against its plate.
+- `weatherIcons.test.ts` asserts the component registry covers every declared
+  icon name, and that day and night variants map separately.
+- `legends.test.ts` and `stormTypes.test.ts` cover the legend table, haversine
+  distance, nearest and legend of the day, and the storm type to tier mapping.
+- `charts.test.ts` covers the scaling geometry: flat series, single points, a
+  forced domain, and non-finite readings, which are dropped rather than scaled.
+- `community.test.ts`, `mapRegion.test.ts` and `outlook.test.ts` cover the
+  sample community layer, the bounding region fit and the daily outlook rows.
+- `autoAcquire.test.ts` and `lastKnownPosition.test.ts` cover the first run
+  permission gate and the shared position store described above.
 
 
 ## The theme system
@@ -97,7 +134,7 @@ useAppTheme      the single read point
 ThemeCard        an option that paints itself in the theme it offers
 ```
 
-Four decisions worth calling out:
+Five decisions worth calling out:
 
 **Contrast is an assertion, not an opinion.** The previous palette shipped an
 offline banner at 1.22:1 and a muted token at 2.0:1. Both looked fine in a list
