@@ -1,35 +1,24 @@
-import { ActivityIndicator, Pressable, View, type PressableProps } from 'react-native';
+import {
+  ActivityIndicator,
+  Pressable,
+  View,
+  type PressableProps,
+  type StyleProp,
+  type ViewStyle,
+} from 'react-native';
+
+import { useAppTheme } from '@/core/theme/useAppTheme';
 
 import { Text } from './Text';
 
-type Tone = 'primary' | 'secondary' | 'ghost' | 'danger';
+export type ButtonTone = 'primary' | 'secondary' | 'ghost' | 'danger';
 
-const TONES: Record<Tone, { container: string; label: string }> = {
-  primary: {
-    container: 'bg-lightning active:opacity-80',
-    label: 'text-ink-900',
-  },
-  secondary: {
-    container:
-      'bg-transparent border border-ink-400 active:opacity-70 dark:border-ink-400',
-    label: 'text-ink-800 dark:text-bone-50',
-  },
-  ghost: {
-    container: 'bg-transparent active:opacity-60',
-    label: 'text-ink-500 dark:text-bone-300',
-  },
-  danger: {
-    container: 'bg-supercell active:opacity-80',
-    label: 'text-white',
-  },
-};
-
-export interface ButtonProps extends Omit<PressableProps, 'children'> {
+export interface ButtonProps extends Omit<PressableProps, 'children' | 'style'> {
   title: string;
-  tone?: Tone;
+  tone?: ButtonTone;
   loading?: boolean;
   icon?: React.ReactNode;
-  className?: string;
+  style?: StyleProp<ViewStyle>;
 }
 
 export function Button({
@@ -38,26 +27,55 @@ export function Button({
   loading = false,
   icon,
   disabled,
-  className = '',
+  style,
   ...rest
 }: ButtonProps) {
-  const styles = TONES[tone];
+  const { theme } = useAppTheme();
+  const { colors } = theme;
   const isDisabled = disabled || loading;
+
+  const fills: Record<ButtonTone, { background: string; label: string; border: string }> = {
+    primary: { background: colors.accent, label: colors.onAccent, border: colors.border },
+    secondary: { background: 'transparent', label: colors.text, border: colors.text },
+    ghost: { background: 'transparent', label: colors.textMuted, border: 'transparent' },
+    danger: { background: colors.tier.severe, label: colors.text, border: colors.border },
+  };
+
+  const fill = fills[tone];
+  // Field Card outlines everything; Skyward only outlines the secondary button.
+  const borderWidth =
+    theme.borderWidth > 0 && tone !== 'ghost' ? theme.borderWidth : tone === 'secondary' ? 1 : 0;
 
   return (
     <Pressable
       accessibilityRole="button"
       accessibilityState={{ disabled: !!isDisabled, busy: loading }}
       disabled={isDisabled}
-      className={`h-12 flex-row items-center justify-center gap-2 rounded-full px-5 ${styles.container} ${isDisabled ? 'opacity-50' : ''} ${className}`}
+      style={[
+        {
+          // 56px clears the 44px minimum with room for a glove.
+          height: 56,
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 8,
+          borderRadius: theme.radius.control,
+          paddingHorizontal: 22,
+          backgroundColor: fill.background,
+          borderWidth,
+          borderColor: fill.border,
+          opacity: isDisabled ? 0.5 : 1,
+        },
+        style,
+      ]}
       {...rest}
     >
       {loading ? (
-        <ActivityIndicator size="small" />
+        <ActivityIndicator size="small" color={fill.label} />
       ) : (
         <>
           {icon ? <View>{icon}</View> : null}
-          <Text variant="heading" className={styles.label}>
+          <Text variant="heading" color={fill.label} style={{ fontFamily: theme.type.display }}>
             {title}
           </Text>
         </>

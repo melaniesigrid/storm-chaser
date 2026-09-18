@@ -1,32 +1,101 @@
-import { Text as RNText, type TextProps as RNTextProps } from 'react-native';
+import { Text as RNText, type StyleProp, type TextProps as RNTextProps, type TextStyle } from 'react-native';
 
-type Variant =
+import { useAppTheme } from '@/core/theme/useAppTheme';
+import type { Theme } from '@/core/theme/themes';
+
+export type TextVariant =
+  | 'hero'
   | 'display'
   | 'title'
   | 'heading'
   | 'body'
+  | 'message'
   | 'caption'
   | 'label'
   | 'readout';
 
-const VARIANTS: Record<Variant, string> = {
-  // Display and title carry the app voice: tight, condensed, confident.
-  display: 'font-bold text-[34px] leading-[38px] text-ink-800 dark:text-bone-50',
-  title: 'font-semibold text-[20px] leading-[26px] text-ink-800 dark:text-bone-50',
-  heading: 'font-semibold text-[15px] leading-[20px] text-ink-800 dark:text-bone-50',
-  body: 'font-sans text-[15px] leading-[22px] text-ink-600 dark:text-bone-200',
-  caption: 'font-sans text-[13px] leading-[18px] text-ink-500 dark:text-bone-300',
-  // Instrument labels: uppercase, letterspaced, deliberately small.
-  label: 'font-mono text-[10px] leading-[14px] tracking-[1.6px] uppercase text-ink-500 dark:text-bone-300',
-  // Numeric readouts are always mono so columns of figures line up.
-  readout: 'font-monoBold text-[22px] leading-[26px] text-ink-800 dark:text-bone-50',
-};
+export type TextTone = 'default' | 'muted' | 'onAccent';
 
-export interface TextProps extends RNTextProps {
-  variant?: Variant;
-  className?: string;
+/**
+ * The type scale.
+ *
+ * Every size moved up from the previous scale, which topped out at 34px and
+ * bottomed out at a 10px uppercase mono label used for whole sentences. The
+ * floor is now 12px and long-form copy has its own variant.
+ *
+ * `hero` and `readout` are always mono so columns of figures line up; `hero`,
+ * `display` and `title` take the theme's display face, which is what carries
+ * the personality difference between Skyward and Field Card.
+ */
+function variantStyle(variant: TextVariant, theme: Theme): TextStyle {
+  const { type, colors } = theme;
+
+  switch (variant) {
+    case 'hero':
+      return { fontFamily: type.monoBold, fontSize: 64, lineHeight: 66, letterSpacing: -2, color: colors.text };
+    case 'display':
+      return { fontFamily: type.display, fontSize: 40, lineHeight: 44, letterSpacing: -1, color: colors.text };
+    case 'title':
+      return { fontFamily: type.display, fontSize: 24, lineHeight: 30, letterSpacing: -0.5, color: colors.text };
+    case 'heading':
+      return { fontFamily: type.bodySemibold, fontSize: 17, lineHeight: 22, color: colors.text };
+    case 'body':
+      return { fontFamily: type.body, fontSize: 17, lineHeight: 24, color: colors.text };
+    // Long-form copy in banners and explanations. Sentence case, never the
+    // tracked uppercase mono that `label` uses.
+    case 'message':
+      return { fontFamily: type.bodyMedium, fontSize: 17, lineHeight: 24, color: colors.text };
+    case 'caption':
+      return { fontFamily: type.body, fontSize: 15, lineHeight: 21, color: colors.textMuted };
+    // Instrument labels only: single words like CAPE or GUSTS.
+    case 'label':
+      return {
+        fontFamily: type.monoMedium,
+        fontSize: 12,
+        lineHeight: 16,
+        letterSpacing: 1,
+        textTransform: 'uppercase',
+        color: colors.textMuted,
+      };
+    case 'readout':
+      return { fontFamily: type.monoBold, fontSize: 26, lineHeight: 30, color: colors.text };
+  }
 }
 
-export function Text({ variant = 'body', className = '', ...rest }: TextProps) {
-  return <RNText className={`${VARIANTS[variant]} ${className}`} {...rest} />;
+function toneColor(tone: TextTone, theme: Theme): string | undefined {
+  switch (tone) {
+    case 'muted':
+      return theme.colors.textMuted;
+    case 'onAccent':
+      return theme.colors.onAccent;
+    case 'default':
+      return undefined;
+  }
+}
+
+export interface TextProps extends RNTextProps {
+  variant?: TextVariant;
+  tone?: TextTone;
+  /** Escape hatch for tier colours, which are data driven rather than semantic. */
+  color?: string;
+  style?: StyleProp<TextStyle>;
+}
+
+export function Text({
+  variant = 'body',
+  tone = 'default',
+  color,
+  style,
+  ...rest
+}: TextProps) {
+  const { theme } = useAppTheme();
+
+  const override = color ?? toneColor(tone, theme);
+
+  return (
+    <RNText
+      style={[variantStyle(variant, theme), override ? { color: override } : null, style]}
+      {...rest}
+    />
+  );
 }

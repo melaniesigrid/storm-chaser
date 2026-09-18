@@ -3,6 +3,7 @@ import { useMemo } from 'react';
 import { View } from 'react-native';
 import MapView, { Marker, PROVIDER_DEFAULT, type Region } from 'react-native-maps';
 
+import { WeatherIcon } from '@/core/icons/WeatherIcon';
 import { useAppTheme } from '@/core/theme/useAppTheme';
 import { EmptyState, Panel, Text } from '@/core/ui';
 import { chaseLevelForTier, describeStormType } from '@/features/storms/model/stormTypes';
@@ -25,7 +26,7 @@ export default function MapScreen() {
     return (
       <View className="flex-1 bg-bone-50 dark:bg-ink-800">
         <EmptyState
-          glyph="◎"
+          illustration={<WeatherIcon name="compass" size={96} />}
           title="Nothing to plot"
           description="Reports captured with a position fix appear here, coloured by severity."
           actionLabel="Document a storm"

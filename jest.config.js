@@ -3,9 +3,12 @@ module.exports = {
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
+    // Metro resolves these through react-native-svg-transformer; Jest cannot,
+    // so Meteocons imports resolve to a stub component instead.
+    '\\.svg$': '<rootDir>/__mocks__/svgMock.js',
   },
   transformIgnorePatterns: [
     'node_modules/(?!((jest-)?react-native|@react-native(-community)?|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg|nativewind|react-native-css-interop|@tanstack/.*))',
   ],
-  collectCoverageFrom: ['src/**/*.{ts,tsx}', '!src/**/index.ts'],
+  collectCoverageFrom: ['src/**/*.{ts,tsx}', 'app/**/*.tsx', '!src/**/index.ts'],
 };

@@ -1,6 +1,7 @@
 import { useRouter } from 'expo-router';
 import { FlatList, Pressable, View } from 'react-native';
 
+import { WeatherIcon } from '@/core/icons/WeatherIcon';
 import { EmptyState, Panel, Skeleton, Text } from '@/core/ui';
 import { StormCard } from '@/features/storms/components/StormCard';
 import { useStormReports } from '@/features/storms/hooks/useStormLog';
@@ -40,7 +41,7 @@ export default function FieldLogScreen() {
         }
         ListEmptyComponent={
           <EmptyState
-            glyph="⚡"
+            illustration={<WeatherIcon name="thunderstorms-day-rain" size={96} />}
             title="No storms logged yet"
             description="Photograph a storm and the app stamps it with your coordinates, the time and the conditions at that moment."
             actionLabel="Document a storm"

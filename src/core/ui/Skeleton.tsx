@@ -1,23 +1,20 @@
 import { useEffect, useRef } from 'react';
-import { Animated, Easing, View } from 'react-native';
+import { Animated, Easing, View, type DimensionValue } from 'react-native';
+
+import { useAppTheme } from '@/core/theme/useAppTheme';
 
 export interface SkeletonProps {
   height?: number;
-  width?: number | string;
+  width?: DimensionValue;
   rounded?: boolean;
-  className?: string;
 }
 
 /**
  * Loading placeholder with a slow breathing pulse. Used instead of a spinner on
  * first load so the layout does not jump when data lands.
  */
-export function Skeleton({
-  height = 16,
-  width = '100%',
-  rounded = false,
-  className = '',
-}: SkeletonProps) {
+export function Skeleton({ height = 16, width = '100%', rounded = false }: SkeletonProps) {
+  const { theme } = useAppTheme();
   const pulse = useRef(new Animated.Value(0.35)).current;
 
   useEffect(() => {
@@ -42,10 +39,13 @@ export function Skeleton({
   }, [pulse]);
 
   return (
-    <Animated.View style={{ opacity: pulse, width: width as number }}>
+    <Animated.View style={{ opacity: pulse, width }}>
       <View
-        style={{ height }}
-        className={`bg-bone-200 dark:bg-ink-600 ${rounded ? 'rounded-full' : 'rounded-lg'} ${className}`}
+        style={{
+          height,
+          borderRadius: rounded ? height / 2 : 10,
+          backgroundColor: theme.colors.surfaceSunken,
+        }}
       />
     </Animated.View>
   );
