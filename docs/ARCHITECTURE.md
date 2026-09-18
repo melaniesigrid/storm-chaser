@@ -92,7 +92,7 @@ orphaned file is recoverable, a record pointing at nothing is not.
 
 ## Testing approach
 
-291 tests over 14 suites, all targeting logic rather than pixels:
+304 tests over 15 suites, all targeting logic rather than pixels:
 
 - `format.test.ts` covers every readout the user sees, including negative zero,
   compass wrapping and missing values.
@@ -115,8 +115,9 @@ orphaned file is recoverable, a record pointing at nothing is not.
   forced domain, and non-finite readings, which are dropped rather than scaled.
 - `community.test.ts`, `mapRegion.test.ts` and `outlook.test.ts` cover the
   sample community layer, the bounding region fit and the daily outlook rows.
-- `autoAcquire.test.ts` and `lastKnownPosition.test.ts` cover the first run
-  permission gate and the shared position store described above.
+- `autoAcquire.test.ts`, `onboardingGate.test.ts` and `lastKnownPosition.test.ts`
+  cover the first run permission gate and the shared position store described
+  above.
 
 
 ## The theme system
