@@ -50,9 +50,10 @@ for (const vp of VIEWPORTS) {
   await context.close();
 }
 
-// The theme gallery on its own: the closest thing to an app screenshot that can
-// be produced without a device, since the three mockups use the real tokens.
-{
+// Two sections on their own. #themes is the closest thing to an app screenshot
+// that can be produced without a device, since the three mockups use the real
+// tokens; #design is the proposal boards the README's Design process describes.
+for (const id of ['themes', 'design']) {
   const context = await browser.newContext({
     viewport: { width: 1440, height: 900 },
     deviceScaleFactor: 2,
@@ -62,8 +63,8 @@ for (const vp of VIEWPORTS) {
   await page.goto(target, { waitUntil: 'networkidle' });
   await page.evaluate(() => document.fonts.ready);
   await page.waitForTimeout(1200);
-  await page.locator('#themes').screenshot({ path: resolve(outDir, 'themes.png') });
-  console.log('wrote themes.png');
+  await page.locator(`#${id}`).screenshot({ path: resolve(outDir, `${id}.png`) });
+  console.log(`wrote ${id}.png`);
   await context.close();
 }
 

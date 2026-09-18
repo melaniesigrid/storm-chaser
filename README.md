@@ -14,7 +14,7 @@
   <img src="https://img.shields.io/badge/Expo_SDK-57-000020?style=flat-square&logo=expo&logoColor=white" alt="Expo SDK 57" />
   <img src="https://img.shields.io/badge/React_Native-0.86-61DAFB?style=flat-square&logo=react&logoColor=black" alt="React Native 0.86" />
   <img src="https://img.shields.io/badge/TypeScript-strict-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript strict" />
-  <img src="https://img.shields.io/badge/tests-128_passing-4FD1C5?style=flat-square" alt="128 tests passing" />
+  <img src="https://img.shields.io/badge/tests-238_passing-4FD1C5?style=flat-square" alt="238 tests passing" />
   <img src="https://img.shields.io/badge/API_keys-none_required-F5C242?style=flat-square" alt="No API keys required" />
   <img src="https://img.shields.io/badge/platforms-iOS_%7C_Android-14213A?style=flat-square" alt="iOS and Android" />
 </p>
@@ -146,7 +146,7 @@ Set CAPTURE_URL to point the script at the deployed site instead of the local fi
 <details>
   <summary>Tooling</summary>
   <ul>
-    <li><a href="https://jestjs.io/">Jest</a> via <a href="https://www.npmjs.com/package/jest-expo">jest-expo</a> — 128 tests, no renderer, no mocking framework</li>
+    <li><a href="https://jestjs.io/">Jest</a> via <a href="https://www.npmjs.com/package/jest-expo">jest-expo</a> — 238 tests, no renderer, no mocking framework</li>
     <li><a href="https://github.com/kristerkari/react-native-svg-transformer">react-native-svg-transformer</a> so Meteocons import as components</li>
     <li><a href="https://playwright.dev/">Playwright</a> for the screenshot script (dev-only, not a dependency)</li>
     <li><a href="https://vercel.com/">Vercel</a> for the static showcase site in <code>landing/</code></li>
@@ -206,6 +206,56 @@ confetti and the meter animation are skipped entirely and the information is ide
 Everything visual resolves through a named token in
 [`src/core/theme/themes.ts`](src/core/theme/themes.ts). A screen never asks which theme is
 active; it asks the active theme for a token. Adding a fourth theme is a data change.
+
+#### Design process
+
+The theme system below is the *result*. It is worth recording what it beat, because the
+token contract exists precisely because these directions disagreed with each other so
+hard that no screen could be allowed to hard-code a colour.
+
+Two rounds were drawn at full fidelity on a design canvas before any of it reached
+`themes.ts` — three wordmarks, then the conditions screen four ways with identical data
+and identical layout, so the only variable was the treatment.
+
+<div align="center">
+  <img src="docs/screenshots/design.png" alt="The seven design proposals: three wordmark directions in Anton, Bricolage Grotesque and Big Shoulders Display, then the conditions screen drawn four ways as Storm Radar, Skyward, Field Card and High-Vis, each labelled shipped, partly kept or not chosen" width="100%" />
+</div>
+
+<br />
+
+**Round one — the wordmark.** Three display faces, each with its own app-icon lockup,
+palette and motion.
+
+| Direction | Face | Argument | Outcome |
+| --- | --- | --- | --- |
+| 01 · Broadcast | **Anton** | Ultra-condensed, one weight, no apologies. Reads at 16px on a tab bar and at 124px on a splash. | **Rejected.** One weight means no hierarchy — there is nothing to build a whole interface out of. |
+| 02 · Atmospheric | **Bricolage Grotesque** | Weight as the whole idea: hairline against heavy inside one word, with the optical-size axis holding it together as it shrinks. | **Shipped.** The 200/800 pair became the display token for both Skyward themes and the wordmark on the showcase site. |
+| 03 · Signage | **Big Shoulders Display** | Highway signage — hazard stripe, condensed caps, a 100–900 variable axis, a "FIELD INSTRUMENT" strapline. | **Partly kept.** Too severe as the everyday voice, but its strapline is the showcase site's hero eyebrow and its amber `#F5C242` and teal `#4FD1C5` are the Active and Unsettled rungs of the chase ladder. |
+
+**Round two — the conditions screen.** The same screen, the same numbers, four treatments.
+
+| Direction | Ground | Display face | Outcome |
+| --- | --- | --- | --- |
+| A · Storm Radar | `#05070B` instrument dark | IBM Plex Mono throughout | **Rejected.** Precise to the point of reading as a readout rather than a sky. |
+| B · Skyward | Sky gradient, soft elevation, 0px borders | Bricolage Grotesque | **Shipped twice** — as Skyward Day and a night-tuned Skyward Night off the same token names. |
+| C · Field Card | `#FFF8EC`, 3px outlines, hard offset shadows | Archivo Black | **Shipped.** Also the contract's hardest test: a theme with no gradient and a non-zero border. |
+| D · High-Vis | Pure black, hazard yellow, square corners | IBM Plex Mono | **Rejected.** Unbeatable in a field at noon, exhausting everywhere else. |
+
+Three things carried out of the exploration into the code, and they are the reason the
+rest of this section reads the way it does:
+
+- **A theme is not a colour scheme.** Skyward and Field Card disagree on radius, border
+  width, elevation *and* typeface. So `radius`, `borderWidth` and the display family are
+  tokens, not constants — see [`src/core/theme/themes.ts`](src/core/theme/themes.ts).
+- **The chase ladder is semantic, not decorative.** All four boards showed the same five
+  tiers, and all four needed different values for them. That split became `tier` and
+  `tierText`, resolved per theme.
+- **Two levels of mascot finish.** Volt was drawn minimal for Skyward and built up with a
+  visor, antenna and rivets for Field Card. That is why his level of detail follows the
+  active theme rather than a prop.
+
+Both rounds are reproduced, in their original palettes and faces, in the *Design process*
+section of the [showcase site](landing/index.html).
 
 #### Themes
 
@@ -317,23 +367,53 @@ Three decisions worth the note, all documented at the source:
 Day and night variants are mapped separately: a sun behind a cloud at 2am is the kind of
 detail that makes an app feel like nobody used it.
 
-Tab bar icons are not Meteocons. They are three geometric glyphs — `◬` Conditions, `▤`
-Field log, `◎` Map — tinted with the active tab token, so the bar stays legible at 12px
-where a detailed weather icon would not.
+Tab bar icons are not Meteocons either. They are three drawn `react-native-svg` marks —
+a bolt in a cloud, a stack of ruled cards, a dropped pin — sharing one 1.9px stroke and
+one corner radius, tinted with the active tab token. They were Unicode characters
+(`◬` `▤` `◎`) until the bar started looking accidental: a text glyph renders in whatever
+fallback face the platform picks, which meant three different weights and three different
+optical sizes sitting next to each other.
 
 #### Logo and mascot
 
-There is **no dedicated logo asset in this repository.** The mark at the top of this file
-is `landing/icons/thunderstorms-day-rain.svg`, the Meteocons glyph the showcase site also
-uses as its favicon. The wordmark on the showcase site is set in Bricolage Grotesque —
-"storm" at 200, "chaser" at 800 — rather than drawn.
+The identity lives in [`src/core/brand/`](src/core/brand/) and is drawn, not exported.
+
+**The wordmark** is two words in two weights with a ray under them: "storm" at Bricolage
+200 over "chaser" at 800, and a three-stop gradient bar that draws itself in left to right
+once on appearance. The whole idea is weight contrast inside a single name, which is why
+the lockup needs no icon to be recognisable. Field Card cannot do weight contrast —
+Archivo Black ships one weight — so there the same idea is carried by case and by a hard
+square ray instead of a rounded one. `Wordmark` takes a cap `size` and derives everything
+from it, so it is the same component at 56px in onboarding and 26px in Settings.
+
+**The monogram** is `sc` struck through by a bolt on a plate, in
+[`Monogram.tsx`](src/core/brand/Monogram.tsx). The bolt is taller than the plate and
+cropped by it, so it reads as a strike passing through the mark rather than a sticker
+inside it. The letters are drawn twice, stroke pass then fill pass, because
+`react-native-svg` does not implement SVG `paint-order` and a centred stroke would
+otherwise eat into the letterforms.
+
+**App icon sources** are in [`assets/brand/`](assets/brand/) as SVG. They drop the `sc`
+and keep the bolt alone: at 48px on a home screen the letters collide with the bolt's own
+crossbar. They are not yet wired into `app.json`: Expo needs PNG, and rasterising an SVG needs a
+tool this repo does not depend on. [`assets/brand/README.md`](assets/brand/README.md) has
+the two commands and the exact `app.json` block.
 
 **Volt**, the mascot, is one square and two eyes, built from `View` geometry in
 [`src/core/ui/Volt.tsx`](src/core/ui/Volt.tsx) with no image assets, so he renders from a
 24px badge to a 150px onboarding hero with no export step. His level of detail follows the
-theme rather than a prop: Skyward keeps him to a square and two eyes, Field Card gives him
-the visor, antenna and rivets that match its heavier outlines. He has five moods: `idle`,
-`alert`, `logged`, `offline`, `asleep`.
+theme rather than a prop: Skyward keeps him to a shell and two eyes, Field Card gives him
+the visor with a highlight sweeping across it, the pulsing antenna, the rivets and the
+vents that match its heavier outlines. He has five moods: `idle`, `alert`, `logged`,
+`offline`, `asleep` — and `asleep` floats two z's rather than just closing his eyes,
+which is the only thing that distinguishes it from `offline`.
+
+His shell colour is `theme.brand.voltShell`, not the accent. Pointing it at the accent was
+a real bug rather than a shortcut: it made him rust on Skyward Day, amber on Skyward
+Night, and the same colour as the primary button on Field Card — a different character on
+every theme. He is yellow because he is yellow, powered down to slate at night, and his
+moods are what light him up. `theme.test.ts` now asserts the idle shell never collides
+with a mood fill, since that would make changing mood show nothing at all.
 
 <!-- Env Variables -->
 ### :key: Environment Variables
@@ -388,7 +468,7 @@ npx expo install --fix
 npm test
 ```
 
-128 tests across formatting, severity, mapping, the repository, the theme contract, the
+238 tests across formatting, severity, mapping, the repository, the theme contract, the
 icon mapping, the community layer and the storm legends. No renderer, no device, no
 mocking framework.
 
@@ -483,6 +563,7 @@ app/                       Expo Router routes. Screens compose, they do not fetc
 src/core/                  Design tokens, shared UI kit, pure utilities.
     theme/                 The three themes, the provider, the contrast helpers.
     icons/                 The Meteocons subset and its registry.
+    brand/                 Wordmark and Monogram: the identity, drawn.
     ui/                    Button, Panel, Screen, Skeleton, Confetti, Volt.
 src/features/<feature>/
     api/                   Wire contracts and HTTP clients.
@@ -494,7 +575,7 @@ src/services/              Cross cutting: query client, network probe, cloud syn
 landing/                   The static showcase site. One HTML file, no build step.
 scripts/                   Screenshot capture for this README.
 docs/                      Architecture notes, AI disclosure, time log, screenshots.
-__tests__/                 128 tests. Domain, data and theme layers.
+__tests__/                 238 tests. Domain, data and theme layers.
 ```
 
 `model/` never imports from `hooks/` or `components/`. That is what makes the interesting
@@ -541,7 +622,7 @@ The snapshot is copied onto the record at capture time rather than referenced.
 | Skeleton screens | Layout matched skeletons on both data screens |
 | Pull to refresh | Conditions and field log |
 | Cloud integration | Upload client plus a community feed; no keys, sample-backed unless configured |
-| Unit tests | 128, across formatting, severity, mapping, the repository, the theme contract, the icon mapping, the community layer and the storm legends |
+| Unit tests | 238, across formatting, severity, mapping, the repository, the theme contract, the icon mapping, the community layer and the storm legends |
 
 ### Known limits
 

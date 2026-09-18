@@ -8,7 +8,7 @@
 <link rel="icon" href="icons/thunderstorms-day-rain.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Archivo+Black&family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Archivo+Black&family=Anton&family=Big+Shoulders+Display:wght@300..900&family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   /* ============================================================
      Themes. The site wears the same three the app does, resolved
@@ -197,20 +197,22 @@
 
   /*
     Lightning is not a fade in. It is a stepped leader punching down, a return
-    stroke that blows out the exposure, then three or four restrikes down the
-    same ionised channel before it dies. These percentages are that sequence at
-    6s: dark until 42%, then roughly 900ms of violence, then dark again.
+    stroke that blows out the exposure, then two restrikes down the same
+    ionised channel before it dies. Capped at three luminance peaks so no
+    one-second window in this 6s loop can exceed the WCAG 2.3.1 general flash
+    threshold (max 3 flashes/sec): peaks land at 43% / 2.58s, 47% / 2.82s and
+    53% / 3.18s of the cycle — all three inside one 0.6s window, then silent
+    for the remaining ~5.4s of the loop, so any rolling one-second window
+    contains at most 3 peaks, never 4+.
   */
   @keyframes skyflash {
     0%, 42%      { opacity: 0; }
     43%          { opacity: 0.9; }
-    44.5%        { opacity: 0.12; }
-    45.5%        { opacity: 0.75; }
-    47%          { opacity: 0.06; }
-    48.5%        { opacity: 0.55; }
-    51%          { opacity: 0.18; }
-    54%          { opacity: 0.30; }
-    60%, 100%    { opacity: 0; }
+    44.5%        { opacity: 0.08; }
+    47%          { opacity: 0.65; }
+    49.5%        { opacity: 0.06; }
+    53%          { opacity: 0.45; }
+    58%, 100%    { opacity: 0; }
   }
 
   .hero .wrap { position: relative; z-index: 2; }
@@ -221,10 +223,16 @@
     font-weight: 500;
     letter-spacing: 3px;
     text-transform: uppercase;
-    color: var(--ink-soft);
+    color: var(--ink);
   }
 
   .lockup { display: flex; align-items: flex-start; gap: clamp(12px, 4vw, 52px); margin-top: 26px; flex-wrap: wrap; }
+
+  .wordmark {
+    margin: 0;
+    font-size: inherit;
+    font-weight: inherit;
+  }
 
   .wordmark .light,
   .wordmark .heavy {
@@ -352,6 +360,12 @@
   .btn-primary:hover { color: var(--page); }
   .btn-ghost:hover { color: var(--ink); }
 
+  .btn:focus-visible,
+  .switch button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+
   .specs {
     display: flex;
     flex-wrap: wrap;
@@ -365,6 +379,226 @@
   }
 
   .specs b { font-weight: 600; color: var(--ink); }
+
+  /* ---------- design proposals ----------
+     These boards are history, not product. They keep the exact palettes and
+     faces they were drawn in, so they deliberately do NOT resolve theme
+     tokens — flipping the switcher must not rewrite a rejected proposal.
+     ---------------------------------------------------------------- */
+
+  h3.phase, .phase {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin: 0 0 20px;
+  }
+
+  .phase + .phase { margin-top: 0; }
+
+  .props {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+    margin: 0 0 72px;
+  }
+
+  .props--ui { grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
+  .props:last-child { margin-bottom: 0; }
+
+  .prop { display: flex; flex-direction: column; gap: 14px; }
+
+  /* The board itself: a fixed-ratio stage the proposal is drawn inside. */
+  .board {
+    position: relative;
+    overflow: hidden;
+    border-radius: 18px;
+    padding: 22px;
+    height: 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .props--ui .board { height: 340px; padding: 16px; gap: 10px; }
+
+  .board-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .swatches { display: flex; gap: 6px; margin-top: auto; }
+  .swatches span { width: 26px; height: 26px; border-radius: 7px; }
+
+  .prop-note { margin: 0; font-size: 16px; line-height: 1.55; color: var(--ink-soft); }
+  .prop-note b { color: var(--ink); font-weight: 600; }
+
+  .verdict {
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+    gap: 7px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 5px 11px;
+    border-radius: 999px;
+    border: max(1px, var(--card-border)) solid var(--line);
+    color: var(--ink-soft);
+  }
+
+  .verdict--shipped {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--on-accent);
+  }
+
+  /* Direction 01 — Anton, broadcast */
+  .b-anton {
+    background: radial-gradient(120% 90% at 20% 0%, #131A28 0%, #07090E 60%);
+    color: #F2F6FA;
+  }
+  .b-anton .board-tag { color: #FFD400; }
+  .b-anton .mark { font-family: 'Anton', sans-serif; font-size: clamp(38px, 6vw, 52px); line-height: 0.86; text-transform: uppercase; }
+  .b-anton .mark i { display: block; font-style: normal; }
+  .b-anton .mark i + i { color: #FFD400; }
+  .b-anton .rule {
+    height: 7px;
+    width: 72%;
+    margin-top: 10px;
+    border-radius: 4px;
+    background: linear-gradient(90deg, rgba(255,212,0,0) 0%, #FFD400 22%, #FFFFFF 58%, #FFD400 80%, rgba(255,212,0,0) 100%);
+    transform: rotate(-4deg);
+  }
+
+  /* Direction 02 — Bricolage, atmospheric (the one that shipped) */
+  .b-bric {
+    background: linear-gradient(165deg, #B9CBE4 0%, #DCD9CE 48%, #F4F1E8 100%);
+    color: #14213A;
+  }
+  .b-bric .board-tag { color: #96301F; }
+  .b-bric .mark { font-family: 'Bricolage Grotesque', sans-serif; font-size: clamp(38px, 6vw, 52px); line-height: 0.9; letter-spacing: -0.04em; }
+  .b-bric .mark i { display: block; font-style: normal; font-weight: 200; }
+  .b-bric .mark i + i { font-weight: 800; }
+  .b-bric .rule {
+    height: 8px;
+    width: 62%;
+    margin-top: 10px;
+    border-radius: 4px;
+    background: linear-gradient(90deg, #FFB400 0%, #FF5A47 62%, #C4402E 100%);
+  }
+
+  /* Direction 03 — Big Shoulders, signage */
+  .b-shoulders { background: #14140F; color: #F4F2E8; padding-left: 40px; }
+  .b-shoulders .board-tag { color: #4FD1C5; }
+  .b-shoulders .hazard {
+    position: absolute;
+    left: 16px;
+    top: 16px;
+    bottom: 16px;
+    width: 12px;
+    border-radius: 3px;
+    background: repeating-linear-gradient(135deg, #F5C242 0 10px, #14140F 10px 20px);
+  }
+  .b-shoulders .mark { font-family: 'Big Shoulders Display', sans-serif; font-weight: 900; font-size: clamp(40px, 6vw, 54px); line-height: 0.82; text-transform: uppercase; }
+  .b-shoulders .mark i { display: block; font-style: normal; }
+  .b-shoulders .mark i + i { color: #F5C242; }
+  .b-shoulders .rule { height: 8px; width: 58%; margin-top: 10px; background: #FF5A47; transform: rotate(-3deg); }
+  .b-shoulders .strap {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 300;
+    font-size: 15px;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: #9E9C8E;
+  }
+
+  /* Screen treatments */
+  .mini { display: flex; flex-direction: column; gap: 8px; }
+  .mini-temp { font-size: 42px; line-height: 1; }
+  .mini-cond { font-size: 14px; font-weight: 600; }
+  .mini-pnl { padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+  .mini-label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; }
+  .mini-score { font-size: 34px; line-height: 0.9; }
+  .mini-bar { height: 10px; overflow: hidden; }
+  .mini-bar i { display: block; width: 72%; height: 100%; }
+  .mini-cta {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    width: 100%;
+    min-height: 44px;
+    padding: 0 12px;
+    border: 0;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: default;
+  }
+
+  /* A — Storm Radar */
+  .b-radar { background: #05070B; color: #F2F6FA; }
+  .b-radar .board-tag { color: #FF5A47; }
+  .b-radar .mini-temp, .b-radar .mini-score { font-family: 'IBM Plex Mono', monospace; font-weight: 600; }
+  .b-radar .mini-score { color: #FF5A47; }
+  .b-radar .mini-pnl { background: #0E141C; border: 1px solid #1E2836; border-radius: 14px; }
+  .b-radar .mini-label { color: #97A2B3; }
+  .b-radar .mini-bar { background: #1E2836; border-radius: 3px; }
+  .b-radar .mini-bar i { background: #FF5A47; }
+  .b-radar .mini-cta { background: #FF5A47; color: #05070B; border-radius: 22px; }
+
+  /* B — Skyward */
+  .b-sky { background: linear-gradient(175deg, #6E9AD4 0%, #A9C3E4 42%, #E8E4DA 78%, #F7F4EC 100%); color: #14213A; }
+  .b-sky .board-tag { color: #14213A; }
+  .b-sky .mini-temp, .b-sky .mini-score { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; letter-spacing: -0.04em; }
+  .b-sky .mini-score { color: #FF5A47; }
+  .b-sky .mini-pnl { background: #FFFFFF; border-radius: 18px; box-shadow: 0 8px 22px rgba(20, 33, 58, 0.16); }
+  .b-sky .mini-label { color: #4A5670; }
+  .b-sky .mini-bar { background: #E4E8F0; border-radius: 5px; }
+  .b-sky .mini-bar i { background: linear-gradient(90deg, #F5C242 0%, #FF5A47 100%); }
+  .b-sky .mini-cta { background: #14213A; color: #FFFFFF; border-radius: 22px; }
+
+  /* C — Field Card */
+  .b-field { background: #FFF8EC; border: 3px solid #14140F; color: #14140F; }
+  .b-field .board-tag { color: #3F3E34; }
+  .b-field .mini-temp, .b-field .mini-score { font-family: 'Archivo Black', sans-serif; letter-spacing: -0.04em; }
+  .b-field .mini-pnl { background: #FFFFFF; border: 3px solid #14140F; border-radius: 14px; box-shadow: 4px 4px 0 #14140F; }
+  .b-field .mini-label { color: #3F3E34; }
+  .b-field .mini-bar { background: #FFF8EC; border: 3px solid #14140F; border-radius: 7px; }
+  .b-field .mini-bar i { background: #FF5A47; }
+  .b-field .mini-cta { background: #F5C242; color: #14140F; border: 3px solid #14140F; border-radius: 24px; box-shadow: 4px 4px 0 #14140F; font-family: 'Archivo Black', sans-serif; font-weight: 400; }
+
+  /* D — High-Vis */
+  .b-hivis { background: #000000; color: #FFFFFF; }
+  .b-hivis .board-tag { background: #FFD400; color: #000000; padding: 4px 8px; align-self: flex-start; }
+  .b-hivis .mini-temp, .b-hivis .mini-score { font-family: 'IBM Plex Mono', monospace; font-weight: 700; letter-spacing: -0.04em; }
+  .b-hivis .mini-cond { color: #FFD400; text-transform: uppercase; }
+  .b-hivis .mini-pnl { border: 3px solid #FFD400; }
+  .b-hivis .mini-label { color: #FFD400; }
+  .b-hivis .mini-bar { background: #2A2A2A; }
+  .b-hivis .mini-bar i { background: #FFD400; }
+  .b-hivis .mini-cta { background: #FFD400; color: #000000; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .b-anton .rule, .b-bric .rule, .b-shoulders .rule {
+      transform-origin: left center;
+      animation: prop-rule 4.2s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+    }
+  }
+
+  @keyframes prop-rule {
+    0%, 20% { clip-path: inset(0 100% 0 0); }
+    45%     { clip-path: inset(0 0 0 0); }
+    100%    { clip-path: inset(0 0 0 0); }
+  }
 
   /* ---------- phones ---------- */
 
@@ -505,6 +739,7 @@
   .foot-note { font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: var(--ink-soft); }
 
   @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
     .skyflash, .bolt-stage, .channel, .fork, .ray { animation: none; }
     .channel, .fork { stroke-dashoffset: 0; opacity: 1; }
     .ray { transform: scaleX(1); }
@@ -532,11 +767,11 @@
     <p class="eyebrow">Field instrument · iOS and Android</p>
 
     <div class="lockup">
-      <div class="wordmark">
+      <h1 class="wordmark">
         <span class="light">storm</span>
         <span class="heavy">chaser</span>
         <div class="ray"></div>
-      </div>
+      </h1>
 
       <div class="bolt-stage" aria-hidden="true">
         <svg class="bolt-svg" viewBox="0 0 120 220" role="img">
@@ -565,10 +800,177 @@
       <span><b>React Native</b> Expo SDK 57</span>
       <span><b>TypeScript</b> strict</span>
       <span><b>Open-Meteo</b> keyless</span>
-      <span><b>181</b> unit tests</span>
+      <span><b>238</b> unit tests</span>
     </div>
   </div>
 </header>
+
+<section id="design" class="design">
+  <div class="wrap">
+    <h2>The three themes started as seven proposals</h2>
+    <p class="section-lede">
+      Nothing here was the first idea. The wordmark went through three display faces
+      before one stuck, and the conditions screen was drawn four ways at full fidelity —
+      same data, same layout, four different arguments about what a field app should feel
+      like. The boards below are the originals, kept in the palettes and faces they were
+      drawn in. They do not follow the theme switcher; a rejected direction should look
+      like itself.
+    </p>
+
+    <h3 class="phase">Phase 01 &middot; Wordmark, three display faces</h3>
+    <div class="props">
+
+      <article class="prop">
+        <div class="board b-anton">
+          <span class="board-tag">01 &middot; Anton / Broadcast</span>
+          <div class="mark"><i>Storm</i><i>Chaser</i></div>
+          <div class="rule"></div>
+          <div class="swatches" aria-hidden="true">
+            <span style="background:#FFD400"></span><span style="background:#FF5A47"></span>
+            <span style="background:#8E7CFF"></span><span style="background:#F2F6FA"></span>
+          </div>
+        </div>
+        <span class="verdict">Not chosen</span>
+        <p class="prop-note">
+          Ultra-condensed, one weight, no apologies. It reads at 16px on a tab bar and at
+          124px on a splash. <b>Rejected for having exactly one voice</b> — with a single
+          weight there is no hierarchy to build a whole interface out of.
+        </p>
+      </article>
+
+      <article class="prop">
+        <div class="board b-bric">
+          <span class="board-tag">02 &middot; Bricolage / Atmospheric</span>
+          <div class="mark"><i>storm</i><i>chaser</i></div>
+          <div class="rule"></div>
+          <div class="swatches" aria-hidden="true">
+            <span style="background:#FFB400"></span><span style="background:#FF5A47"></span>
+            <span style="background:#14213A"></span><span style="background:#F4F1E8"></span>
+          </div>
+        </div>
+        <span class="verdict verdict--shipped">Shipped</span>
+        <p class="prop-note">
+          Weight as the whole idea: hairline against heavy inside one word. The optical-size
+          axis holds it together from a tab label to a splash screen, and the 200/800 pair
+          became <b>the display token for both Skyward themes</b>. It is the lockup at the
+          top of this page.
+        </p>
+      </article>
+
+      <article class="prop">
+        <div class="board b-shoulders">
+          <div class="hazard" aria-hidden="true"></div>
+          <span class="board-tag">03 &middot; Big Shoulders / Signage</span>
+          <div class="mark"><i>Storm</i><i>Chaser</i></div>
+          <div class="rule"></div>
+          <span class="strap">Field Instrument</span>
+          <div class="swatches" aria-hidden="true">
+            <span style="background:#F5C242"></span><span style="background:#FF5A47"></span>
+            <span style="background:#4FD1C5"></span><span style="background:#F4F2E8"></span>
+          </div>
+        </div>
+        <span class="verdict">Partly kept</span>
+        <p class="prop-note">
+          Highway signage: hazard stripe, condensed caps, a 100–900 variable axis. Too
+          severe for the everyday screen, but <b>its language survives</b> — the
+          &ldquo;field instrument&rdquo; strapline is the hero eyebrow, and its amber and
+          teal are the Active and Unsettled rungs of the chase ladder.
+        </p>
+      </article>
+
+    </div>
+
+    <h3 class="phase">Phase 02 &middot; The conditions screen, four treatments</h3>
+    <div class="props props--ui">
+
+      <article class="prop">
+        <div class="board b-radar">
+          <span class="board-tag">A &middot; Storm Radar</span>
+          <div class="mini">
+            <div class="mini-temp">24&deg;</div>
+            <div class="mini-cond">Thunderstorms</div>
+          </div>
+          <div class="mini-pnl">
+            <span class="mini-label">Chase index</span>
+            <span class="mini-score">72</span>
+            <div class="mini-bar"><i></i></div>
+          </div>
+          <span class="mini-cta">Document this storm</span>
+        </div>
+        <span class="verdict">Not chosen</span>
+        <p class="prop-note">
+          Instrument-panel dark, every figure in mono, a 20-segment meter. Precise, but it
+          reads as a readout rather than a sky.
+        </p>
+      </article>
+
+      <article class="prop">
+        <div class="board b-sky">
+          <span class="board-tag">B &middot; Skyward</span>
+          <div class="mini">
+            <div class="mini-temp">24&deg;</div>
+            <div class="mini-cond">Thunderstorms</div>
+          </div>
+          <div class="mini-pnl">
+            <span class="mini-label">Chase index</span>
+            <span class="mini-score">72</span>
+            <div class="mini-bar"><i></i></div>
+          </div>
+          <span class="mini-cta">Document this storm</span>
+        </div>
+        <span class="verdict verdict--shipped">Shipped &times;2</span>
+        <p class="prop-note">
+          The sky itself as the background, soft elevation, no borders. It shipped twice —
+          <b>Skyward Day and a night-tuned Skyward Night</b> off the same token names.
+        </p>
+      </article>
+
+      <article class="prop">
+        <div class="board b-field">
+          <span class="board-tag">C &middot; Field Card</span>
+          <div class="mini">
+            <div class="mini-temp">24&deg;</div>
+            <div class="mini-cond">THUNDERSTORMS</div>
+          </div>
+          <div class="mini-pnl">
+            <span class="mini-label">Chase index</span>
+            <span class="mini-score">72</span>
+            <div class="mini-bar"><i></i></div>
+          </div>
+          <span class="mini-cta">DOCUMENT THIS STORM</span>
+        </div>
+        <span class="verdict verdict--shipped">Shipped</span>
+        <p class="prop-note">
+          Trading-card weight: 3px outlines, hard offset shadows, Archivo Black. It gave
+          the token contract its <b>hardest test</b> — a theme with no gradient and a
+          non-zero border.
+        </p>
+      </article>
+
+      <article class="prop">
+        <div class="board b-hivis">
+          <span class="board-tag">D &middot; High-Vis</span>
+          <div class="mini">
+            <div class="mini-temp">24&deg;</div>
+            <div class="mini-cond">Thunderstorms</div>
+          </div>
+          <div class="mini-pnl">
+            <span class="mini-label">Chase index</span>
+            <span class="mini-score">72</span>
+            <div class="mini-bar"><i></i></div>
+          </div>
+          <span class="mini-cta">DOCUMENT THIS STORM</span>
+        </div>
+        <span class="verdict">Not chosen</span>
+        <p class="prop-note">
+          Hazard yellow on black, square corners, maximum contrast for direct sunlight.
+          Unbeatable in a field at noon and exhausting everywhere else.
+        </p>
+      </article>
+
+    </div>
+  </div>
+</section>
 
 <section id="themes" class="themes">
   <div class="wrap">
@@ -786,22 +1188,27 @@
         <tr>
           <td>One</td>
           <td>Architecture, weather domain, capture flow, persistence, map, offline, tests, docs</td>
-          <td class="num">9 h 40 m</td>
+          <td class="num">7 h 45 m</td>
         </tr>
         <tr>
           <td>Two</td>
           <td>Design exploration, three-theme system, visual rebuild, Meteocons, onboarding, accessibility fixes</td>
-          <td class="num">1 h 40 m</td>
+          <td class="num">1 h 20 m</td>
+        </tr>
+        <tr>
+          <td>Three</td>
+          <td>Community reports, storm legends and detail route, chart layer, brand identity, review and fixes</td>
+          <td class="num">1 h 10 m</td>
         </tr>
         <tr class="total">
           <td>Total</td>
           <td>Inside the 24 hour window</td>
-          <td class="num">11 h 20 m</td>
+          <td class="num">10 h 15 m</td>
         </tr>
       </tbody>
     </table>
 
-    <p style="margin-top:22px;color:var(--ink-soft);line-height:1.6;">
+    <p style="margin-top:22px;color:var(--ink-soft);line-height:1.6;max-width:60ch;">
       Full breakdown in
       <a href="https://github.com/melaniesigrid/storm-chaser/blob/main/docs/TIME_LOG.md">docs/TIME_LOG.md</a>,
       and AI tool usage is disclosed in full in
