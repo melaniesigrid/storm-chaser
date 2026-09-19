@@ -1,5 +1,11 @@
 <!doctype html>
-<html lang="en" data-theme="atmospheric">
+<html lang="en" data-theme="atmospheric" data-sky="night">
+<!--
+  data-sky is resolved again in the head script below, before first paint, so
+  the page never renders one sky and snaps to the other. It ships as night
+  because that is the sky this work is meant to be judged in and the honest
+  answer when nothing is known yet.
+-->
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -61,7 +67,8 @@
     --display-tracking: -0.04em;
     --display-leading: 0.98;
     --display-size: clamp(38px, 5.6vw, 64px);
-    --wordmark-size: clamp(54px, 10.5vw, 112px);
+    /* 104px on a 900px board. */
+    --wordmark-size: clamp(52px, 11.5556vw, 166px);
     --wordmark-leading: 0.92;
     --label-tracking: 2px;
     --measure: 62ch;
@@ -96,32 +103,92 @@
     --rain-on: 1;
     --shaft-on: 0;
     --bloom-on: 1;
+    --hazard-w: 0px;
+    --hazard: none;
+    /* Bricolage separates its two lines on WEIGHT -- 200 against 800 inside
+       one word -- so both stay in the ink. Colouring them would be solving a
+       problem this face does not have. */
+    --lockup-heavy: var(--ink);
     --ray-image: linear-gradient(90deg, var(--t-active) 0%, var(--t-severe) 62%, var(--accent) 100%);
     --ray-tilt: rotate(0deg);
   }
 
+  /*
+   * ---- Atmospheric, by day ----
+   *
+   * The same design at the other end of the day, which is why this block holds
+   * colour and sky and nothing else: the face, the weights, the radii, the
+   * measure and the motion all come from the block above and are not restated
+   * here. Skyward Day and Skyward Night are ONE direction, and if a type or
+   * spacing token appeared below then they would quietly be two.
+   *
+   * This is also the only sky on the page that moves with the visitor.
+   * Broadcast and Signage are taste, and a taste does not have a sunrise.
+   */
+  html[data-theme="atmospheric"][data-sky="day"] {
+    /* The haze band at stop three is the horizon; without it the sky flattens
+       into a two-colour wash, exactly as it does at night. */
+    --bg-1: #8DB0DF;
+    --bg-2: #A9C3E4;
+    --bg-3: #E8E4DA;
+    --bg-4: #F7F4EC;
+    --page: #F4F1E8;
+    --band: #EDEAE0;
+    --surface: #FFFFFF;
+    --ink: #14213A;
+    --ink-soft: #33405A;
+    --line: #D6D2C6;
+    --accent: #C4402E;
+    --on-accent: #FFFFFF;
+    --t-dormant: #5B6472;
+    --t-unsettled: #4FD1C5;
+    --t-active: #F5C242;
+    --t-severe: #FF5A47;
+    --t-extreme: #8E7CFF;
+    /* Darkened off the fill: #FF5A47 as type on white is 2.9:1. */
+    --t-severe-text: #C4402E;
+
+    /* Lit from above rather than from the storm: the shadow falls, nothing
+       glows. The night block's inset highlight would read as a seam here. */
+    --lift: 0 10px 30px rgba(20, 33, 58, 0.16);
+    --lift-hover: 0 16px 40px rgba(20, 33, 58, 0.22);
+
+    --bolt-core: #14213A;
+    --bolt-glow: #FFB400;
+    --flash: rgba(255, 244, 214, 0.9);
+
+    /* Sun, not rain: one slow raking shaft and no bloom. Daylight has no
+       lightning -- a daytime storm is resolved by switching to night, not by
+       the day sky growing a flash. */
+    --sky-tint: #FFF4D6;
+    --sky-density: 0.12;
+    --rain-on: 0;
+    --shaft-on: 1;
+    --bloom-on: 0;
+    --hazard-w: 0px;
+    --hazard: none;
+  }
+
   :root,
   html[data-theme="broadcast"] {
-    /* ---- 01 Broadcast: Anton, from the first wordmark board ----
-       Rejected for the app because one weight gives you no hierarchy to build
-       an interface out of. That is exactly why it is worth wearing here: the
-       constraint is the character. Hierarchy comes from SIZE and COLOUR only,
-       which is what a lower third on a weather bulletin actually does. */
-    /* Flat by decision, not by omission: four copies of one value, because a
-       bulletin graphic sits on a key, not on a sky. The weather belongs to
-       Bricolage, and a gradient here would be borrowing another face's
-       argument. */
-    --bg-1: #07090E;
-    --bg-2: #07090E;
-    --bg-3: #07090E;
+    /* ---- Direction 01 · Anton / Broadcast ----
+       Taken from the wordmark board, not from the conditions board that used
+       to stand in for it. The ground is a blue-black lit from the upper left,
+       which is what a graphic keyed over a feed sits on -- not the flat pure
+       key this theme had drifted to. Hierarchy still comes from size and
+       colour only, because Anton ships one weight and that IS the argument. */
+    --bg-1: #131A28;
+    --bg-2: #0F1622;
+    --bg-3: #0A0F18;
     --bg-4: #07090E;
     --page: #07090E;
-    --band: #05070B;
-    --surface: #12161D;
-    --ink: #FFFFFF;
-    --ink-soft: #C2C7CF;
-    /* The rule, not a hairline. Broadcast separates planes with white. */
-    --line: #FFFFFF;
+    --band: #0B0F16;
+    --surface: #131A28;
+    --ink: #F2F6FA;
+    --ink-soft: #97A2B3;
+    /* The board draws its plate edge at #2A3342, which is 1.4:1 on this ground
+       -- a boundary nobody can see. Lifted to clear the 3:1 non-text floor. */
+    --line: #525E78;
     --accent: #FFD400;
     --on-accent: #07090E;
     --t-dormant: #5B6472;
@@ -132,69 +199,79 @@
     --t-severe-text: #FF7A69;
 
     --display: 'Anton', sans-serif;
-    /* Anton ships exactly one weight, so light and heavy are the same number.
-       Writing it out rather than faking a 200 the family does not have. */
+    /* One weight, so light and heavy are the same number. Written out rather
+       than faking a 200 the family does not have. */
     --display-weight: 400;
     --display-light: 400;
     --display-case: uppercase;
     --display-tracking: 0.005em;
     --display-leading: 0.86;
     --display-size: clamp(36px, 5.4vw, 60px);
-    --wordmark-size: clamp(52px, 10.5vw, 118px);
+    /* The board sets the lockup at 124px on a 900px board: 13.7778% of the
+       width it is drawn on. The hero is that board now, so it is that ratio. */
+    --wordmark-size: clamp(56px, 13.7778vw, 198px);
     --wordmark-leading: 0.84;
-    --label-tracking: 2.5px;
+    --label-tracking: 3px;
     --measure: 58ch;
     --body-size: 18px;
     --body-leading: 1.6;
 
-    /* Zero throughout, and 4px of rule. With neither elevation nor a curve to
-       spend, every scrap of hierarchy comes from the white block edge. */
-    --radius: 0px;
-    --radius-sm: 0px;
-    --radius-control: 0px;
-    --radius-pill: 0px;
-    --card-border: 4px;
-    --rule: 4px;
+    /* The board's app-icon plate is a 24px round-rect, so that is the radius
+       this direction actually draws. */
+    --radius: 24px;
+    --radius-sm: 16px;
+    --radius-control: 28px;
+    --radius-pill: 999px;
+    --card-border: 0px;
+    --rule: 1px;
     --section-pad: 88px;
 
-    /* No shadow at all. A keyed graphic is not lifted off the picture, it is
-       cut into it; the edge does the whole job. */
-    --lift: none;
-    --lift-hover: none;
+    /* A graphic held off the picture by a hairline of its own yellow. */
+    --lift: 0 0 0 1px rgba(255, 212, 0, 0.16), 0 18px 40px rgba(0, 0, 0, 0.6);
+    --lift-hover: 0 0 0 1px rgba(255, 212, 0, 0.45), 0 24px 52px rgba(0, 0, 0, 0.66);
     --press: translateY(2px);
-
-    /* A cut has no curve. Linear, and short enough to read as a take. */
-    --ease: linear;
-    --dur: 80ms;
+    --ease: cubic-bezier(0.3, 0, 0.2, 1);
+    --dur: 160ms;
 
     --bolt-core: #FFFFFF;
     --bolt-glow: #FFD400;
     --flash: rgba(255, 212, 0, 0.8);
-    /* No sky. Bricolage is the only face whose background is generated from
-       the weather; this one is switched off out loud rather than left out. */
+    /* No sky. Bricolage is the only face whose background comes from the
+       weather; this one is switched off out loud rather than left out. */
     --sky-tint: #07090E;
     --sky-density: 0;
     --rain-on: 0;
     --shaft-on: 0;
     --bloom-on: 0;
+    --hazard-w: 0px;
+    --hazard: none;
+    /* The board's ray: yellow to a white hot-spot and back, tilted -7. */
     --ray-image: linear-gradient(90deg, rgba(255, 212, 0, 0) 0%, #FFD400 22%, #FFFFFF 58%, #FFD400 80%, rgba(255, 212, 0, 0) 100%);
-    --ray-tilt: rotate(-4deg);
+    --ray-tilt: rotate(-7deg);
+    /* Anton has ONE weight, so the lockup cannot separate its two lines on
+       weight the way Bricolage does. The board separates them on colour
+       instead, and that is the whole reason this direction still reads. */
+    --lockup-heavy: #FFD400;
   }
 
-  html[data-theme="fieldcard"] {
-    /* ---- Field Card: print, not software ----
-       Flat by design: one background value repeated, because a gradient
-       would be a screen pretending to be weather. Nothing here moves. */
-    --bg-1: #FFF8EC;
-    --bg-2: #FFF8EC;
-    --bg-3: #FFF8EC;
-    --bg-4: #FFF8EC;
-    --page: #FFF8EC;
-    --band: #F6EEDD;
-    --surface: #FFFFFF;
-    --ink: #14140F;
-    --ink-soft: #3F3E34;
-    --line: #14140F;
+  html[data-theme="signage"] {
+    /* ---- Direction 03 · Big Shoulders / Signage ----
+       Highway signage: ink ground, condensed caps, a hazard stripe down the
+       edge, and the amber and teal that became the Active and Unsettled rungs
+       of the chase ladder. This replaces the cream Field Card, which was a
+       different board wearing this one's typeface. */
+    --bg-1: #14140F;
+    --bg-2: #14140F;
+    --bg-3: #14140F;
+    --bg-4: #14140F;
+    --page: #14140F;
+    --band: #1B1B15;
+    --surface: #1B1B15;
+    --ink: #F4F2E8;
+    --ink-soft: #C2C0B2;
+    /* Teal, at 3px, because that is the board's own plate edge. Signage does
+       not whisper its boundaries. */
+    --line: #4FD1C5;
     --accent: #F5C242;
     --on-accent: #14140F;
     --t-dormant: #5B6472;
@@ -202,61 +279,60 @@
     --t-active: #F5C242;
     --t-severe: #FF5A47;
     --t-extreme: #8E7CFF;
-    --t-severe-text: #C4402E;
+    --t-severe-text: #FF7A69;
 
     --display: 'Big Shoulders Display', sans-serif;
-    /* Archivo Black stood here and shipped ONE weight, so its light display
-       role had to borrow Instrument Sans. Big Shoulders carries a real
-       100-to-900, so the light role is the SAME condensed face at 300 and the
-       Field Card lockup can set one word in two weights the way the Bricolage
-       one does. */
+    /* A real 100-to-900 axis, so the light role is the SAME condensed face at
+       300 rather than another family standing in for it. */
     --display-weight: 900;
     --display-light: 300;
     --display-case: uppercase;
-    --display-tracking: -0.015em;
-    --display-leading: 0.92;
-    --display-size: clamp(30px, 4.2vw, 46px);
-    --wordmark-size: clamp(44px, 8.4vw, 92px);
-    --wordmark-leading: 0.88;
-    --label-tracking: 3px;
-    /* A shorter measure: print columns are narrower than screen columns. */
-    --measure: 52ch;
+    --display-tracking: 0.01em;
+    --display-leading: 0.82;
+    --display-size: clamp(34px, 5vw, 56px);
+    /* 132px on a 900px board: the widest lockup of the three, because the
+       face is the most condensed. */
+    --wordmark-size: clamp(58px, 14.6667vw, 211px);
+    --wordmark-leading: 0.82;
+    /* The strapline's 7px tracking, as drawn. */
+    --label-tracking: 7px;
+    --measure: 54ch;
     --body-size: 17px;
-    --body-leading: 1.5;
+    --body-leading: 1.55;
 
-    --radius: 20px;
-    --radius-sm: 14px;
-    /* The printed card's CTA is a rounded capsule with an ink outline, as
-       drawn on the board. Rounded-with-hard-outlines is its character. */
-    --radius-control: 30px;
-    --radius-pill: 999px;
+    /* Square throughout. A road sign has corners. */
+    --radius: 0px;
+    --radius-sm: 0px;
+    --radius-control: 0px;
+    --radius-pill: 0px;
     --card-border: 3px;
     --rule: 3px;
-    /* Denser. A printed sheet does not have 112px of air between blocks. */
-    --section-pad: 72px;
+    --section-pad: 84px;
 
-    /* Ink on paper. The shadow is an offset block, not a blur. */
-    --lift: 4px 4px 0 var(--line);
-    --lift-hover: 6px 6px 0 var(--line);
-    /* Pressing a card sits it DOWN on its own shadow. */
-    --press: translate(4px, 4px);
-
-    /* No easing. Mechanical things do not accelerate. */
+    /* No shadow. The board's plates are cut into the ground, not lifted off
+       it; the 3px edge does the whole job. */
+    --lift: none;
+    --lift-hover: none;
+    --press: translateY(2px);
     --ease: linear;
-    --dur: 60ms;
+    --dur: 120ms;
 
-    /* Ink, like every other line on this theme. The core was cream on a cream
-       page, so the only thing drawing the bolt was its own soft glow. */
-    --bolt-core: #14140F;
-    --bolt-glow: #FF5A47;
-    --flash: rgba(255, 220, 120, 0.85);
-    --sky-tint: #FFF8EC;
+    --bolt-core: #F4F2E8;
+    --bolt-glow: #4FD1C5;
+    --flash: rgba(79, 209, 197, 0.8);
+    --sky-tint: #14140F;
     --sky-density: 0;
     --rain-on: 0;
     --shaft-on: 0;
     --bloom-on: 0;
-    --ray-image: linear-gradient(90deg, var(--t-active) 0%, var(--t-severe) 62%, var(--accent) 100%);
-    --ray-tilt: rotate(0deg);
+    /* The hazard stripe, promoted off the board and onto the page edge. */
+    --hazard-w: 12px;
+    --hazard: repeating-linear-gradient(135deg, #F5C242 0 12px, #14140F 12px 24px);
+    /* The slash, solid red at -4, rather than a fade. */
+    --ray-image: linear-gradient(90deg, #FF5A47 0%, #FF7A69 58%, #FF5A47 100%);
+    --ray-tilt: rotate(-4deg);
+    /* Amber second line, as the board draws it. */
+    --lockup-heavy: #F5C242;
   }
 
   * { box-sizing: border-box; }
@@ -409,7 +485,7 @@
    * a hairline and a heavy.
    */
   .wordmark .light { font-weight: var(--display-light); }
-  .wordmark .heavy { font-weight: var(--display-weight); }
+  .wordmark .heavy { font-weight: var(--display-weight); color: var(--lockup-heavy, inherit); }
 
 
   .ray {
@@ -596,180 +672,19 @@
   .props:last-child { margin-bottom: 0; }
 
   /*
-   * The wordmark boards get a row each.
-   *
-   * They were drawn at 900x620 with the lockup at 124px, and squeezing three
-   * of them into an auto-fit grid clamped the type to 52px -- which threw away
-   * the one thing a wordmark board exists to show. A display face is an
-   * argument about scale; you cannot make it at a third of the size.
+   * Signage runs a hazard stripe down the edge of the page. Width and fill are
+   * both tokens, so the two themes that do not want it resolve to 0px and
+   * none rather than being switched off by a rule that names them.
    */
-  .props--wordmark { grid-template-columns: 1fr; gap: 40px; }
-  .props--wordmark .prop { gap: 18px; }
-  .props--wordmark .board {
-    height: auto;
-    min-height: clamp(380px, 44vw, 560px);
-    padding: clamp(26px, 3.4vw, 48px);
-    gap: 18px;
-  }
-  .props--wordmark .swatches { margin-top: 0; }
-
-  /*
-   * The size proof. The Anton note claims the face "reads at 16px on a tab bar
-   * and at 124px on a splash", and the board above it showed exactly one of
-   * those two sizes. This is the other end of the claim, in the board's own
-   * face, so the sentence can be checked rather than taken on trust.
-   */
-  .proof {
-    display: flex;
-    align-items: baseline;
-    flex-wrap: wrap;
-    gap: clamp(14px, 2vw, 30px);
-    margin-top: auto;
-  }
-  .proof b, .proof s {
-    font-family: var(--board-face);
-    font-weight: var(--board-face-weight);
-    text-transform: var(--board-case, none);
-    letter-spacing: var(--board-tracking, 0);
-    text-decoration: none;
-    line-height: 1;
-  }
-  .proof b { font-size: 30px; }
-  .proof s { font-size: 16px; opacity: 0.72; }
-  .proof em {
-    font-family: 'IBM Plex Mono', monospace;
-    font-style: normal;
-    font-size: 11px;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    opacity: 0.6;
-  }
-
-  .prop { display: flex; flex-direction: column; gap: 14px; }
-
-  /* The board itself: a fixed-ratio stage the proposal is drawn inside. */
-  .board {
-    position: relative;
-    overflow: hidden;
-    border-radius: 18px;
-    padding: 22px;
-    height: 300px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .props--ui .board { height: 340px; padding: 16px; gap: 10px; }
-
-  .board-tag {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-  }
-
-  .swatches { display: flex; gap: 6px; margin-top: auto; }
-  .swatches span { width: 26px; height: 26px; border-radius: 7px; }
-
-  .prop-note { margin: 0; font-size: 16px; line-height: 1.55; color: var(--ink-soft); }
-  .prop-note b { color: var(--ink); font-weight: 600; }
-
-  .verdict {
-    display: inline-flex;
-    align-items: center;
-    align-self: flex-start;
-    gap: 7px;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    padding: 5px 11px;
-    border-radius: var(--radius-pill);
-    border: max(1px, var(--card-border)) solid var(--line);
-    color: var(--ink-soft);
-  }
-
-  .verdict--shipped {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: var(--on-accent);
-  }
-
-  /* Direction 01 — Anton, broadcast */
-  .b-anton {
-    background: radial-gradient(120% 90% at 20% 0%, #131A28 0%, #07090E 60%);
-    color: #F2F6FA;
-    --board-face: 'Anton', sans-serif;
-    --board-face-weight: 400;
-    --board-case: uppercase;
-    --board-tracking: 0.005em;
-  }
-  .b-anton .board-tag { color: #FFD400; }
-  .b-anton .mark { font-family: 'Anton', sans-serif; font-size: clamp(62px, 12.5vw, 140px); line-height: 0.84; text-transform: uppercase; }
-  .b-anton .mark i { display: block; font-style: normal; }
-  .b-anton .mark i + i { color: #FFD400; }
-  .b-anton .rule {
-    height: clamp(7px, 1vw, 13px);
-    width: 72%;
-    margin-top: clamp(10px, 1.4vw, 20px);
-    border-radius: 4px;
-    background: linear-gradient(90deg, rgba(255,212,0,0) 0%, #FFD400 22%, #FFFFFF 58%, #FFD400 80%, rgba(255,212,0,0) 100%);
-    transform: rotate(-4deg);
-  }
-
-  /* Direction 02 — Bricolage, atmospheric (the one that shipped) */
-  .b-bric {
-    background: linear-gradient(165deg, #B9CBE4 0%, #DCD9CE 48%, #F4F1E8 100%);
-    color: #14213A;
-    --board-face: 'Bricolage Grotesque', sans-serif;
-    --board-face-weight: 800;
-    --board-tracking: -0.04em;
-  }
-  .b-bric .board-tag { color: #96301F; }
-  .b-bric .mark { font-family: 'Bricolage Grotesque', sans-serif; font-size: clamp(62px, 12.5vw, 140px); line-height: 0.88; letter-spacing: -0.04em; }
-  .b-bric .mark i { display: block; font-style: normal; font-weight: 200; }
-  .b-bric .mark i + i { font-weight: 800; }
-  .b-bric .rule {
-    height: clamp(8px, 1.1vw, 14px);
-    width: 62%;
-    margin-top: clamp(10px, 1.4vw, 20px);
-    border-radius: 4px;
-    background: linear-gradient(90deg, #FFB400 0%, #FF5A47 62%, #C4402E 100%);
-  }
-
-  /* Direction 03 — Big Shoulders, signage */
-  .b-shoulders {
-    background: #14140F;
-    color: #F4F2E8;
-    padding-left: clamp(46px, 5vw, 76px);
-    --board-face: 'Big Shoulders Display', sans-serif;
-    --board-face-weight: 900;
-    --board-case: uppercase;
-    --board-tracking: 0.01em;
-  }
-  .b-shoulders .board-tag { color: #4FD1C5; }
-  .b-shoulders .hazard {
-    position: absolute;
-    left: clamp(16px, 1.8vw, 26px);
-    top: 16px;
-    bottom: 16px;
-    width: clamp(12px, 1.4vw, 20px);
-    border-radius: 3px;
-    background: repeating-linear-gradient(135deg, #F5C242 0 10px, #14140F 10px 20px);
-  }
-  .b-shoulders .mark { font-family: 'Big Shoulders Display', sans-serif; font-weight: 900; font-size: clamp(66px, 13.5vw, 152px); line-height: 0.8; text-transform: uppercase; }
-  .b-shoulders .mark i { display: block; font-style: normal; }
-  .b-shoulders .mark i + i { color: #F5C242; }
-  .b-shoulders .rule { height: clamp(8px, 1.1vw, 14px); width: 58%; margin-top: clamp(10px, 1.4vw, 20px); background: #FF5A47; transform: rotate(-3deg); }
-  .b-shoulders .strap {
-    font-family: 'Big Shoulders Display', sans-serif;
-    font-weight: 300;
-    font-size: clamp(15px, 1.7vw, 24px);
-    letter-spacing: clamp(5px, 0.7vw, 10px);
-    text-transform: uppercase;
-    color: #9E9C8E;
+  .hazard-rail {
+    position: fixed;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: var(--hazard-w, 0px);
+    background: var(--hazard, none);
+    z-index: 40;
+    pointer-events: none;
   }
 
   /* Screen treatments */
@@ -838,19 +753,6 @@
   .b-hivis .mini-bar { background: #2A2A2A; }
   .b-hivis .mini-bar i { background: #FFD400; }
   .b-hivis .mini-cta { background: #FFD400; color: #000000; }
-
-  @media (prefers-reduced-motion: no-preference) {
-    .b-anton .rule, .b-bric .rule, .b-shoulders .rule {
-      transform-origin: left center;
-      animation: prop-rule 4.2s cubic-bezier(0.22, 1, 0.36, 1) infinite;
-    }
-  }
-
-  @keyframes prop-rule {
-    0%, 20% { clip-path: inset(0 100% 0 0); }
-    45%     { clip-path: inset(0 0 0 0); }
-    100%    { clip-path: inset(0 0 0 0); }
-  }
 
   /* ---------- phones ---------- */
 
@@ -1055,11 +957,20 @@
 
   /* ---------- elevation means something different in each theme ---------- */
 
+  /*
+   * .board is deliberately NOT in this list.
+   *
+   * The page says the proposal boards are the originals and do not follow the
+   * theme switcher, and for two themes that was true only by accident: both
+   * set --card-border to 0, so the border they were inheriting was invisible.
+   * The moment a theme drew a real edge -- Signage at 3px of teal -- every
+   * rejected direction got outlined in the colour of the one that won, which
+   * is the exact thing the section exists not to do.
+   */
   .feature,
   .tier,
   .sub-item,
-  .phone,
-  .board {
+  .phone {
     border-width: var(--card-border);
     border-style: solid;
     border-color: var(--line);
@@ -1269,17 +1180,43 @@
     .btn, .feature, .tier, .switch button { transition: none; }
   }
 
-  /* ---------- the switcher, now part of the hero's own evidence ---------- */
+  /* ---------- the direction picker ---------- */
 
-  .spec-theme {
+  /*
+   * Pinned to the viewport rather than parked in the hero's spec row. While
+   * the page was ABOUT three directions the control was a footnote; now the
+   * page IS one of them and switching is the main thing anyone does here, so
+   * it has to be reachable from any scroll position.
+   *
+   * Every value in it is a token, so the picker is repainted by the same
+   * switch it drives -- including its own corners, which go square on Signage.
+   */
+  .picker {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 60;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: var(--radius-pill);
+    background: var(--surface);
+    border: max(1px, var(--card-border)) solid var(--line);
+    box-shadow: var(--lift);
+  }
+
+  .picker-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    padding-left: 6px;
   }
 
   .switch {
-    /* It used to float in a corner, fixed to the viewport. It belongs in the
-       spec row with the other things this page asserts about itself. */
     position: static;
     display: inline-flex;
     gap: 4px;
@@ -1288,6 +1225,26 @@
     border: 0;
     box-shadow: none;
     backdrop-filter: none;
+  }
+
+  /*
+   * The index sits above the name, the way the boards number themselves.
+   * The column direction is what does it: the button is a flex container, so
+   * display:block on the <i> alone left '01' sitting on the same line as
+   * 'Broadcast'.
+   */
+  .switch button {
+    flex-direction: column;
+    justify-content: center;
+    gap: 1px;
+    line-height: 1.1;
+    padding: 6px 14px;
+  }
+  .switch button i {
+    font-style: normal;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    opacity: 0.65;
   }
 
   .switch button {
@@ -1322,13 +1279,163 @@
   }
 
   @media (max-width: 620px) {
-    .spec-theme { flex-wrap: wrap; }
+    /* At phone width the picker gives up its label and its hard corner
+       placement rather than crowding the lockup it is sitting over. */
+    .picker { top: auto; bottom: 12px; right: 12px; left: 12px; justify-content: center; }
+    .picker-label { display: none; }
   }
 </style>
+<script>
+  /*
+   * Which sky Atmospheric is wearing.
+   *
+   * Runs in the head, before first paint, so the page never renders one sky
+   * and snaps to the other. It resolves in three widening steps, and every one
+   * of them is optional except the first:
+   *
+   *   1. The local clock. Synchronous, no permission, no network, always
+   *      available. This is what actually ships the feature; the rest only
+   *      sharpen it.
+   *   2. Sunrise and sunset for a real position, which is minutes-accurate
+   *      where the clock is hours-crude. Only if geolocation has ALREADY been
+   *      granted -- a landing page that throws a location prompt at a stranger
+   *      has misjudged what it is owed.
+   *   3. The weather there. A thunderstorm in the afternoon is a darker sky
+   *      than the clock knows about, and darkening for it is the whole premise
+   *      of the app this page is for.
+   *
+   * Steps 2 and 3 can fail in every way a browser API can, and each failure
+   * leaves the previous step's answer standing rather than throwing one.
+   *
+   * Only Atmospheric reads this. Broadcast and Signage are taste, and a
+   * taste does not have a sunrise.
+   */
+  (function () {
+    var root = document.documentElement;
+    var coords = null;
+
+    function set(sky) {
+      if (root.getAttribute('data-sky') !== sky) root.setAttribute('data-sky', sky);
+    }
+
+    /* Sunrise and sunset as absolute instants, so no timezone conversion
+       happens anywhere here. Same arithmetic the app uses. */
+    function sunTimes(date, lat, lon) {
+      var rad = Math.PI / 180, J1970 = 2440588, J2000 = 2451545, MS = 86400000;
+      var days = date.getTime() / MS - 0.5 + J1970 - J2000;
+      var lw = rad * -lon, phi = rad * lat;
+      var cycle = Math.round(days - 0.0009 - lw / (2 * Math.PI));
+      var ds = 0.0009 + lw / (2 * Math.PI) + cycle;
+      var M = rad * (357.5291 + 0.98560028 * ds);
+      var C = rad * (1.9148 * Math.sin(M) + 0.02 * Math.sin(2 * M) + 0.0003 * Math.sin(3 * M));
+      var L = M + C + rad * 102.9372 + Math.PI;
+      var dec = Math.asin(Math.sin(rad * 23.4397) * Math.sin(L));
+      var noon = J2000 + ds + 0.0053 * Math.sin(M) - 0.0069 * Math.sin(2 * L);
+      /* The sun's upper limb touching the horizon, refraction folded in. Not
+         zero, which is why a naive "is it above the horizon" check is minutes
+         out. Outside [-1, 1] it never crosses at all: polar day or night. */
+      var cosH = (Math.sin(rad * -0.833) - Math.sin(phi) * Math.sin(dec)) /
+                 (Math.cos(phi) * Math.cos(dec));
+      if (cosH > 1) return 'polar-night';
+      if (cosH < -1) return 'polar-day';
+      var H = Math.acos(cosH);
+      var jset = J2000 + (0.0009 + (H + lw) / (2 * Math.PI) + cycle) +
+                 0.0053 * Math.sin(M) - 0.0069 * Math.sin(2 * L);
+      return {
+        rise: (noon - (jset - noon) + 0.5 - J1970) * MS,
+        set: (jset + 0.5 - J1970) * MS
+      };
+    }
+
+    function fromClock() {
+      var h = new Date().getHours();
+      return h >= 6 && h < 18 ? 'day' : 'night';
+    }
+
+    function fromSun() {
+      if (!coords) return null;
+      var now = new Date();
+      var sun = sunTimes(now, coords.lat, coords.lon);
+      if (sun === 'polar-day') return 'day';
+      if (sun === 'polar-night') return 'night';
+      var t = now.getTime();
+      return t >= sun.rise && t <= sun.set ? 'day' : 'night';
+    }
+
+    var stormy = false;
+
+    function resolve() {
+      /* A thunderstorm darkens a daytime sky enough to be worth switching for.
+         Rain alone does not: an overcast afternoon is still an afternoon. */
+      if (stormy) return 'night';
+      return fromSun() || fromClock();
+    }
+
+    set(resolve());
+
+    /* Turns over while the page is open rather than only on the next load.
+       Ten minutes is far finer than a sunset needs and costs nothing: the
+       resolution is arithmetic on a date and a coordinate, with no I/O. */
+    setInterval(function () { set(resolve()); }, 600000);
+
+    /* Steps 2 and 3, best effort. Wrapped whole: an older browser without
+       Permissions or fetch simply keeps the clock's answer. */
+    try {
+      if (!navigator.permissions || !navigator.geolocation) return;
+
+      navigator.permissions.query({ name: 'geolocation' }).then(function (status) {
+        /* Only when it is already granted. Asking here would be a prompt the
+           visitor did not come for, to change a background. */
+        if (status.state !== 'granted') return;
+
+        navigator.geolocation.getCurrentPosition(function (position) {
+          coords = { lat: position.coords.latitude, lon: position.coords.longitude };
+          set(resolve());
+
+          if (typeof fetch !== 'function') return;
+          fetch('https://api.open-meteo.com/v1/forecast?latitude=' + coords.lat +
+                '&longitude=' + coords.lon + '&current=weather_code')
+            .then(function (response) { return response.ok ? response.json() : null; })
+            .then(function (data) {
+              var code = data && data.current && data.current.weather_code;
+              /* WMO 95, 96 and 99 are the thunderstorm codes. */
+              stormy = code === 95 || code === 96 || code === 99;
+              set(resolve());
+            })
+            .catch(function () { /* the sky is not worth a broken page */ });
+        }, function () { /* no fix; the clock already answered */ }, { timeout: 8000 });
+      }).catch(function () { /* Permissions API present but unhappy */ });
+    } catch (error) { /* keep the clock's answer */ }
+  })();
+</script>
 </head>
 <body>
 
 
+
+<!--
+  The hazard stripe, promoted off Direction 03's board onto the page edge. It
+  is here for every theme and drawn by none of them except the one that sets
+  --hazard-w, so no rule in the stylesheet has to name a theme to switch it on.
+-->
+<div class="hazard-rail" aria-hidden="true"></div>
+
+<!--
+  The theme picker.
+  
+  Back out of the spec row and pinned to the viewport. It sat in the specs
+  while the page was ABOUT three directions; now the page IS one of them, and
+  the control that changes which is the primary thing a visitor does here. It
+  has to be reachable from any scroll position, not only from the top.
+-->
+<div class="picker">
+  <b class="picker-label">Direction</b>
+  <span class="switch" role="group" aria-label="Direction">
+    <button type="button" data-set="broadcast" aria-pressed="false"><i>01</i>Broadcast</button>
+    <button type="button" data-set="atmospheric" aria-pressed="true"><i>02</i>Atmospheric</button>
+    <button type="button" data-set="signage" aria-pressed="false"><i>03</i>Signage</button>
+  </span>
+</div>
 
 <header class="hero">
   <!--
@@ -1397,20 +1504,6 @@
       <span><b>TypeScript</b> strict</span>
       <span><b>Open-Meteo</b> keyless</span>
       <span><b>413</b> unit tests</span>
-      <!--
-        The switcher belongs here rather than floating in a corner. The site's
-        whole claim is that no screen knows which theme is active, and this
-        control is the proof: clicking it repaints every rule on the page.
-        A claim and its evidence should be in the same glance.
-      -->
-      <span class="spec-theme">
-        <b>Theme</b>
-        <span class="switch" role="group" aria-label="Theme">
-          <button type="button" data-set="atmospheric" aria-pressed="true">Atmospheric</button>
-          <button type="button" data-set="broadcast" aria-pressed="false">Broadcast</button>
-          <button type="button" data-set="fieldcard" aria-pressed="false">Field Card</button>
-        </span>
-      </span>
     </div>
   </div>
 </header>
@@ -1426,78 +1519,6 @@
       drawn in. They do not follow the theme switcher; a rejected direction should look
       like itself.
     </p>
-
-    <h3 class="phase">Phase 01 &middot; Wordmark, three display faces</h3>
-    <div class="props props--wordmark">
-
-      <article class="prop">
-        <div class="board b-anton">
-          <span class="board-tag">01 &middot; Anton / Broadcast</span>
-          <div class="mark"><i>Storm</i><i>Chaser</i></div>
-          <div class="rule"></div>
-          <div class="proof" aria-hidden="true">
-            <b>Storm Chaser</b><s>Storm Chaser</s><em>30px &middot; 16px</em>
-          </div>
-          <div class="swatches" aria-hidden="true">
-            <span style="background:#FFD400"></span><span style="background:#FF5A47"></span>
-            <span style="background:#8E7CFF"></span><span style="background:#F2F6FA"></span>
-          </div>
-        </div>
-        <span class="verdict">Not chosen</span>
-        <p class="prop-note">
-          Ultra-condensed, one weight, no apologies. It reads at 16px on a tab bar and at
-          124px on a splash. <b>Rejected for having exactly one voice</b> — with a single
-          weight there is no hierarchy to build a whole interface out of.
-        </p>
-      </article>
-
-      <article class="prop">
-        <div class="board b-bric">
-          <span class="board-tag">02 &middot; Bricolage / Atmospheric</span>
-          <div class="mark"><i>storm</i><i>chaser</i></div>
-          <div class="rule"></div>
-          <div class="proof" aria-hidden="true">
-            <b>storm chaser</b><s>storm chaser</s><em>30px &middot; 16px</em>
-          </div>
-          <div class="swatches" aria-hidden="true">
-            <span style="background:#FFB400"></span><span style="background:#FF5A47"></span>
-            <span style="background:#14213A"></span><span style="background:#F4F1E8"></span>
-          </div>
-        </div>
-        <span class="verdict verdict--shipped">Shipped</span>
-        <p class="prop-note">
-          Weight as the whole idea: hairline against heavy inside one word. The optical-size
-          axis holds it together from a tab label to a splash screen, and the 200/800 pair
-          became <b>the display token for both Skyward themes</b>. It is the lockup at the
-          top of this page.
-        </p>
-      </article>
-
-      <article class="prop">
-        <div class="board b-shoulders">
-          <div class="hazard" aria-hidden="true"></div>
-          <span class="board-tag">03 &middot; Big Shoulders / Signage</span>
-          <div class="mark"><i>Storm</i><i>Chaser</i></div>
-          <div class="rule"></div>
-          <span class="strap">Field Instrument</span>
-          <div class="proof" aria-hidden="true">
-            <b>Storm Chaser</b><s>Storm Chaser</s><em>30px &middot; 16px</em>
-          </div>
-          <div class="swatches" aria-hidden="true">
-            <span style="background:#F5C242"></span><span style="background:#FF5A47"></span>
-            <span style="background:#4FD1C5"></span><span style="background:#F4F2E8"></span>
-          </div>
-        </div>
-        <span class="verdict">Partly kept</span>
-        <p class="prop-note">
-          Highway signage: hazard stripe, condensed caps, a 100–900 variable axis. Too
-          severe for the everyday screen, but <b>its language survives</b> — the
-          &ldquo;field instrument&rdquo; strapline is the hero eyebrow, and its amber and
-          teal are the Active and Unsettled rungs of the chase ladder.
-        </p>
-      </article>
-
-    </div>
 
     <h3 class="phase">Phase 02 &middot; The conditions screen, four treatments</h3>
     <div class="props props--ui">
@@ -1597,7 +1618,10 @@
     <p class="section-lede">
       No screen knows which theme is active. Every colour, typeface and radius resolves
       through a named token, so a third theme is a data change rather than a UI change.
-      This page wears them too — the switcher is up there.
+      These three are the <b>app&rsquo;s</b>. The page runs the same contract on the three
+      wordmark directions instead &mdash; Atmospheric, Broadcast and Signage, in the
+      switcher up there &mdash; which is the clearest proof the contract holds: the same
+      named tokens, filled from a different set of designs entirely.
     </p>
 
     <div class="phones">
@@ -1860,13 +1884,15 @@
       try { localStorage.setItem('sc-theme', name); } catch (error) { /* private mode */ }
     }
 
-    // Everyone arrives in the storm.
+    // Everyone arrives in the weather.
     //
-    // Night is the default for every visitor on every load -- not restored from
-    // a previous visit, and not inherited from the OS light/dark setting. A
-    // storm app that opens on a bright clear page is arguing against itself,
-    // and this is the theme the work is meant to be judged in. The switcher
-    // still does everything it ever did; it just starts from the sky.
+    // Atmospheric is the theme on every load -- not restored from a previous
+    // visit, and not inherited from the OS light/dark setting. It is the theme
+    // the work is meant to be judged in, and it is the only one of the three
+    // that answers to anything outside the page: WHICH Atmospheric sky you get
+    // is resolved in the head script from your clock, your sunrise and, if the
+    // browser will say, the storm actually overhead. Broadcast and Signage
+    // are taste, and a taste does not have a sunrise.
     apply('atmospheric');
 
     buttons.forEach(function (button) {
