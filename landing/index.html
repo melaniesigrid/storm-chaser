@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="night">
+<html lang="en" data-theme="atmospheric">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -30,7 +30,7 @@
      asks which theme is active.
      ============================================================ */
 
-  html[data-theme="night"] {
+  html[data-theme="atmospheric"] {
     /* ---- Skyward Night: the storm you are driving into ---- */
     --bg-1: #0B1026;
     --bg-2: #1B2347;
@@ -61,6 +61,8 @@
     --display-tracking: -0.04em;
     --display-leading: 0.98;
     --display-size: clamp(38px, 5.6vw, 64px);
+    --wordmark-size: clamp(54px, 10.5vw, 112px);
+    --wordmark-leading: 0.92;
     --label-tracking: 2px;
     --measure: 62ch;
     --body-size: 19px;
@@ -90,67 +92,81 @@
     --rain-on: 1;
     --shaft-on: 0;
     --bloom-on: 1;
+    --ray-image: linear-gradient(90deg, var(--t-active) 0%, var(--t-severe) 62%, var(--accent) 100%);
+    --ray-tilt: rotate(0deg);
   }
 
   :root,
-  html[data-theme="day"] {
-    /* ---- Skyward Day: the calm before ---- */
-    --bg-1: #8DB0DF;
-    --bg-2: #A9C3E4;
-    --bg-3: #E8E4DA;
-    --bg-4: #F7F4EC;
-    --page: #F2F0E8;
-    --band: #ECE8DC;
-    --surface: #FFFFFF;
-    --ink: #14213A;
-    --ink-soft: #33405A;
-    --line: #D6D2C6;
-    --accent: #C4402E;
-    --on-accent: #FFFFFF;
+  html[data-theme="broadcast"] {
+    /* ---- 01 Broadcast: Anton, from the first wordmark board ----
+       Rejected for the app because one weight gives you no hierarchy to build
+       an interface out of. That is exactly why it is worth wearing here: the
+       constraint is the character. Hierarchy comes from SIZE and COLOUR only,
+       which is what a lower third on a weather bulletin actually does. */
+    --bg-1: #131A28;
+    --bg-2: #0D131E;
+    --bg-3: #090D15;
+    --bg-4: #07090E;
+    --page: #07090E;
+    --band: #0B0F16;
+    --surface: #131A28;
+    --ink: #F2F6FA;
+    --ink-soft: #97A2B3;
+    --line: #222C3D;
+    --accent: #FFD400;
+    --on-accent: #07090E;
     --t-dormant: #5B6472;
     --t-unsettled: #4FD1C5;
-    --t-active: #F5C242;
+    --t-active: #FFD400;
     --t-severe: #FF5A47;
     --t-extreme: #8E7CFF;
-    --t-severe-text: #C4402E;
+    --t-severe-text: #FF7A69;
 
-    --display: 'Bricolage Grotesque', sans-serif;
-    --display-weight: 800;
-    --display-light: 200;
-    --display-case: none;
-    --display-tracking: -0.035em;
-    --display-leading: 1.02;
-    --display-size: clamp(34px, 5vw, 56px);
-    --label-tracking: 2px;
-    --measure: 60ch;
-    --body-size: 19px;
+    --display: 'Anton', sans-serif;
+    /* Anton ships exactly one weight, so light and heavy are the same number.
+       Writing it out rather than faking a 200 the family does not have. */
+    --display-weight: 400;
+    --display-light: 400;
+    --display-case: uppercase;
+    --display-tracking: 0.005em;
+    --display-leading: 0.86;
+    --display-size: clamp(36px, 5.4vw, 60px);
+    --wordmark-size: clamp(52px, 10.5vw, 118px);
+    --wordmark-leading: 0.84;
+    --label-tracking: 2.5px;
+    --measure: 58ch;
+    --body-size: 18px;
     --body-leading: 1.6;
 
-    --radius: 24px;
-    --radius-sm: 14px;
+    --radius: 8px;
+    --radius-sm: 6px;
     --card-border: 0px;
     --rule: 1px;
-    --section-pad: 96px;
+    --section-pad: 88px;
 
-    /* Daylight is diffuse. Soft, low, no rim. */
-    --lift: 0 10px 26px rgba(20, 33, 58, 0.12);
-    --lift-hover: 0 18px 40px rgba(20, 33, 58, 0.18);
-    --press: translateY(1px);
+    /* Broadcast elevation is a lit edge, not a soft shadow: a graphic keyed
+       over a feed, held off the picture by a hairline of its own yellow. */
+    --lift: 0 0 0 1px rgba(255, 212, 0, 0.16), 0 18px 40px rgba(0, 0, 0, 0.6);
+    --lift-hover: 0 0 0 1px rgba(255, 212, 0, 0.45), 0 24px 52px rgba(0, 0, 0, 0.66);
+    --press: translateY(2px);
 
-    --ease: cubic-bezier(0.22, 1, 0.36, 1);
-    --dur: 380ms;
+    /* Cuts, not eases. Broadcast graphics snap on. */
+    --ease: cubic-bezier(0.3, 0, 0.2, 1);
+    --dur: 160ms;
 
     --bolt-core: #FFFFFF;
-    --bolt-glow: #FFD86B;
-    --flash: rgba(255, 255, 255, 0.85);
-    --sky-tint: #FFF4D6;
-    --sky-density: 0.12;
-    --rain-on: 0;
-    --shaft-on: 1;
-    --bloom-on: 0;
+    --bolt-glow: #FFD400;
+    --flash: rgba(255, 212, 0, 0.8);
+    --sky-tint: #FFD400;
+    --sky-density: 0.1;
+    --rain-on: 1;
+    --shaft-on: 0;
+    --bloom-on: 1;
+    --ray-image: linear-gradient(90deg, rgba(255, 212, 0, 0) 0%, #FFD400 22%, #FFFFFF 58%, #FFD400 80%, rgba(255, 212, 0, 0) 100%);
+    --ray-tilt: rotate(-4deg);
   }
 
-  html[data-theme="card"] {
+  html[data-theme="fieldcard"] {
     /* ---- Field Card: print, not software ----
        Flat by design: one background value repeated, because a gradient
        would be a screen pretending to be weather. Nothing here moves. */
@@ -182,6 +198,8 @@
     --display-tracking: -0.015em;
     --display-leading: 0.92;
     --display-size: clamp(30px, 4.2vw, 46px);
+    --wordmark-size: clamp(44px, 8.4vw, 92px);
+    --wordmark-leading: 0.88;
     --label-tracking: 3px;
     /* A shorter measure: print columns are narrower than screen columns. */
     --measure: 52ch;
@@ -189,17 +207,17 @@
     --body-leading: 1.5;
 
     --radius: 20px;
-    --radius-sm: 0px;
+    --radius-sm: 14px;
     --card-border: 3px;
     --rule: 3px;
     /* Denser. A printed sheet does not have 112px of air between blocks. */
     --section-pad: 72px;
 
     /* Ink on paper. The shadow is an offset block, not a blur. */
-    --lift: 6px 6px 0 var(--line);
-    --lift-hover: 9px 9px 0 var(--line);
+    --lift: 4px 4px 0 var(--line);
+    --lift-hover: 6px 6px 0 var(--line);
     /* Pressing a card sits it DOWN on its own shadow. */
-    --press: translate(6px, 6px);
+    --press: translate(4px, 4px);
 
     /* No easing. Mechanical things do not accelerate. */
     --ease: linear;
@@ -213,6 +231,8 @@
     --rain-on: 0;
     --shaft-on: 0;
     --bloom-on: 0;
+    --ray-image: linear-gradient(90deg, var(--t-active) 0%, var(--t-severe) 62%, var(--accent) 100%);
+    --ray-tilt: rotate(0deg);
   }
 
   * { box-sizing: border-box; }
@@ -307,7 +327,6 @@
     animation: skyflash 6s linear infinite;
   }
 
-  html[data-theme="card"] .skyflash { mix-blend-mode: multiply; }
 
   /*
     Lightning is not a fade in. It is a stepped leader punching down, a return
@@ -352,23 +371,28 @@
   .wordmark .heavy {
     display: block;
     font-family: var(--display);
-    font-size: clamp(54px, 10.5vw, 112px);
-    line-height: 0.92;
-    letter-spacing: -0.04em;
+    font-size: var(--wordmark-size);
+    line-height: var(--wordmark-leading);
+    letter-spacing: var(--display-tracking);
+    text-transform: var(--display-case);
     color: var(--ink);
   }
 
-  .wordmark .light { font-weight: 200; }
+  /*
+   * On Anton these two weights are the SAME number, and that is the point of
+   * wearing it: the board was rejected for having one voice, so the lockup has
+   * to hold itself together on size and colour instead of on contrast between
+   * a hairline and a heavy.
+   */
+  .wordmark .light { font-weight: var(--display-light); }
   .wordmark .heavy { font-weight: var(--display-weight); }
 
-  html[data-theme="card"] .wordmark .light,
-  html[data-theme="card"] .wordmark .heavy { text-transform: uppercase; }
 
   .ray {
     height: 11px;
     border-radius: 6px;
     margin-top: 16px;
-    background: linear-gradient(90deg, var(--t-active) 0%, var(--t-severe) 62%, var(--accent) 100%);
+    background: var(--ray-image);
     transform-origin: left center;
     animation: ray-draw 6s cubic-bezier(0.22, 1, 0.36, 1) infinite;
   }
@@ -379,9 +403,9 @@
    * two and a half seconds out of six. It draws once, early, and stays.
    */
   @keyframes ray-draw {
-    0%   { transform: scaleX(0); }
-    14%  { transform: scaleX(1); }
-    100% { transform: scaleX(1); }
+    0%   { transform: var(--ray-tilt) scaleX(0); }
+    14%  { transform: var(--ray-tilt) scaleX(1); }
+    100% { transform: var(--ray-tilt) scaleX(1); }
   }
 
   /* ---------- the bolt ---------- */
@@ -792,7 +816,6 @@
     box-shadow: 0 10px 28px rgba(20, 33, 58, 0.09);
   }
 
-  html[data-theme="card"] .feature { box-shadow: 5px 5px 0 var(--line); }
 
   .feature img { width: 56px; height: 56px; }
 
@@ -818,7 +841,6 @@
     border: var(--card-border) solid var(--line);
   }
 
-  html[data-theme="card"] .tier { box-shadow: 4px 4px 0 var(--line); }
 
   .tier .bar { height: 10px; border-radius: 5px; margin-bottom: 16px; }
   .tier .range { font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 1px; color: var(--ink-soft); }
@@ -876,7 +898,7 @@
     html { scroll-behavior: auto; }
     .skyflash, .bolt-stage, .channel, .fork, .ray { animation: none; }
     .channel, .fork { stroke-dashoffset: 0; opacity: 1; }
-    .ray { transform: scaleX(1); }
+    .ray { transform: var(--ray-tilt) scaleX(1); }
   }
 
   @media (max-width: 620px) {
@@ -973,7 +995,7 @@
        and a ghost button with no border is a CTA with no edge. */
     border-width: max(2px, var(--card-border));
     border-style: solid;
-    border-color: var(--line);
+    border-color: var(--ink);
     box-shadow: var(--lift);
   }
 
@@ -1018,7 +1040,6 @@
     transition: opacity var(--dur) var(--ease);
   }
 
-  html[data-theme="card"] .sky { display: none; }
 
   .sky-band {
     position: absolute;
@@ -1291,9 +1312,9 @@
       <span class="spec-theme">
         <b>Theme</b>
         <span class="switch" role="group" aria-label="Theme">
-          <button type="button" data-set="day" aria-pressed="false">Day</button>
-          <button type="button" data-set="night" aria-pressed="true">Night</button>
-          <button type="button" data-set="card" aria-pressed="false">Card</button>
+          <button type="button" data-set="atmospheric" aria-pressed="true">Atmospheric</button>
+          <button type="button" data-set="broadcast" aria-pressed="false">Broadcast</button>
+          <button type="button" data-set="fieldcard" aria-pressed="false">Field Card</button>
         </span>
       </span>
     </div>
@@ -1743,7 +1764,7 @@
     // storm app that opens on a bright clear page is arguing against itself,
     // and this is the theme the work is meant to be judged in. The switcher
     // still does everything it ever did; it just starts from the sky.
-    apply('night');
+    apply('atmospheric');
 
     buttons.forEach(function (button) {
       button.addEventListener('click', function () { apply(button.dataset.set); });
