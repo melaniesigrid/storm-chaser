@@ -10,3 +10,4 @@ export { Text } from './Text';
 export { Volt } from './Volt';
 export { Starfield } from './Starfield';
 export { StormyCheer } from './StormyCheer';
+export { PURPLE_ON_DARK, PURPLE_ON_LIGHT, cheerPurple } from './cheerColors';

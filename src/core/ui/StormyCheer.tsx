@@ -14,6 +14,7 @@ import Animated, {
 
 import { useAppTheme } from '@/core/theme/useAppTheme';
 
+import { cheerPurple } from './cheerColors';
 import { bleedFor, Text } from './Text';
 
 /**
@@ -29,21 +30,6 @@ import { bleedFor, Text } from './Text';
  * for a celebration would make a success read as a severity. Purple is unused,
  * so it can only mean this.
  */
-
-/**
- * Two purples rather than one, chosen per theme rather than tokenised.
- *
- * This is deliberately NOT a theme colour. A token would have to be defined in
- * all four themes and satisfy the theme contract, and it would then be
- * available to any screen -- which is exactly what would erode it back into
- * just another colour. It is a single-purpose hue with one caller.
- *
- * Both are checked against the surfaces they land on: the light value clears
- * 4.5:1 on the two dark skies, the dark value clears it on cream and on the
- * daylight gradient.
- */
-const PURPLE_ON_DARK = '#C9A6FF';
-const PURPLE_ON_LIGHT = '#6B21A8';
 
 const IN_MS = 260;
 const HOLD_MS = 900;
@@ -128,7 +114,7 @@ export function StormyCheer({ active, onDone, message = 'Stormy!' }: StormyCheer
 
   if (!active) return null;
 
-  const purple = theme.isDark ? PURPLE_ON_DARK : PURPLE_ON_LIGHT;
+  const purple = cheerPurple(theme.isDark);
 
   return (
     <View

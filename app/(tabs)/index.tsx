@@ -14,6 +14,7 @@ import {
   formatRelativeTime,
   formatSpeed,
 } from '@/core/utils/format';
+import { AirQualityPanel } from '@/features/air/components/AirQualityPanel';
 import { usePublishLastKnownPosition } from '@/features/location/lastKnownPosition';
 import { useDeviceLocation } from '@/features/location/useDeviceLocation';
 import { usePlaceName } from '@/features/location/usePlaceName';
@@ -198,6 +199,8 @@ export default function ConditionsScreen() {
             <Panel tone="instrument-grid" label="Instruments" icon="barometer" style={{ marginBottom: 12 }}>
               <MetricGrid metrics={metrics} />
             </Panel>
+
+            <AirQualityPanel coordinates={location.coordinates} />
 
             <ForecastStrip hours={snapshot.hourly} />
             <OutlookList days={snapshot.daily} />
