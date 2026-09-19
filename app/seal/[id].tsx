@@ -1,6 +1,6 @@
 import * as Haptics from 'expo-haptics';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Alert, Pressable, ScrollView, useWindowDimensions, View } from 'react-native';
 import type Svg from 'react-native-svg';
 
@@ -11,6 +11,7 @@ import { sealData } from '@/features/storms/seal/sealData';
 import {
   SEAL_EXPORT_DP,
   SEAL_EXPORT_DP_HEIGHT,
+  canShareSeal,
   saveSealToLibrary,
   sealFileName,
   shareSeal,
@@ -25,7 +26,7 @@ import {
 /**
  * Stamp a storm.
  *
- * Three templates over one report, a live preview, and two ways off the
+ * Three templates over one report, a live preview, and one way off the
  * device. The preview and the exported file are the same component with a
  * different `width`, which is the whole reason the seal is drawn in viewBox
  * units: there is no second layout to keep in step, so what is posted is
@@ -40,8 +41,29 @@ export default function SealScreen() {
   const { data: report, isLoading, isError } = useStormReport(id);
 
   const [template, setTemplate] = useState<SealTemplateId>('field-card');
-  const [busy, setBusy] = useState<null | 'save' | 'share'>(null);
+  const [busy, setBusy] = useState(false);
   const [celebrating, setCelebrating] = useState(false);
+
+  /**
+   * One button, not two -- and this decides which one it is.
+   *
+   * Sharing is preferred wherever it exists, because the share sheet already
+   * contains "Save Image" and so covers both jobs, while the direct save does
+   * not cover sharing and needs a photo-library permission that on iOS is
+   * where the save was failing outright. Where sharing does not exist (a
+   * desktop browser) the same button downloads, which is that platform's save.
+   */
+  const [canShare, setCanShare] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    void canShareSeal().then((available) => {
+      if (alive) setCanShare(available);
+    });
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   /**
    * The export mount, separate from the preview.
@@ -87,40 +109,35 @@ export default function SealScreen() {
   const previewWidth = Math.min(screenWidth - 32, 420);
   const fileName = sealFileName(data.serial, data.classification);
 
-  async function run(action: 'save' | 'share') {
+  async function run() {
     if (!data) return;
-    setBusy(action);
+    setBusy(true);
 
     const written = await writeSeal(exportRef.current, fileName);
     if (!written.ok) {
-      setBusy(null);
+      setBusy(false);
       Alert.alert('The seal could not be made', written.error.message);
       return;
     }
 
-    const result =
-      action === 'save'
-        ? await saveSealToLibrary(written.value)
-        : await shareSeal(written.value);
+    /*
+     * Share first, save as the fallback -- and the fallback is taken without
+     * asking. A chaser who pressed this wants the seal off the screen; being
+     * told that sharing is unavailable and handed a second button to press is
+     * the app making its own plumbing someone else's problem.
+     */
+    let result = canShare === false
+      ? await saveSealToLibrary(written.value, fileName)
+      : await shareSeal(written.value, fileName);
 
-    setBusy(null);
+    if (!result.ok && canShare !== false) {
+      result = await saveSealToLibrary(written.value, fileName);
+    }
+
+    setBusy(false);
 
     if (!result.ok) {
-      /*
-       * A refused photo-library permission is not a dead end. Sharing needs
-       * no permission at all, so the recovery is offered inline rather than
-       * leaving the chaser with a message and nothing to press.
-       */
-      Alert.alert(
-        'Not saved',
-        result.error.message,
-        action === 'save'
-          ? [
-              { text: 'Cancel', style: 'cancel' },
-              { text: 'Share instead', onPress: () => void run('share') },
-            ]
-          : [{ text: 'OK' }],
-      );
+      Alert.alert('Not saved', result.error.message);
       return;
     }
 
@@ -199,19 +216,16 @@ export default function SealScreen() {
       </Panel>
 
       <Button
-        title="Save to photos"
-        loading={busy === 'save'}
-        disabled={busy !== null}
-        onPress={() => void run('save')}
-        style={{ marginBottom: 8 }}
+        title={canShare === false ? 'Save the seal' : 'Share or save'}
+        loading={busy}
+        disabled={busy}
+        onPress={() => void run()}
       />
-      <Button
-        title="Share"
-        tone="secondary"
-        loading={busy === 'share'}
-        disabled={busy !== null}
-        onPress={() => void run('share')}
-      />
+      <Text variant="label" tone="muted" style={{ marginTop: 8, textAlign: 'center' }}>
+        {canShare === false
+          ? 'The seal downloads as a PNG.'
+          : 'The share sheet can save it to your photos too.'}
+      </Text>
 
       {/*
         The export mount: full size, offscreen, never visible and never

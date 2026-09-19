@@ -64,11 +64,14 @@ export async function writeSeal(svg: Svg | null, _fileName: string): Promise<Res
  * never fails for permission reasons -- the browser's own download UI is the
  * consent step.
  */
-export async function saveSealToLibrary(dataUrl: string): Promise<Result<true>> {
+export async function saveSealToLibrary(
+  dataUrl: string,
+  fileName = 'storm-seal.png',
+): Promise<Result<true>> {
   try {
     const link = document.createElement('a');
     link.href = dataUrl;
-    link.download = 'storm-seal.png';
+    link.download = fileName;
     // Firefox requires the anchor to be in the document before a click on it
     // counts as a user-initiated download.
     document.body.appendChild(link);
@@ -81,23 +84,45 @@ export async function saveSealToLibrary(dataUrl: string): Promise<Result<true>> 
 }
 
 /**
+ * Whether this browser can share a PNG file.
+ *
+ * `canShare` is asked with a real (one-byte) File because the flag is
+ * per-payload: a browser can share text and still refuse files, and Safari on
+ * iOS is the one that matters here. Asked up front so the screen can show a
+ * single button that does the thing that works -- share on a phone, download
+ * on a desktop -- rather than a Save that quietly does nothing on iOS.
+ */
+export async function canShareSeal(): Promise<boolean> {
+  try {
+    if (typeof navigator === 'undefined' || typeof navigator.share !== 'function') return false;
+    const probe = new File([new Uint8Array([0])], 'storm-seal.png', { type: 'image/png' });
+    return navigator.canShare?.({ files: [probe] }) === true;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * The Web Share API, where it exists.
  *
  * Only over HTTPS and only on browsers that implement `canShare` for files,
  * which in practice means mobile Safari and Chrome on Android -- exactly the
  * phones this build is being looked at on. Everywhere else it reports that
- * sharing is unavailable so the screen can offer the download instead,
+ * sharing is unavailable so the screen can fall back to the download,
  * rather than silently doing nothing.
  */
-export async function shareSeal(dataUrl: string): Promise<Result<true>> {
+export async function shareSeal(
+  dataUrl: string,
+  fileName = 'storm-seal.png',
+): Promise<Result<true>> {
   try {
     const response = await fetch(dataUrl);
     const blob = await response.blob();
-    const file = new File([blob], 'storm-seal.png', { type: 'image/png' });
+    const file = new File([blob], fileName, { type: 'image/png' });
 
     const shareData = { files: [file], title: 'Storm seal' };
     if (typeof navigator.share !== 'function' || !navigator.canShare?.(shareData)) {
-      return err('unknown', 'This browser cannot share files. Use Save instead.');
+      return err('unknown', 'This browser cannot share files. Saving it instead.');
     }
 
     await navigator.share(shareData);

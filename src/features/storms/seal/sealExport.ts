@@ -112,7 +112,10 @@ export async function writeSeal(
  * already has an open note about permission timing, and a prompt that appears
  * because a screen opened is the exact pattern being fixed elsewhere.
  */
-export async function saveSealToLibrary(fileUri: string): Promise<Result<true>> {
+export async function saveSealToLibrary(
+  fileUri: string,
+  _fileName?: string,
+): Promise<Result<true>> {
   try {
     const permission = await MediaLibrary.requestPermissionsAsync(true);
     if (!permission.granted) {
@@ -130,13 +133,32 @@ export async function saveSealToLibrary(fileUri: string): Promise<Result<true>> 
 }
 
 /**
+ * Whether the OS share sheet can be offered at all.
+ *
+ * The screen asks before it decides which single action to run, so that the
+ * one button it shows is the one that will actually work here.
+ */
+export async function canShareSeal(): Promise<boolean> {
+  try {
+    return await Sharing.isAvailableAsync();
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Opens the OS share sheet.
  *
- * Needs no permission, which is why it is the fallback offered whenever
- * saving is refused: a chaser who declines photo-library access has not
- * declined to share, and a dead end there would be the app's fault.
+ * This is the primary way off the device, not the fallback. The sheet on both
+ * platforms carries "Save Image" alongside the apps, so it saves AND shares,
+ * and it needs no photo-library permission to be shown -- where the direct
+ * `saveToLibrary` path does, and on iOS that permission is exactly where the
+ * save was failing.
  */
-export async function shareSeal(fileUri: string): Promise<Result<true>> {
+export async function shareSeal(
+  fileUri: string,
+  _fileName?: string,
+): Promise<Result<true>> {
   try {
     if (!(await Sharing.isAvailableAsync())) {
       return err('unknown', 'Sharing is not available on this device');
