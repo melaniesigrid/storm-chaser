@@ -9,9 +9,10 @@
 # looks exactly like a working one.
 #
 # The landing page is a static directory with no build step, so this uploads
-# `landing/` prebuilt rather than asking Vercel to run an install. That also
-# keeps the Expo app at the repo root out of the deploy entirely -- it is not
-# what this project serves.
+# it prebuilt rather than asking Vercel to run an install. The Vercel project's
+# own Root Directory setting is what narrows the deploy to `landing/` and keeps
+# the Expo app at the repo root out of it; the CLI therefore runs from the repo
+# root, and the steps below check that a page came out the other end.
 #
 # Required repository secrets (Settings -> Secrets and variables -> Actions):
 #   VERCEL_TOKEN        a token from https://vercel.com/account/tokens
@@ -42,7 +43,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: production
-      url: https://stormchaser-field.vercel.app
+      url: https://storm-chaser-three.vercel.app
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
@@ -90,14 +91,56 @@ jobs:
           grep -q 'Big Shoulders' "$page" || { echo "::error::Big Shoulders is not in $page"; exit 1; }
           echo "three themes ($(printf '%s ' $themes)) and three display faces present"
 
+      # Run from the repo root, not from `landing/`.
+      #
+      # The Vercel project carries its own Root Directory setting, and it is
+      # already `landing`. Running the CLI inside `landing/` made it resolve
+      # that a second time, to `landing/landing`, which does not exist -- so
+      # `vercel build` finished in 20ms with an empty `.vercel/output`, the
+      # deploy reported success, and the alias served a 404 at `/` while
+      # production went on showing the old page. A green run is not a deploy.
       - name: Pull the project settings
         run: vercel pull --yes --environment=production --token="${{ secrets.VERCEL_TOKEN }}"
-        working-directory: landing
 
       - name: Build
         run: vercel build --prod --token="${{ secrets.VERCEL_TOKEN }}"
-        working-directory: landing
+
+      # An empty build is the failure that hid here for two green runs: the
+      # page guard above passed, the deploy passed, and nothing served.
+      - name: Check the build produced a page
+        run: |
+          set -euo pipefail
+          out=.vercel/output/static/index.html
+          if [ ! -s "$out" ]; then
+            echo "::error::$out is missing or empty -- vercel build produced no page"
+            echo "what the build did produce:"
+            find .vercel/output -maxdepth 3 2>/dev/null || echo "  (no .vercel/output at all)"
+            exit 1
+          fi
+          grep -q 'data-set="' "$out" || {
+            echo "::error::$out is not the landing page -- no theme picker in it"
+            exit 1
+          }
+          echo "built page is $(wc -c < "$out") bytes"
 
       - name: Deploy to production
         run: vercel deploy --prebuilt --prod --token="${{ secrets.VERCEL_TOKEN }}"
-        working-directory: landing
+
+      # The deploy prints the alias it actually aliased. If that is not the
+      # domain this workflow claims to publish, say so rather than leave the
+      # environment link pointing somewhere nothing was deployed.
+      - name: Check production serves the new page
+        run: |
+          set -euo pipefail
+          url=https://storm-chaser-three.vercel.app
+          if ! body=$(curl -fsS --retry 5 --retry-delay 3 --retry-all-errors --max-time 30 "$url"); then
+            echo "::error::$url did not serve a page after the deploy"
+            exit 1
+          fi
+          for theme in $(grep -o 'data-set="[a-z-]*"' landing/index.html | sed 's/.*="//;s/"//' | sort -u); do
+            printf '%s' "$body" | grep -q "data-set=\"$theme\"" || {
+              echo "::error::$url does not offer the $theme theme -- production is not this build"
+              exit 1
+            }
+          done
+          echo "$url is serving this build"
