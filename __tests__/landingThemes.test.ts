@@ -162,19 +162,26 @@ describe('the full-bleed flash', () => {
 });
 
 /**
- * The rain is the last beat of the hero's sequence -- ray, bolt, then the
+ * The rain is the last beat of the hero's sequence -- ray, bolt, then a short
  * downpour -- and that ordering is the whole reason it looks composed rather
- * than busy. It lives in a delay, and a delay is the first thing a later hand
- * rounds to zero.
+ * than busy. It lives in the back quarter of a 6s cycle, and a cycle is the
+ * first thing a later hand widens "just to see it for longer".
  */
 describe('the hero rain', () => {
-  /** The bolt's bloom peaks halfway through its own 3s cycle. */
-  const BOLT_BLOOM_MS = 1500;
+  /** The master clock every hero animation is cut against. */
+  const CYCLE_MS = 6000;
+  /** The bolt's second bloom, halfway through its own 3s cycle, twice over. */
+  const BOLT_BLOOM_MS = 4500;
 
-  function rainArrivalMs(): number {
-    const shorthand = PAGE.match(/rain-arrive\s+(\d+)ms\s+var\(--ease\)\s+(\d+)ms/);
-    expect(shorthand).not.toBeNull();
-    return Number(shorthand![2]);
+  function burstKeyframes(): string {
+    const block = PAGE.match(/@keyframes rain-burst \{((?:[^{}]*\{[^{}]*\})*[^{}]*)\}/);
+    expect(block).not.toBeNull();
+    return block![1]!;
+  }
+
+  /** Every percentage stop in the burst, in order. */
+  function burstStops(): number[] {
+    return [...burstKeyframes().matchAll(/(\d+)%/g)].map((m) => Number(m[1]));
   }
 
   it('falls only where a direction asks for it', () => {
@@ -184,15 +191,38 @@ describe('the hero rain', () => {
     expect(declared.filter((on) => on === 1)).toHaveLength(1);
   });
 
-  it('waits for the strike before it starts', () => {
-    expect(rainArrivalMs()).toBeGreaterThan(BOLT_BLOOM_MS);
+  it('runs on the same clock as the ray and the bolt', () => {
+    expect(PAGE).toContain('rain-burst 6s var(--ease) infinite');
+    for (const name of ['ray-draw', 'bolt-halo']) {
+      expect(PAGE).toMatch(new RegExp(`animation: ${name} 6s`));
+    }
   });
 
-  it('arrives once and stays, rather than restarting every cycle', () => {
-    // `both` is what holds the arrived opacity; without it the bands snap back
-    // to the static rule the moment the fade ends.
-    const shorthand = PAGE.match(/rain-arrive\s+\d+ms\s+var\(--ease\)\s+\d+ms\s+(\w+);/);
-    expect(shorthand).not.toBeNull();
-    expect(shorthand![1]).toBe('both');
+  it('holds off until the bolt has struck', () => {
+    const [first] = burstStops();
+    expect(first).toBe(0);
+    // The stop where it stops being invisible.
+    const liftsAt = (burstStops()[1]! / 100) * CYCLE_MS;
+    expect(liftsAt).toBeGreaterThan(BOLT_BLOOM_MS);
+  });
+
+  it('is over inside two seconds, then starts again', () => {
+    const stops = burstStops();
+    const visibleMs = ((stops[stops.length - 1]! - stops[1]!) / 100) * CYCLE_MS;
+    expect(visibleMs).toBeGreaterThanOrEqual(1000);
+    expect(visibleMs).toBeLessThanOrEqual(2000);
+    // It ends where it began, or the restart is a jump cut.
+    expect(burstKeyframes()).toMatch(/100%\s*\{\s*opacity:\s*0;/);
+  });
+
+  it('is drawn as drops rather than as streaks', () => {
+    // A tiled teardrop mask over a flat tint, not a hairline gradient.
+    expect(PAGE).toContain("mask-image: url(\"data:image/svg+xml,");
+    expect(PAGE).toMatch(/\.rain \{[^}]*background: var\(--sky-tint\)/);
+    // Five drops in the tile, at five scales: regular spacing reads as dots.
+    const tile = PAGE.match(/data:image\/svg\+xml,[^"]*/)![0];
+    const scales = [...tile.matchAll(/scale\(([\d.]+)\)/g)].map((m) => m[1]);
+    expect(scales).toHaveLength(5);
+    expect(new Set(scales).size).toBe(5);
   });
 });

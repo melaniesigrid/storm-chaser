@@ -1099,61 +1099,59 @@
   }
 
   /*
-   * A streak needs to be thin in one axis and long in the other, and a single
-   * linear-gradient can only vary along one. The gradient makes the DASH down
-   * the tile; the mask cuts it to a hairline across it. Without the mask the
-   * "rain" is the full tile width -- slabs, not weather.
+   * The drop, not the streak.
+   *
+   * Rain drawn as hairlines is rain seen through a long exposure; rain seen by
+   * an eye is fat little tadpoles -- round at the bottom, drawn to a point at
+   * the top by the air they are falling through. That shape cannot come out of
+   * a linear-gradient, so it comes out of one tiled SVG carrying five drops at
+   * five sizes at five irregular positions. Regular spacing would read as
+   * polka dots; this is polka dots that got rained on.
+   *
+   * The SVG is a MASK rather than a background image, because a data URI
+   * cannot read `--sky-tint`. The tint is a flat fill underneath and the drops
+   * decide where it shows, so the weather still recolours with the direction.
    */
   .rain {
     transform: rotate(var(--ang, 14deg));
-    background-image: linear-gradient(
-      to bottom,
-      transparent 0 58%,
-      var(--sky-tint) 58% 93%,
-      transparent 93% 100%
-    );
-    background-size: var(--col, 26px) var(--tile, 88px);
-    -webkit-mask-image: repeating-linear-gradient(
-      to right,
-      #000 0 1.4px,
-      transparent 1.4px var(--col, 26px)
-    );
-    mask-image: repeating-linear-gradient(
-      to right,
-      #000 0 1.4px,
-      transparent 1.4px var(--col, 26px)
-    );
+    background: var(--sky-tint);
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='%23fff'%3E%3Cg transform='translate(6 4) scale(1.15)'%3E%3Cpath d='M10 1C10 1 19 13 19 19.5A9 9 0 1 1 1 19.5C1 13 10 1 10 1Z'/%3E%3C/g%3E%3Cg transform='translate(48 18) scale(0.72)'%3E%3Cpath d='M10 1C10 1 19 13 19 19.5A9 9 0 1 1 1 19.5C1 13 10 1 10 1Z'/%3E%3C/g%3E%3Cg transform='translate(74 50) scale(1)'%3E%3Cpath d='M10 1C10 1 19 13 19 19.5A9 9 0 1 1 1 19.5C1 13 10 1 10 1Z'/%3E%3C/g%3E%3Cg transform='translate(24 54) scale(0.85)'%3E%3Cpath d='M10 1C10 1 19 13 19 19.5A9 9 0 1 1 1 19.5C1 13 10 1 10 1Z'/%3E%3C/g%3E%3Cg transform='translate(58 76) scale(0.6)'%3E%3Cpath d='M10 1C10 1 19 13 19 19.5A9 9 0 1 1 1 19.5C1 13 10 1 10 1Z'/%3E%3C/g%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='%23fff'%3E%3Cg transform='translate(6 4) scale(1.15)'%3E%3Cpath d='M10 1C10 1 19 13 19 19.5A9 9 0 1 1 1 19.5C1 13 10 1 10 1Z'/%3E%3C/g%3E%3Cg transform='translate(48 18) scale(0.72)'%3E%3Cpath d='M10 1C10 1 19 13 19 19.5A9 9 0 1 1 1 19.5C1 13 10 1 10 1Z'/%3E%3C/g%3E%3Cg transform='translate(74 50) scale(1)'%3E%3Cpath d='M10 1C10 1 19 13 19 19.5A9 9 0 1 1 1 19.5C1 13 10 1 10 1Z'/%3E%3C/g%3E%3Cg transform='translate(24 54) scale(0.85)'%3E%3Cpath d='M10 1C10 1 19 13 19 19.5A9 9 0 1 1 1 19.5C1 13 10 1 10 1Z'/%3E%3C/g%3E%3Cg transform='translate(58 76) scale(0.6)'%3E%3Cpath d='M10 1C10 1 19 13 19 19.5A9 9 0 1 1 1 19.5C1 13 10 1 10 1Z'/%3E%3C/g%3E%3C/svg%3E");
+    /* Square, because `rain-fall` slides by exactly one tile down: any other
+       ratio would either stretch the drops or expose the seam. */
+    -webkit-mask-size: var(--tile, 88px) var(--tile, 88px);
+    mask-size: var(--tile, 88px) var(--tile, 88px);
+    -webkit-mask-repeat: repeat;
+    mask-repeat: repeat;
     opacity: calc(var(--o, 0.5) * var(--rain-on, 0));
     will-change: transform;
     /*
-     * Two animations, two jobs. `rain-fall` is the endless slide; `rain-arrive`
-     * runs ONCE and only fades the bands in, 1.7s after load -- past the ray's
-     * 0.84s draw and past the bolt's bloom at 1.5s. It is a one-shot rather
-     * than a beat in the 6s cycle because rain that stops and restarts every
-     * six seconds reads as a rendering fault, not as weather. `both` holds the
-     * final opacity so the storm stays once it has arrived.
+     * Two animations, two jobs. `rain-fall` is the endless slide, always
+     * running so a drop is never caught standing still; `rain-burst` is what
+     * makes the rain an EVENT -- it holds the bands at zero for three quarters
+     * of the 6s cycle and spends the last ~1.6s of it letting them fall
+     * through, so the sequence reads ray, bolt, downpour, and begins again.
+     * Both are 6s, and so are `ray-draw` and `bolt-halo`: one clock, four
+     * hands.
      */
     animation:
       rain-fall var(--d, 900ms) linear infinite,
-      rain-arrive 1100ms var(--ease) 1700ms both;
-  }
-
-  @keyframes rain-arrive {
-    from { opacity: 0; }
-    to { opacity: calc(var(--o, 0.5) * var(--rain-on, 0)); }
+      rain-burst 6s var(--ease) infinite;
   }
 
   /*
-   * Translating by exactly one tile is seamless; by anything else it jumps.
-   *
-   * It moves on `transform`, not `background-position`. Background position is
-   * not a property the compositor can take, so seven full-bleed rain layers
-   * animating it repaint on the main thread every frame, for as long as the
-   * page is open. A transform on the same element is handed to the compositor
-   * and costs the main thread nothing. The rotation has to be repeated in the
-   * keyframe because it is the same property; `inset: -30%` is the overscan
-   * that keeps a one-tile slide from exposing an edge.
+   * 76% of 6s is 4.56s -- the first frame after the bolt's second bloom peaks
+   * at 4.5s, so the drops never begin lifting while the flash is still the
+   * brightest thing on the page. Full by 4.92s, held to 5.82s, gone on the
+   * restart: 1.44s of rain. A downpour that never lets up is a texture, and a
+   * texture is not the end of a sentence.
    */
+  @keyframes rain-burst {
+    0%, 76% { opacity: 0; }
+    82%, 97% { opacity: calc(var(--o, 0.5) * var(--rain-on, 0)); }
+    100% { opacity: 0; }
+  }
+
   @keyframes rain-fall {
     from { transform: rotate(var(--ang, 14deg)) translate3d(0, 0, 0); }
     to { transform: rotate(var(--ang, 14deg)) translate3d(0, var(--tile, 88px), 0); }
@@ -1488,21 +1486,21 @@
     -->
     <div class="skyflash"></div>
     <div class="sky-band">
-      <div class="rain rain--near" style="--ang:14deg; --col:22px; --tile:88px; --o:0.9;  --d:760ms"></div>
-      <div class="rain rain--mid"  style="--ang:12deg; --col:34px; --tile:72px; --o:0.55; --d:1180ms"></div>
-      <div class="rain rain--far"  style="--ang:10deg; --col:52px; --tile:56px; --o:0.3;  --d:1720ms"></div>
+      <div class="rain rain--near" style="--ang:14deg; --tile:154px; --o:0.72; --d:880ms"></div>
+      <div class="rain rain--mid"  style="--ang:11deg; --tile:113px; --o:0.46; --d:1270ms"></div>
+      <div class="rain rain--far"  style="--ang:8deg;  --tile:79px;  --o:0.3;  --d:1790ms"></div>
       <div class="shaft" style="--ang:24deg; --tile:1600px; --o:0.7; --d:44s"></div>
       <div class="bloom"></div>
     </div>
 
     <div class="sky-rail sky-rail--l">
-      <div class="rain rain--near" style="--ang:14deg; --col:26px; --tile:88px; --o:0.7; --d:900ms"></div>
-      <div class="rain rain--far"  style="--ang:10deg; --col:48px; --tile:56px; --o:0.3; --d:1720ms"></div>
+      <div class="rain rain--near" style="--ang:14deg; --tile:146px; --o:0.7;  --d:940ms"></div>
+      <div class="rain rain--far"  style="--ang:9deg;  --tile:83px;  --o:0.34; --d:1810ms"></div>
     </div>
 
     <div class="sky-rail sky-rail--r">
-      <div class="rain rain--near" style="--ang:14deg; --col:26px; --tile:88px; --o:0.7; --d:840ms"></div>
-      <div class="rain rain--far"  style="--ang:10deg; --col:48px; --tile:56px; --o:0.3; --d:1640ms"></div>
+      <div class="rain rain--near" style="--ang:15deg; --tile:161px; --o:0.7;  --d:860ms"></div>
+      <div class="rain rain--far"  style="--ang:9deg;  --tile:74px;  --o:0.34; --d:1700ms"></div>
     </div>
   </div>
   <div class="wrap">
