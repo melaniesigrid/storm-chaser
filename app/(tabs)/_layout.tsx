@@ -19,8 +19,11 @@ type TabGlyphName = 'conditions' | 'log' | 'map';
 function TabGlyph({ name, color }: { name: TabGlyphName; color: ColorValue }) {
   const stroke = color as string;
 
+  // 30, not 24. The glyphs are drawn on a 24 grid and scale with the viewBox,
+  // so the stroke thickens with them and the bar reads as a set of marks
+  // rather than as three hairline diagrams under the labels.
   return (
-    <Svg width={24} height={24} viewBox="0 0 24 24" fill="none">
+    <Svg width={30} height={30} viewBox="0 0 24 24" fill="none">
       {name === 'conditions' ? (
         <>
           <Path
@@ -96,7 +99,7 @@ export default function TabsLayout() {
             importantForAccessibility="no-hide-descendants"
             style={{ paddingHorizontal: 16, justifyContent: 'center' }}
           >
-            <Monogram size={26} motion="strike" />
+            <Monogram size={32} motion="strike" />
           </View>
         ),
         headerRight: () => (
@@ -123,7 +126,13 @@ export default function TabsLayout() {
         tabBarStyle: {
           backgroundColor: colors.tabBar,
           borderTopColor: colors.border,
+          // The bar grows with the marks: at the default height a 30px glyph
+          // and a 12px label crowd each other against the top rule.
+          height: 68,
+          paddingTop: 6,
+          paddingBottom: 8,
         },
+        tabBarIconStyle: { marginBottom: 2 },
         tabBarActiveTintColor: colors.tabActive,
         tabBarInactiveTintColor: colors.tabInactive,
         tabBarLabelStyle: {

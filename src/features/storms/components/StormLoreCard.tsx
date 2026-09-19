@@ -42,7 +42,7 @@ export function StormLoreCard({ origin, today }: StormLoreCardProps) {
   if (!legend) return null;
 
   return (
-    <Panel label="Storm lore" style={{ marginBottom: 12 }}>
+    <Panel label="Storm lore" icon="tornado" style={{ marginBottom: 12 }}>
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={`${legend.name}. ${legend.claim} Opens the full entry.`}

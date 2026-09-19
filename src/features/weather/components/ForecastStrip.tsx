@@ -48,7 +48,7 @@ export function ForecastStrip({ hours }: { hours: HourlyPoint[] }) {
   const chartWidth = hours.length * COLUMN + (hours.length - 1) * GAP;
 
   return (
-    <Panel label="Next 12 hours" style={{ marginBottom: 12 }}>
+    <Panel label="Next 12 hours" icon="thermometer-celsius" style={{ marginBottom: 12 }}>
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         <View style={{ paddingRight: 8 }}>
           {/* The shape of the next twelve hours, which a row of figures cannot show. */}

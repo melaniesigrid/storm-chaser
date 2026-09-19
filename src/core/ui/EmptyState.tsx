@@ -29,7 +29,22 @@ export function EmptyState({
 
   return (
     <View style={{ alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32, paddingVertical: 56 }}>
-      {illustration ? <View style={{ marginBottom: 20 }}>{illustration}</View> : null}
+      {/* Sat on a sunken disc so the icon reads as a deliberate mark rather
+          than a picture dropped onto the sky. */}
+      {illustration ? (
+        <View
+          style={{
+            marginBottom: 22,
+            padding: 20,
+            borderRadius: Math.min(96, theme.radius.panel * 3),
+            backgroundColor: theme.colors.surfaceSunken,
+            borderWidth: theme.borderWidth,
+            borderColor: theme.colors.border,
+          }}
+        >
+          {illustration}
+        </View>
+      ) : null}
 
       <Text variant="title" style={{ marginBottom: 10, textAlign: 'center' }}>
         {title}

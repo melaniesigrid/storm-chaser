@@ -1,11 +1,29 @@
 import { View, type StyleProp, type ViewProps, type ViewStyle } from 'react-native';
 
+import { WeatherIcon } from '@/core/icons/WeatherIcon';
+import type { WeatherIconName } from '@/core/icons/names';
 import { useAppTheme } from '@/core/theme/useAppTheme';
 
 import { Text } from './Text';
 
+/**
+ * Big enough to be a mark rather than a bullet.
+ *
+ * Meteocons are drawn as illustrations -- a cloud with a bolt coming out of it
+ * has real detail in it -- and at the 16px a label row would normally give an
+ * icon they turn to mush. This is the one size every panel head uses, so the
+ * cards line up down a scroll.
+ */
+const PANEL_ICON = 34;
+
 export interface PanelProps extends ViewProps {
   label?: string;
+  /**
+   * A mark for the label row. Decoration: the label beside it already says
+   * what the panel is, so the icon is hidden from the screen reader rather
+   * than announced as a second, wordless copy of the heading.
+   */
+  icon?: WeatherIconName;
   accessory?: React.ReactNode;
   style?: StyleProp<ViewStyle>;
 }
@@ -19,7 +37,7 @@ export interface PanelProps extends ViewProps {
  * soft shadow, Skyward Night with a faint glow, Field Card with a hard offset
  * block shadow and a 3px outline.
  */
-export function Panel({ label, accessory, style, children, ...rest }: PanelProps) {
+export function Panel({ label, icon, accessory, style, children, ...rest }: PanelProps) {
   const { theme } = useAppTheme();
   const { colors } = theme;
 
@@ -63,16 +81,22 @@ export function Panel({ label, accessory, style, children, ...rest }: PanelProps
       ]}
       {...rest}
     >
-      {(label || accessory) && (
+      {(label || icon || accessory) && (
         <View
           style={{
             marginBottom: 12,
             flexDirection: 'row',
             alignItems: 'center',
             justifyContent: 'space-between',
+            gap: 10,
           }}
         >
-          {label ? <Text variant="label">{label}</Text> : <View />}
+          {icon ? (
+            <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+              <WeatherIcon name={icon} size={PANEL_ICON} />
+            </View>
+          ) : null}
+          {label ? <Text variant="label" style={{ flex: 1 }}>{label}</Text> : <View style={{ flex: 1 }} />}
           {accessory}
         </View>
       )}

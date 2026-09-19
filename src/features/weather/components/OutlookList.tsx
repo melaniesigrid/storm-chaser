@@ -40,7 +40,7 @@ export function OutlookList({ days }: { days: DailyPoint[] }) {
   if (!days.length) return null;
 
   return (
-    <Panel label="7 day outlook" style={{ marginBottom: 12 }}>
+    <Panel label="7 day outlook" icon="partly-cloudy-day" style={{ marginBottom: 12 }}>
       {days.map((day, index) => (
         <View
           key={day.date}

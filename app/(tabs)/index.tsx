@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { RefreshControl, ScrollView, View } from 'react-native';
+import { RefreshControl, ScrollView } from 'react-native';
 
 import { WeatherIcon } from '@/core/icons/WeatherIcon';
 import { useAppTheme } from '@/core/theme/useAppTheme';
@@ -172,41 +172,50 @@ export default function ConditionsScreen() {
 
         {snapshot ? (
           <>
-            <Panel style={{ marginBottom: 12 }}>
-              <View style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' }}>
-                <View style={{ flex: 1 }}>
-                  {place ? <Text variant="title">{place}</Text> : null}
+            {/*
+              The hero runs down the card rather than across it. Side by side,
+              the icon and the temperature were two columns fighting for the
+              same width, and the icon had to stay small to let the reading
+              fit. Stacked, the condition gets to be 150px of weather with the
+              place name over it and the reading under it, which is the shape
+              the marketing page uses and the reason it looks like a poster
+              rather than a table.
+            */}
+            <Panel style={{ marginBottom: 12, alignItems: 'center' }}>
+              {place ? (
+                <Text variant="title" style={{ textAlign: 'center' }}>
+                  {place}
+                </Text>
+              ) : null}
 
-                  <Text variant="label" style={{ marginTop: place ? 4 : 0, marginBottom: 10 }}>
-                    {location.coordinates
-                      ? formatCoordinates(
-                          location.coordinates.latitude,
-                          location.coordinates.longitude,
-                          3,
-                        )
-                      : 'Position unknown'}
-                  </Text>
+              <Text variant="label" style={{ marginTop: place ? 4 : 0 }}>
+                {location.coordinates
+                  ? formatCoordinates(
+                      location.coordinates.latitude,
+                      location.coordinates.longitude,
+                      3,
+                    )
+                  : 'Position unknown'}
+              </Text>
 
-                  <Text variant="hero">{formatTemperature(snapshot.current.temperatureC)}</Text>
+              <WeatherIcon
+                name={iconForCondition(snapshot.current.condition, !snapshot.current.isDay)}
+                size={150}
+              />
 
-                  <Text variant="title" style={{ marginTop: 6 }}>
-                    {snapshot.current.condition.label}
-                  </Text>
-                  <Text variant="caption" style={{ marginTop: 6 }}>
-                    {`Feels like ${formatTemperature(snapshot.current.apparentTemperatureC)} · updated ${formatRelativeTime(snapshot.fetchedAt)}`}
-                  </Text>
-                </View>
+              <Text variant="hero">{formatTemperature(snapshot.current.temperatureC)}</Text>
 
-                <WeatherIcon
-                  name={iconForCondition(snapshot.current.condition, !snapshot.current.isDay)}
-                  size={124}
-                />
-              </View>
+              <Text variant="title" style={{ marginTop: 8, textAlign: 'center' }}>
+                {snapshot.current.condition.label}
+              </Text>
+              <Text variant="caption" style={{ marginTop: 6, textAlign: 'center' }}>
+                {`Feels like ${formatTemperature(snapshot.current.apparentTemperatureC)} · updated ${formatRelativeTime(snapshot.fetchedAt)}`}
+              </Text>
             </Panel>
 
             <ChaseIndexPanel chase={snapshot.current.chase} />
 
-            <Panel label="Instruments" style={{ marginBottom: 12 }}>
+            <Panel label="Instruments" icon="barometer" style={{ marginBottom: 12 }}>
               <MetricGrid metrics={metrics} />
             </Panel>
 
