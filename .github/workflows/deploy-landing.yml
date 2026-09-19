@@ -25,12 +25,18 @@
 
 name: Deploy landing
 
+# Every push to main, with no path filter.
+#
+# A filter on `landing/**` is the cheaper setting and it was the wrong one. It
+# means production only moves when somebody happens to touch the page, so the
+# live site silently represents whatever the last landing-page commit knew --
+# which is the same failure this workflow was written to end, just with a
+# smaller window. The deploy takes forty seconds and uploads a static
+# directory; running it on a commit that changed nothing under `landing/`
+# costs that and republishes identical bytes.
 on:
   push:
     branches: [main]
-    paths:
-      - 'landing/**'
-      - '.github/workflows/deploy-landing.yml'
   # So a stale production can be corrected without an empty commit.
   workflow_dispatch:
 
