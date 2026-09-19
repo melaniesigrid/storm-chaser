@@ -82,8 +82,8 @@ export default function TabsLayout() {
         headerRight: () => (
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Appearance settings"
-            onPress={() => router.push('/settings')}
+            accessibilityLabel="Your profile and appearance"
+            onPress={() => router.push('/profile')}
             hitSlop={12}
             style={{ paddingHorizontal: 16, minHeight: 44, justifyContent: 'center' }}
           >
@@ -96,7 +96,7 @@ export default function TabsLayout() {
                 textTransform: 'uppercase',
               }}
             >
-              Theme
+              Profile
             </Text>
           </Pressable>
         ),
