@@ -222,6 +222,14 @@ describe.each(THEME_NAMES)('%s', (name) => {
     expect(theme.type.monoBold).toMatch(/Mono/);
   });
 
+  // Negative tracking on a face that is already condensed is what clipped
+  // letters off the ends of Broadcast headings. A theme may decline the
+  // scale's tightening, but none may ask for more of it.
+  it('keeps display tracking within the scale it is multiplying', () => {
+    expect(theme.type.displayTracking).toBeGreaterThanOrEqual(0);
+    expect(theme.type.displayTracking).toBeLessThanOrEqual(1);
+  });
+
   it('clears AA for body text on both background and surface', () => {
     expect(contrastRatio(theme.colors.text, theme.colors.background)).toBeGreaterThanOrEqual(AA_TEXT);
     expect(contrastRatio(theme.colors.text, theme.colors.surface)).toBeGreaterThanOrEqual(AA_TEXT);

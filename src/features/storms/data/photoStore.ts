@@ -50,3 +50,20 @@ export async function photoExists(uri: string): Promise<boolean> {
     return false;
   }
 }
+
+/**
+ * Removes the whole photo directory.
+ *
+ * Only account erasure uses this: deleting reports one at a time leaves the
+ * directory itself and any file whose record was already lost, and "delete
+ * everything" has to mean the files too, not just the index of them.
+ */
+export async function deleteAllPhotos(): Promise<Result<true>> {
+  try {
+    const directory = photoDirectory();
+    if (directory.exists) directory.delete();
+    return ok(true);
+  } catch (cause) {
+    return err('storage', 'The saved photos could not be removed', cause);
+  }
+}

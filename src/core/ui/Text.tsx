@@ -36,15 +36,19 @@ export type TextTone = 'default' | 'muted' | 'onAccent';
 function variantStyle(variant: TextVariant, theme: Theme): TextStyle {
   const { type, colors } = theme;
 
+  // Display tracking is a theme's to refuse: a face as tight as Anton clips
+  // its own glyphs when the scale pulls it tighter still.
+  const track = (amount: number) => amount * type.displayTracking;
+
   switch (variant) {
     case 'hero':
       return { fontFamily: type.monoBold, fontSize: 64, lineHeight: 66, letterSpacing: -2, color: colors.text };
     case 'score':
-      return { fontFamily: type.display, fontSize: 56, lineHeight: 54, letterSpacing: -2, color: colors.text };
+      return { fontFamily: type.display, fontSize: 56, lineHeight: 54, letterSpacing: track(-2), color: colors.text };
     case 'display':
-      return { fontFamily: type.display, fontSize: 40, lineHeight: 44, letterSpacing: -1, color: colors.text };
+      return { fontFamily: type.display, fontSize: 40, lineHeight: 44, letterSpacing: track(-1), color: colors.text };
     case 'title':
-      return { fontFamily: type.display, fontSize: 24, lineHeight: 30, letterSpacing: -0.5, color: colors.text };
+      return { fontFamily: type.display, fontSize: 24, lineHeight: 30, letterSpacing: track(-0.5), color: colors.text };
     case 'heading':
       return { fontFamily: type.bodySemibold, fontSize: 17, lineHeight: 22, color: colors.text };
     case 'body':

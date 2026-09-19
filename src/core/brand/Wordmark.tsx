@@ -89,7 +89,7 @@ export function Wordmark({
           fontFamily: theme.type.displayLight,
           fontSize: size,
           lineHeight,
-          letterSpacing: -size * 0.036,
+          letterSpacing: -size * 0.036 * theme.type.displayTracking,
           textAlign: align,
         }}
       >
@@ -100,7 +100,7 @@ export function Wordmark({
         style={{
           fontSize: size,
           lineHeight,
-          letterSpacing: -size * 0.036,
+          letterSpacing: -size * 0.036 * theme.type.displayTracking,
           textAlign: align,
         }}
       >

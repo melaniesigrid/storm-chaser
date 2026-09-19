@@ -19,6 +19,8 @@ export interface StormRepository {
   update(id: string, patch: Partial<StormReport>): Promise<Result<StormReport>>;
   remove(id: string): Promise<Result<string>>;
   markSyncState(id: string, state: SyncState): Promise<Result<StormReport>>;
+  /** Drops the whole envelope. Used by account erasure, never by the log UI. */
+  clear(): Promise<Result<void>>;
 }
 
 /**
@@ -140,6 +142,15 @@ export function createStormRepository(
 
     async markSyncState(id, state) {
       return update(id, { syncState: state });
+    },
+
+    async clear() {
+      try {
+        await store.removeItem(STORAGE_KEY);
+        return ok(undefined);
+      } catch (cause) {
+        return err('storage', 'Saved storm reports could not be removed', cause);
+      }
     },
   };
 }

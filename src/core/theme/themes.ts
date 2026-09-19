@@ -94,6 +94,18 @@ export interface ThemeTypography {
   bodyMedium: string;
   bodySemibold: string;
   bodyBold: string;
+  /**
+   * Multiplier on the negative tracking the display sizes are set with.
+   *
+   * The type scale tightens its display sizes because Bricolage and Big
+   * Shoulders are drawn loose enough to want it. Anton is not: it is already a
+   * condensed face with almost no side bearing, and pulling it tighter on top
+   * of that runs the glyphs into each other and past the edge of the box the
+   * platform measured for them, which is what was clipping letters off the
+   * ends of headings in Broadcast. A theme that does not want the tightening
+   * says so here rather than every headline in the app special-casing a font.
+   */
+  displayTracking: number;
   /** Always mono. Columns of figures have to line up in every theme. */
   mono: string;
   monoMedium: string;
@@ -346,6 +358,7 @@ const BROADCAST_MOTION: ThemeMotion = {
 const SKYWARD_TYPE: ThemeTypography = {
   display: 'BricolageGrotesque_800ExtraBold',
   displayLight: 'BricolageGrotesque_200ExtraLight',
+  displayTracking: 1,
   body: 'InstrumentSans_400Regular',
   bodyMedium: 'InstrumentSans_500Medium',
   bodySemibold: 'InstrumentSans_600SemiBold',
@@ -364,6 +377,8 @@ const BROADCAST_TYPE: ThemeTypography = {
   ...SKYWARD_TYPE,
   display: 'Anton_400Regular',
   displayLight: 'Anton_400Regular',
+  // Anton sets its own tracking. Nothing is taken out of it.
+  displayTracking: 0,
 };
 
 /**

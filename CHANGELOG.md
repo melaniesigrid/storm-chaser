@@ -6,6 +6,14 @@ All notable changes to this project are documented here. Dates are YYYY-MM-DD.
 
 ### Added
 
+- **Delete my account.** Profile now ends in an Account panel whose one button
+  erases the chaser from the phone: call sign, every report, every photograph,
+  the theme preference, the onboarding flag and both copies of the query cache.
+  There is no server account to close, so `eraseAccount` composes all six in one
+  place and runs every step even after one fails — a half-erased device reported
+  as clean is the worst outcome available. Confirmed behind a destructive alert
+  that says it cannot be undone, and it lands back on onboarding.
+
 - **The mark strikes on every launch.** An overlay paints the SC monogram on the
   active theme's own gradient, drops the bolt through it once, and leaves. It
   plays every launch rather than only the first, which is affordable only
@@ -34,6 +42,14 @@ All notable changes to this project are documented here. Dates are YYYY-MM-DD.
   crossbar, so small marks draw one silhouette instead.
 
 ### Fixed
+
+- **Broadcast stopped clipping its own letters.** The type scale tightens
+  display sizes for Bricolage and Big Shoulders; Anton is condensed already, and
+  the extra negative tracking pushed glyphs past the box the platform measured,
+  shaving the ends off headings. Tracking is now a theme token
+  (`type.displayTracking`) that Broadcast sets to 0, so the fix is one value in
+  the token layer rather than a font check in every headline, and a test holds
+  every theme inside the scale it multiplies.
 
 - **The Map tab no longer white-screens on web.** `react-native-maps` is native
   only: its layer specs call `codegenNativeComponent`, which `react-native-web`

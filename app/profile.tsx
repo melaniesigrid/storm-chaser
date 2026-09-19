@@ -1,8 +1,11 @@
 import * as Haptics from 'expo-haptics';
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { ScrollView, TextInput, View } from 'react-native';
+import { Alert, ScrollView, TextInput, View } from 'react-native';
 
+import { eraseAccount } from '@/core/account';
 import { Wordmark } from '@/core/brand';
+import { onboardingGate } from '@/core/onboarding/onboardingGate';
 import { MAX_CHASER_NAME_LENGTH, useProfile } from '@/core/profile';
 import { ThemeCard } from '@/core/theme/ThemeCard';
 import { AUTO_PREFERENCE, type ThemePreference } from '@/core/theme/themeStore';
@@ -13,7 +16,42 @@ import { Button, Panel, Screen, Text, Volt } from '@/core/ui';
 export default function ProfileScreen() {
   const { theme, themeName, setTheme, followSystem, isExplicit, preference, isAwaitingPosition } =
     useAppTheme();
-  const { profile, ready, setName } = useProfile();
+  const { profile, ready, setName, clear } = useProfile();
+  const router = useRouter();
+  const [erasing, setErasing] = useState(false);
+
+  async function erase() {
+    setErasing(true);
+    const result = await eraseAccount();
+
+    // In-memory state is reset whether or not every key came off disk: what is
+    // still on screen after this is the one thing the chaser can see.
+    clear();
+    followSystem();
+    await onboardingGate.refresh();
+    setErasing(false);
+
+    if (!result.ok) {
+      Alert.alert(
+        'Some of it is still here',
+        'Your data could not be fully removed from this phone. Try again, or delete the app to be sure.',
+      );
+      return;
+    }
+
+    router.replace('/onboarding');
+  }
+
+  function confirmErase() {
+    Alert.alert(
+      'Delete your account?',
+      'Your call sign, every storm in your field log and its photographs are removed from this phone. Storm Chaser keeps no copy anywhere else, so this cannot be undone.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Delete everything', style: 'destructive', onPress: () => void erase() },
+      ],
+    );
+  }
 
   function choose(next: ThemePreference) {
     setTheme(next);
@@ -107,6 +145,27 @@ export default function ProfileScreen() {
               style={{ marginTop: 16 }}
             />
           ) : null}
+        </Panel>
+
+        {/*
+          Last on the screen, and the only destructive control in the app that
+          is not attached to a single record. There is no server account to
+          close: this is the phone forgetting the chaser entirely, which is
+          what the confirmation says in as many words.
+        */}
+        <Panel label="Account" style={{ marginTop: 4 }}>
+          <Text variant="body">
+            Everything Storm Chaser knows about you is on this phone. Deleting your
+            account erases your call sign, your whole field log and its photos.
+          </Text>
+
+          <Button
+            title="Delete my account"
+            tone="danger"
+            loading={erasing}
+            onPress={confirmErase}
+            style={{ marginTop: 16 }}
+          />
         </Panel>
       </ScrollView>
     </Screen>
