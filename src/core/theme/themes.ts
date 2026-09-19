@@ -476,34 +476,53 @@ const skywardDay: Theme = {
   description: 'Bright, atmospheric',
   isDark: false,
   colors: {
-    background: '#F4F0E4',
-    /**
-     * Golden hour rather than midday blue, and that is a contrast decision
-     * before it is a mood one.
-     *
-     * The old sky ran #8DB0DF at the top, which carried `textMuted` at 4.65:1 --
-     * a tenth over the AA floor, and the ceiling on how dark the blue could get
-     * without taking captions under it. Warm light buys the whole scale room:
-     * the same muted token reads at 5.3:1 on the gold and the ink at 7.5:1, so
-     * every line on the screen gained contrast by the sky changing colour
-     * rather than by the type getting heavier.
-     *
-     * It is also the ground the weather is drawn ON. Meteocons are cool --
-     * white cloud, #B0BCCD shadow, #E6EFFC fill -- and a cool cloud on a warm
-     * sky separates by hue, which is a channel a blue sky was not using at all.
+    /*
+     * Only ever seen for a frame, under the gradient and behind a screen
+     * transition, so it is the sky's haze band rather than a colour of its
+     * own -- a cream flash between two blue screens is the kind of thing you
+     * notice without being able to say what you noticed.
      */
-    backgroundGradient: ['#E0A93A', '#EDC266', '#F3DEAB', '#F7F3E8'],
+    background: '#DDE8E6',
+    /**
+     * A real daytime sky: blue overhead, warming to low light at the horizon.
+     *
+     * This replaces an all-gold gradient, and the gold was there for a reason
+     * worth writing down before it is overruled. A blue zenith is the darkest
+     * thing this theme can put behind body copy, so it sets the ceiling on
+     * every text token drawn on the sky, and the previous blue (#8DB0DF)
+     * carried `textMuted` at 4.65:1 -- a tenth over the floor. Going warm
+     * bought headroom cheaply.
+     *
+     * The headroom is bought differently now. `textMuted` went from #33405A to
+     * #2A3550, which is worth about 0.9 of a contrast point, and that is what
+     * pays for a zenith at #6BA5DC: ink at 6.2:1 and muted copy at 4.7:1 on
+     * the darkest stop, both clear of AA with more margin than the gold had.
+     * The type got heavier so the sky could be a sky -- the opposite trade to
+     * the one made before, made deliberately.
+     *
+     * The fourth stop is the gain. A single-hue wash reads as a fill; blue
+     * falling through a desaturated haze band into #F7EFD2 reads as distance,
+     * which is the one thing a weather app's background should be saying. And
+     * the low warm light at the bottom keeps the reason the gold was chosen in
+     * the first place -- Meteocons are cool (white cloud, #B0BCCD shadow,
+     * #E6EFFC fill), and they now sit against the warm end of the gradient
+     * near the hero while the cool end reads as the air above them.
+     */
+    backgroundGradient: ['#6BA5DC', '#93BFE0', '#CADCDE', '#F7EFD2'],
     backgroundGradientLocations: [0, 0.42, 0.78, 1],
     surface: '#FFFFFF',
     surfaceSunken: '#EDEAE0',
     border: '#D6D2C6',
     text: '#14213A',
-    textMuted: '#33405A',
+    // Darkened from #33405A to buy the sky its blue back; see the gradient.
+    textMuted: '#2A3550',
     accent: '#C4402E',
     onAccent: '#FFFFFF',
     cameraGround: '#05070B',
     onCameraGround: '#F2F6FA',
-    tabBar: '#FFFFFF',
+    // The warm floor the gradient lands on, so the bar is the ground the sky
+    // meets rather than a white shelf under it. Its top rule still separates.
+    tabBar: '#F7EFD2',
     tabActive: '#14213A',
     tabInactive: '#5B6472',
     tier: {
@@ -552,8 +571,8 @@ const skywardDay: Theme = {
   },
   /**
    * Daylight frost. The fill is white at 0.74, which over the darkest stop of
-   * this theme's own gradient (#8DB0DF, the top of the sky) composites to
-   * roughly #DCE7F5 -- ink at 13:1 and muted copy comfortably past AA, while
+   * this theme's own gradient (#6BA5DC, the top of the sky) composites to
+   * roughly #DCE9F6 -- ink at 13:1 and muted copy comfortably past AA, while
    * the cumulus bank still moves visibly behind the card.
    *
    * The sheen is white falling to nothing, and the rim is near-opaque white:
@@ -793,20 +812,30 @@ const fieldCard: Theme = {
       // Twelve stocks, not six. A run of reports is meant to read as a handful
       // of collected cards, and at six the repeat was visible inside one
       // screenful -- which made the palette look like a bug rather than a
-      // print shop. Every value is a light stock carrying the theme's ink
-      // (#14140F) far clear of AA; the theme test holds the whole list to it.
-      '#FFFFFF',
-      '#FFEFC2',
-      '#CFEDE8',
-      '#FFD9D2',
-      '#E4DCFF',
-      '#F4EAD7',
-      '#CFE4FF',
-      '#DDEFC8',
-      '#FFE0C2',
-      '#FFD8EA',
-      '#D6F2FB',
-      '#E8E6DF',
+      // print shop.
+      //
+      // And twelve MID-TONE stocks, not twelve tinted whites. The first set
+      // sat between 0.75 and 1.0 relative luminance, which is close enough to
+      // paper that on a phone in daylight the column still read as white with
+      // a cast on it. These sit between 0.54 and 0.78: far enough apart to
+      // name -- kraft, straw, teal, salmon, iris -- while every one of them
+      // still carries the theme's ink at better than 10:1.
+      //
+      // Dropping plain white was the other half of it. A palette whose first
+      // entry is the surface colour will always have one card that looks like
+      // the tint failed to apply.
+      '#EDE3CE',
+      '#F5D98A',
+      '#A5DCD2',
+      '#F6B8AC',
+      '#C7BBF0',
+      '#E2D4B4',
+      '#AFCEEC',
+      '#C3DFA2',
+      '#F5C79C',
+      '#F2B5D2',
+      '#AEDFEE',
+      '#D2CFC2',
     ],
     border: '#14140F',
     text: '#14140F',
@@ -826,12 +855,22 @@ const fieldCard: Theme = {
       severe: '#FF5A47',
       extreme: '#8E7CFF',
     },
+    /*
+     * Darkened well past the other themes', because in this one alone these
+     * are drawn on twelve different grounds rather than on one white card.
+     * The old set was tuned against `surface` and never re-checked against
+     * the stocks: `unsettled` at #0F7D72 was already reading at 3.8:1 on most
+     * of them, under AA, and mid-tone stock would have taken it to 2.3:1.
+     * Every value here clears 4.5:1 on the DARKEST stock in the palette, so
+     * the guarantee holds whichever card a report lands on. The saturated
+     * `tier` fills above are untouched -- they are rails and pins, not text.
+     */
     tierText: {
-      dormant: '#4A5464',
-      unsettled: '#0F7D72',
-      active: '#8A5D00',
-      severe: '#C4402E',
-      extreme: '#5B3FC4',
+      dormant: '#2E3743',
+      unsettled: '#0A544D',
+      active: '#5C3E00',
+      severe: '#8F2B1D',
+      extreme: '#3B2585',
     },
   },
   type: FIELD_CARD_TYPE,

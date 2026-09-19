@@ -110,14 +110,16 @@ the capture position was doing at the time.
 **Conditions** — 43.653° N, 79.383° W, on two of the four themes
 
 Storm Chaser ships as a phone app, so every capture is a phone: 390 × 844 at 2x. The two
-below are the same screen a second apart. Skyward Day generates its background from the
-observation and floats frosted panes in front of it; Field Card is printed stock, and
+below are the same screen a second apart. Skyward Day runs a four-stop sky — blue at the
+zenith, through a haze band, into low warm light at the horizon — and floats frosted panes
+in front of it, with the header and the tab bar taking the first and last stop so the
+chrome is part of the sky rather than a bar laid over it. Field Card is printed stock, and
 gives every card its own colour off a twelve-stock palette so a column reads as a handful
 of collected cards rather than one long white sheet.
 
 | Skyward Day | Field Card |
 | :---: | :---: |
-| <img src="docs/screenshots/app-conditions-mobile.png" alt="Conditions tab on Skyward Day: the temperature and condition over a live sky gradient, with the Chase Index and instruments on frosted panes" width="300" /> | <img src="docs/screenshots/app-conditions-field-card-mobile.png" alt="The same Conditions tab on Field Card: cream paper, heavy ink outlines and hard offset shadows, each card printed on a different pale stock" width="300" /> |
+| <img src="docs/screenshots/app-conditions-mobile.png" alt="Conditions tab on Skyward Day: the temperature and condition over a live sky gradient, with the Chase Index and instruments on frosted panes" width="300" /> | <img src="docs/screenshots/app-conditions-field-card-mobile.png" alt="The same Conditions tab on Field Card: cream paper, heavy ink outlines and hard offset shadows, each card printed on a different mid-tone stock" width="300" /> |
 
 <details>
   <summary><b>More screens</b> — onboarding, the field log empty state, the theme picker</summary>

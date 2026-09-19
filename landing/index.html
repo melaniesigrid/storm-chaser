@@ -142,15 +142,15 @@
   html[data-theme="atmospheric"][data-sky="day"] {
     /* The haze band at stop three is the horizon; without it the sky flattens
        into a two-colour wash, exactly as it does at night. */
-    --bg-1: #E0A93A;
-    --bg-2: #EDC266;
-    --bg-3: #F3DEAB;
-    --bg-4: #F7F3E8;
+    --bg-1: #6BA5DC;
+    --bg-2: #93BFE0;
+    --bg-3: #CADCDE;
+    --bg-4: #F7EFD2;
     --page: #F4F1E8;
     --band: #EDEAE0;
     --surface: #FFFFFF;
     --ink: #14213A;
-    --ink-soft: #33405A;
+    --ink-soft: #2A3550;
     --line: #D6D2C6;
     --accent: #C4402E;
     --on-accent: #FFFFFF;
@@ -758,7 +758,7 @@
   .b-radar .mini-cta { background: #FF5A47; color: #05070B; border-radius: 22px; }
 
   /* B — Skyward */
-  .b-sky { background: linear-gradient(175deg, #E0A93A 0%, #EDC266 42%, #F3DEAB 78%, #F7F3E8 100%); color: #14213A; }
+  .b-sky { background: linear-gradient(175deg, #6BA5DC 0%, #93BFE0 42%, #CADCDE 78%, #F7EFD2 100%); color: #14213A; }
   .b-sky .board-tag { color: #14213A; }
   .b-sky .mini-temp, .b-sky .mini-score { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; letter-spacing: -0.04em; }
   .b-sky .mini-score { color: #FF5A47; }
@@ -805,7 +805,7 @@
     box-shadow: 0 22px 50px rgba(20, 33, 58, 0.22);
   }
 
-  .phone--day   { background: linear-gradient(170deg, #E0A93A, #EDC266 42%, #F3DEAB 80%, #F7F3E8); color: #14213A; }
+  .phone--day   { background: linear-gradient(170deg, #6BA5DC, #93BFE0 42%, #CADCDE 80%, #F7EFD2); color: #14213A; }
   .phone--night { background: linear-gradient(170deg, #0B1026, #1B2347 55%, #2A2140); color: #EDF1FA; }
   .phone--card  { background: #FFF8EC; border: 3px solid #14140F; color: #14140F; }
 
@@ -1796,24 +1796,27 @@
     <div class="stocks">
       <h3>Twelve stocks, one ink</h3>
       <div class="stock-row">
-        <span class="stock" style="background:#FFFFFF"></span>
-        <span class="stock" style="background:#FFEFC2"></span>
-        <span class="stock" style="background:#CFEDE8"></span>
-        <span class="stock" style="background:#FFD9D2"></span>
-        <span class="stock" style="background:#E4DCFF"></span>
-        <span class="stock" style="background:#F4EAD7"></span>
-        <span class="stock" style="background:#CFE4FF"></span>
-        <span class="stock" style="background:#DDEFC8"></span>
-        <span class="stock" style="background:#FFE0C2"></span>
-        <span class="stock" style="background:#FFD8EA"></span>
-        <span class="stock" style="background:#D6F2FB"></span>
-        <span class="stock" style="background:#E8E6DF"></span>
+        <span class="stock" style="background:#EDE3CE"></span>
+        <span class="stock" style="background:#F5D98A"></span>
+        <span class="stock" style="background:#A5DCD2"></span>
+        <span class="stock" style="background:#F6B8AC"></span>
+        <span class="stock" style="background:#C7BBF0"></span>
+        <span class="stock" style="background:#E2D4B4"></span>
+        <span class="stock" style="background:#AFCEEC"></span>
+        <span class="stock" style="background:#C3DFA2"></span>
+        <span class="stock" style="background:#F5C79C"></span>
+        <span class="stock" style="background:#F2B5D2"></span>
+        <span class="stock" style="background:#AEDFEE"></span>
+        <span class="stock" style="background:#D2CFC2"></span>
       </div>
       <p class="stock-note">
-        In Field Card every logged storm is printed on its own stock, picked from the
-        report&rsquo;s id so a card keeps its colour when the log is filtered or added to.
-        Six of these was one screenful before the palette repeated. Each one carries the
-        theme&rsquo;s single ink at WCAG AA, which the theme test holds the whole list to.
+        In Field Card every card is printed on its own stock &mdash; a logged storm picks
+        one from its id, a fixed panel from its name &mdash; so a card keeps its colour
+        when the column around it is filtered or added to. Six of these was one screenful
+        before the palette repeated, and the first twelve were tinted whites that a phone
+        in daylight read as white. These are stock. Every text colour the theme can draw
+        on them, ink and captions and the tier-coloured score, clears WCAG AA on all
+        twelve, which the theme test holds the whole list to.
       </p>
     </div>
   </div>

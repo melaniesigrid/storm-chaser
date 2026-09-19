@@ -80,7 +80,14 @@ export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{
-        headerStyle: { backgroundColor: colors.background },
+        /*
+          The header is the top of the sky, not a bar laid over it. Taking the
+          gradient's first stop rather than `background` is what closes the
+          seam: a flat cream strip above a blue zenith reads as two screens
+          stacked, and on the themes with no gradient the two values are the
+          same, so nothing moves there.
+        */
+        headerStyle: { backgroundColor: colors.backgroundGradient[0] },
         headerTintColor: colors.text,
         headerTitleStyle: { fontFamily: type.display, fontSize: 20 },
         /*

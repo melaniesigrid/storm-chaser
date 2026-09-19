@@ -894,12 +894,50 @@ describe('card stocks', () => {
    * carry the theme's ink is a readability bug dressed as a style, so the whole
    * palette is held to AA for body text.
    */
-  it('carries body text at AA on every tint a theme offers', () => {
+  it('carries every text colour at AA on every tint a theme offers', () => {
+    for (const themeName of THEME_NAMES) {
+      const theme = THEMES[themeName];
+
+      /*
+       * `text` alone was the original assertion, and it was not enough. A card
+       * carries muted captions and a tier-coloured score as well as body copy,
+       * and because only `text` was checked, `tierText.unsettled` spent the
+       * whole of the first tint palette at 3.8:1 against eleven of the twelve
+       * stocks -- under AA, and invisible to this suite. Anything that can be
+       * drawn as TEXT on a stock is checked against every stock.
+       */
+      const drawnAsText = {
+        text: theme.colors.text,
+        textMuted: theme.colors.textMuted,
+        ...Object.fromEntries(
+          Object.entries(theme.colors.tierText).map(([tier, hex]) => [`tierText.${tier}`, hex]),
+        ),
+      };
+
+      for (const tint of theme.colors.cardTints ?? []) {
+        for (const [token, hex] of Object.entries(drawnAsText)) {
+          expect({ themeName, tint, token, ok: meetsAA(hex, tint, AA_TEXT) })
+            .toEqual({ themeName, tint, token, ok: true });
+        }
+      }
+    }
+  });
+
+  /**
+   * The palette is meant to read as stock, not as a white card that went
+   * slightly wrong in the press. Two floors hold that: nothing may BE the
+   * surface colour, and nothing may sit so close to paper that the tint is
+   * deniable. 0.80 relative luminance is roughly a 5% ink coverage -- below
+   * the point where a phone in daylight can still tell you it is there.
+   */
+  it('prints on stock rather than on tinted white', () => {
     for (const themeName of THEME_NAMES) {
       const theme = THEMES[themeName];
       for (const tint of theme.colors.cardTints ?? []) {
-        expect({ themeName, tint, ok: meetsAA(theme.colors.text, tint, AA_TEXT) })
-          .toEqual({ themeName, tint, ok: true });
+        expect({ themeName, tint, isSurface: tint === theme.colors.surface })
+          .toEqual({ themeName, tint, isSurface: false });
+        expect({ themeName, tint, tooPale: relativeLuminance(tint) > 0.8 })
+          .toEqual({ themeName, tint, tooPale: false });
       }
     }
   });

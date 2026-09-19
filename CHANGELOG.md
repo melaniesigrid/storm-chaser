@@ -41,8 +41,31 @@ All notable changes to this project are documented here. Dates are YYYY-MM-DD.
   against a white the card no longer is. A test pins the six tones of the
   Conditions column to six different stocks.
 
+- **A sky that is a sky.** Skyward Day ran an all-gold gradient, which was
+  chosen for contrast headroom: a blue zenith is the darkest thing the theme
+  can put behind body copy. The headroom is bought differently now —
+  `textMuted` darkened by about 0.9 of a contrast point — which pays for four
+  stops running blue, through a desaturated haze band, into low warm light at
+  the horizon. Ink reads at 6.2:1 and captions at 4.7:1 on the darkest stop,
+  both with more margin than the gold had. The header takes the first stop and
+  the tab bar the last, so the chrome is part of the sky instead of two flat
+  bars laid over it.
+- **Field Card prints on stock, not on tinted white.** The twelve tints sat
+  between 0.75 and 1.0 relative luminance — close enough to paper that on a
+  phone in daylight the column still read as white with a cast on it. They now
+  sit between 0.54 and 0.78, and plain white is gone from the palette, because
+  a palette whose first entry is the surface colour will always have one card
+  that looks like the tint failed to apply.
+
 ### Fixed
 
+- **Field Card's tier text was under AA on eleven of its twelve stocks.** The
+  `tierText` set was tuned against `surface` and never re-checked against the
+  stocks a card is actually printed on; `unsettled` was reading at 3.8:1. The
+  whole set is darkened to clear 4.5:1 against the darkest stock in the
+  palette, and the theme test now checks everything that can be drawn as text
+  on a stock — body, captions and all five tier colours — rather than body
+  alone, which is why the gap survived the first palette.
 - **`npm run lint` and `npm run typecheck` both run again.** `tsc` was exiting
   on a deprecated `baseUrl` before it checked a line, and could no longer find
   Jest's globals; the flat ESLint config was crawling the repo checkouts under

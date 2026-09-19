@@ -135,7 +135,8 @@ function AppStack() {
       <StatusBar style={theme.isDark ? 'light' : 'dark'} />
       <Stack
         screenOptions={{
-          headerStyle: { backgroundColor: colors.background },
+          // The top of the sky, matching the tab headers. See `(tabs)/_layout`.
+          headerStyle: { backgroundColor: colors.backgroundGradient[0] },
           headerTintColor: colors.text,
           headerTitleStyle: { fontFamily: type.display, fontSize: 20 },
           contentStyle: { backgroundColor: colors.background },
