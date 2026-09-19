@@ -4,6 +4,7 @@ import { RefreshControl, ScrollView } from 'react-native';
 
 import { WeatherIcon } from '@/core/icons/WeatherIcon';
 import { useAppTheme } from '@/core/theme/useAppTheme';
+import { useNow } from '@/core/utils/useNow';
 import { Button, Panel, Screen, StatusBanner, Text } from '@/core/ui';
 import {
   formatBearing,
@@ -24,6 +25,7 @@ import { ChaseIndexPanel } from '@/features/weather/components/ChaseIndexPanel';
 import { ForecastStrip } from '@/features/weather/components/ForecastStrip';
 import { MetricGrid, type Metric } from '@/features/weather/components/MetricGrid';
 import { OutlookList } from '@/features/weather/components/OutlookList';
+import { VoltPerch } from '@/features/weather/components/VoltPerch';
 import { WeatherSkeleton } from '@/features/weather/components/WeatherSkeleton';
 import { WeatherUnavailable } from '@/features/weather/components/WeatherUnavailable';
 import { useWeatherSnapshot } from '@/features/weather/hooks/useWeather';
@@ -31,6 +33,12 @@ import { iconForCondition } from '@/features/weather/model/weatherIcons';
 import { useNetworkStatus } from '@/services/net/useNetworkStatus';
 
 const STALE_AFTER_MS = 10 * 60 * 1000;
+
+/**
+ * How often the staleness check re-evaluates. Well under `STALE_AFTER_MS`, and
+ * far coarser than a frame: this drives one banner, not an animation.
+ */
+const STALE_TICK_MS = 15_000;
 
 export default function ConditionsScreen() {
   const router = useRouter();
@@ -57,10 +65,14 @@ export default function ConditionsScreen() {
   const isInitialLoading =
     !useSample && (location.status === 'requesting' || (query.isLoading && !query.data));
 
+  /**
+   * Ticking rather than read during render, so a screen left open actually goes
+   * stale on its own instead of waiting for an unrelated re-render to notice.
+   */
+  const now = useNow(STALE_TICK_MS);
+
   const isStale =
-    !useSample &&
-    query.dataUpdatedAt > 0 &&
-    Date.now() - query.dataUpdatedAt > STALE_AFTER_MS;
+    !useSample && query.dataUpdatedAt > 0 && now - query.dataUpdatedAt > STALE_AFTER_MS;
 
   /**
    * Also the way back out of sample mode: dropping the flag re-enables the live
@@ -211,6 +223,14 @@ export default function ConditionsScreen() {
               <Text variant="caption" style={{ marginTop: 6, textAlign: 'center' }}>
                 {`Feels like ${formatTemperature(snapshot.current.apparentTemperatureC)} · updated ${formatRelativeTime(snapshot.fetchedAt)}`}
               </Text>
+
+              {/*
+                Last child, and absolutely positioned: he lands on the empty
+                right shoulder the centred hero leaves behind, and paints over
+                everything above him rather than under it. Nothing in the card
+                moves to make room for him, before or after he speaks.
+              */}
+              <VoltPerch group={snapshot.current.condition.group} />
             </Panel>
 
             <ChaseIndexPanel chase={snapshot.current.chase} />

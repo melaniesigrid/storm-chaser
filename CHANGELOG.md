@@ -6,6 +6,71 @@ All notable changes to this project are documented here. Dates are YYYY-MM-DD.
 
 ### Added
 
+- **Volt lies on the conditions card and answers questions.** The mascot now
+  perches on the empty top-right shoulder of the first weather card, tipped
+  back at an angle and swaying, and a tap gets a fact about the sky outside —
+  thunderstorm facts during a thunderstorm, snow facts in snow — in a speech
+  bubble that springs out of the corner he is sitting on. Facts rotate rather
+  than draw at random, so two taps never repeat. Tap anywhere else, or wait
+  nine seconds, and he goes back to lounging. Nothing in the card moves to make
+  room for him, and Reduce Motion drops the sway, the wobble and the spring
+  while keeping the fact.
+- **Storm legends carry photographs and the long version.** Each of the 22
+  entries now has an image, two paragraphs on the mechanism and the consequence,
+  and a block of checkable figures. Images came from Wikimedia Commons with the
+  licence read from the API rather than assumed — public domain, CC0, CC BY and
+  CC BY-SA only — and each is credited in the app and in `docs/IMAGE_CREDITS.md`.
+  Where no freely licensed photograph of a specific storm exists, the image
+  illustrates the phenomenon and the caption underneath says what it really
+  shows. One legend found nothing acceptable and keeps its icon.
+- **Classifications explain themselves.** Selecting a storm type shows one
+  sentence on how to recognise it from the ground, on the capture form and on
+  the saved report.
+- **39 community demo storms instead of 6.** Six still generate around the
+  viewer so the map is populated wherever you stand; 33 more sit at fixed
+  coordinates on every inhabited continent, so zooming out is worth doing.
+- **Stars in the dark themes.** A seeded, static field between the gradient and
+  the content, denser and brighter towards the top where the sky is darkest.
+  Draws nothing in the daylight themes.
+- **Field Card prints each report on its own stock.** Six tints of hues the
+  theme already owns, chosen by a hash of the report id so a card keeps its
+  colour for life. Every tint carries the theme's ink at AA, which is asserted.
+
+### Fixed
+
+- **The back button said `(tabs)`.** iOS labels a back button with the previous
+  screen's title, and the tab group's header is hidden, so its title fell back
+  to the route name. Titled the group and pinned a default back label, which
+  fixes every pushed screen at once rather than one route at a time.
+- **Text clipped at both ends.** `score` set a 56px face in a 54px line box, and
+  the display faces paint outside the box React Native measures for them. Line
+  heights are now asserted never to fall below their font size, and the large
+  variants carry a self-cancelling bleed so the drawing box widens without the
+  layout moving.
+- **Hiding storm lore did nothing on iOS.** The marker layer was unmounted
+  behind a condition; unmounting a fragment-returning child of `MapView` leaves
+  its annotations on the map. It is now always mounted and its list varies
+  instead, which goes through the marker diff both platforms handle.
+- **`npm run typecheck` failed** on a pre-existing type error in
+  `eraseAccount.test.ts`, unrelated to any of the above.
+
+- **A storm photo can be imported, not only shot.** The capture flow keeps the
+  shutter as its primary action and adds an import path beside it, which joins
+  the camera path at the metadata phase so classification, notes, storage and
+  failure handling stay one implementation. The metadata phase is now checked
+  before the camera permission gate, so a device that has refused the camera —
+  or has none — can still file a report. Imported photos take their capture time
+  from EXIF (`DateTimeOriginal`, then `DateTimeDigitized`, then `DateTime`, then
+  the asset creation time, then the clock), read as local time and discarded
+  outright when it does not parse, because a wrong timestamp is worse than an
+  honest fallback.
+- **Reports record where the photo came from.** `photoSource` distinguishes a
+  camera shot from an import, because an imported photo carries the position and
+  conditions of the import rather than of the storm. The metadata form says so
+  before saving and the detail view keeps it in the record panel. This moved the
+  storage envelope to version 2 and gave the migration hook its first real job:
+  version 1 predates import, so its reports are marked camera shot on read.
+
 - **Delete my account.** Profile now ends in an Account panel whose one button
   erases the chaser from the phone: call sign, every report, every photograph,
   the theme preference, the onboarding flag and both copies of the query cache.
