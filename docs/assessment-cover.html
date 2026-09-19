@@ -1,0 +1,779 @@
+<!doctype html>
+<!--
+  The assessment submission document, as branded content.
+
+  Source of truth for docs/Storm-Chaser-Assessment-Cover.pdf.
+  Render it with: npm run cover
+
+  Page one is the cover sheet the brief asks for -- candidate, assessment,
+  repository, recording, time log -- and it is held to exactly one page by the
+  renderer. Everything after it is the submission itself: what was built, how
+  it is put together, what it is tested against and what it does not do.
+
+  Field Card stock rather than either Skyward: this is the one artifact that
+  gets printed or read as a page rather than as a screen, and Field Card is
+  the theme built for that -- flat ground, 3px outlines, hard offset shadows,
+  no gradient to band on paper. It is also what the storm seals export as, so
+  a cover and a seal sitting side by side read as the same product.
+
+  Every colour here is a Field Card token from docs/BRANDING.md. Nothing is
+  picked by eye.
+
+  Content mirrors docs/SUBMISSION.md and docs/TIME_LOG.md. Those stay the
+  canonical prose; this is the same account laid out to be read as a document.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Storm Chaser — Assessment Submission</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* Field Card, verbatim from docs/BRANDING.md. */
+    --accent: #F5C242;
+    --text: #14140F;
+    --text-muted: #3F3E34;
+    --background: #FFF8EC;
+    --surface: #FFFFFF;
+    --border: #14140F;
+
+    /* Field Card's own geometry: a non-zero border and a hard offset. */
+    --border-width: 3px;
+    --radius: 20px;
+    --offset: 6px;
+  }
+
+  /*
+   * Margins live on @page, not on body. Body padding would indent the first
+   * page and then let every page after it run into the paper edge, because
+   * padding applies once to the box rather than once per sheet.
+   */
+  @page { size: A4; margin: 14mm 15mm; }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  /*
+   * The stock colour goes on <html>, not <body>. Only the root element's
+   * background propagates to the page canvas, so on body it paints the
+   * content box and leaves a white frame in the @page margin -- a cream
+   * document printed on a white border.
+   */
+  html { background: var(--background); }
+
+  body {
+    /* No background here on purpose -- see the note on <html> above. A
+       background on body stops painting where body's box ends, which on the
+       last page leaves cream above the fold and white below it. */
+    color: var(--text);
+    font-family: 'Instrument Sans', system-ui, sans-serif;
+    font-size: 10.5pt;
+    line-height: 1.55;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* --- Typography ----------------------------------------------------- */
+
+  h1 {
+    font-family: 'Archivo Black', 'Instrument Sans', sans-serif;
+    font-size: 25pt;
+    line-height: 1;
+    letter-spacing: -0.01em;
+  }
+
+  h2 {
+    font-family: 'Archivo Black', 'Instrument Sans', sans-serif;
+    font-size: 15pt;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+  }
+
+  p + p { margin-top: 3mm; }
+
+  strong { font-weight: 700; }
+
+  /* Underline rather than colour: an amber link on cream fails contrast, and
+     a printed document has to survive being printed in greyscale. */
+  a { color: var(--text); text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+
+  .mono { font-family: 'IBM Plex Mono', monospace; font-size: 9pt; }
+
+  /* --- Shared furniture ----------------------------------------------- */
+
+  .card {
+    background: var(--surface);
+    border: var(--border-width) solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--offset) var(--offset) 0 var(--border);
+    padding: 6mm;
+    /* A card split across a page break loses its outline on one side, which
+       is the whole of Field Card's identity. */
+    break-inside: avoid;
+  }
+
+  .card-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 8pt;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 4mm;
+  }
+
+  /* --- Cover ---------------------------------------------------------- */
+
+  /*
+   * One sheet, always. The height is the A4 box less the @page margins, and
+   * `break-after` starts the body of the document on page two whatever the
+   * cover ends up containing.
+   */
+  .cover {
+    min-height: calc(297mm - 28mm);
+    display: flex;
+    flex-direction: column;
+    gap: 5mm;
+    break-after: page;
+  }
+
+  .masthead { display: flex; align-items: center; gap: 6mm; }
+
+  .mark {
+    width: 17mm;
+    height: 17mm;
+    flex: none;
+    border: var(--border-width) solid var(--border);
+    border-radius: 6px;
+    box-shadow: var(--offset) var(--offset) 0 var(--border);
+    overflow: hidden;
+  }
+  .mark svg { display: block; width: 100%; height: 100%; }
+
+  .strapline {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 8.5pt;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-top: 2.5mm;
+  }
+
+  /* The one stripe of accent. Field Card uses amber as a marker, not a fill. */
+  .rule {
+    height: 11px;
+    background: var(--accent);
+    border: var(--border-width) solid var(--border);
+    border-radius: 3px;
+    margin-top: -3mm;
+  }
+
+  dl { display: grid; grid-template-columns: 38mm 1fr; row-gap: 2.6mm; column-gap: 6mm; }
+
+  dt {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 8.5pt;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding-top: 1px;
+  }
+
+  dd { font-size: 11pt; word-break: break-word; }
+
+  .scope { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; }
+
+  .tally {
+    border: var(--border-width) solid var(--border);
+    border-radius: 14px;
+    background: var(--surface);
+    padding: 4mm;
+    text-align: center;
+  }
+
+  .tally-number { font-family: 'Archivo Black', sans-serif; font-size: 20pt; line-height: 1; }
+
+  .tally-caption {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 8pt;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-top: 2mm;
+  }
+
+  /* --- Time log ------------------------------------------------------- */
+
+  /* The total is the number the assessor is actually checking against the
+     24 hour window, so it gets display weight and the sessions sit under it
+     as the supporting breakdown rather than as a table to be added up. */
+  .total {
+    display: flex;
+    align-items: baseline;
+    gap: 3mm;
+    margin-bottom: 3.5mm;
+    padding-bottom: 3.5mm;
+    border-bottom: var(--border-width) solid var(--border);
+  }
+
+  .total-figure { font-family: 'Archivo Black', sans-serif; font-size: 18pt; line-height: 1; }
+
+  .total-note {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 8pt;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .sessions { width: 100%; border-collapse: collapse; }
+  .sessions th { text-align: left; font-weight: 500; font-size: 10.5pt; padding: 1.1mm 0; }
+  .sessions td {
+    text-align: right;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10pt;
+    font-weight: 500;
+    padding: 1.1mm 0;
+    white-space: nowrap;
+  }
+
+  /* The status band is the one solid-amber element, so it is the thing the
+     eye lands on after the wordmark. */
+  .status {
+    background: var(--accent);
+    border: var(--border-width) solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--offset) var(--offset) 0 var(--border);
+    padding: 5mm 6mm;
+    font-weight: 600;
+  }
+
+  .cover footer {
+    margin-top: auto;
+    padding-top: 5mm;
+    border-top: var(--border-width) solid var(--border);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 8pt;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    display: flex;
+    justify-content: space-between;
+  }
+
+  /* --- Body sections -------------------------------------------------- */
+
+  /*
+   * No `break-inside: avoid` on the chapter itself. A chapter that must stay
+   * whole pushes a full-page feature table onto the next sheet and leaves
+   * half a page blank behind it; keeping the heading attached to its first
+   * rows is all that actually needs protecting.
+   */
+  section.chapter { margin-bottom: 9mm; }
+
+  /* The numbered tab is how a reader finds their place in a printed stack;
+     the amber sits inside a black outline so it stays legible in greyscale. */
+  .chapter-head {
+    display: flex;
+    align-items: center;
+    gap: 4mm;
+    margin-bottom: 5mm;
+    break-after: avoid;
+    break-inside: avoid;
+  }
+
+  table.grid tbody tr, .sessions tr { break-inside: avoid; }
+
+  .chapter-number {
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 11pt;
+    line-height: 1;
+    background: var(--accent);
+    border: var(--border-width) solid var(--border);
+    border-radius: 8px;
+    padding: 2mm 3mm;
+    flex: none;
+  }
+
+  /* --- Feature and decision tables ------------------------------------ */
+
+  table.grid { width: 100%; border-collapse: collapse; font-size: 9.5pt; }
+
+  table.grid thead th {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 7.5pt;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    text-align: left;
+    padding: 0 3mm 2.5mm 0;
+    border-bottom: var(--border-width) solid var(--border);
+  }
+
+  table.grid tbody td {
+    padding: 2.5mm 3mm 2.5mm 0;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+
+  table.grid tbody tr:last-child td { border-bottom: none; }
+  table.grid td:last-child, table.grid th:last-child { padding-right: 0; }
+
+  .feature-name { font-weight: 600; width: 52mm; }
+
+  /* A word, not a coloured dot: "Complete" survives greyscale and a reader
+     who cannot distinguish the colours. */
+  .done {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 7.5pt;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    width: 24mm;
+  }
+
+  /* Same column, but a duration is a figure rather than a status word, so it
+     keeps its own case. */
+  .duration {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9pt;
+    font-weight: 600;
+    white-space: nowrap;
+    width: 24mm;
+  }
+
+  ul { list-style: none; }
+  li { padding-left: 6mm; position: relative; margin-bottom: 2.5mm; break-inside: avoid; }
+  li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 2.1mm;
+    width: 2.4mm;
+    height: 2.4mm;
+    background: var(--accent);
+    border: 1.5px solid var(--border);
+  }
+
+  .decision-term { font-weight: 700; }
+
+  pre {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 8.5pt;
+    line-height: 1.7;
+    background: var(--background);
+    border: var(--border-width) solid var(--border);
+    border-radius: 12px;
+    padding: 4mm 5mm;
+    margin-top: 4mm;
+  }
+
+  .colophon {
+    margin-top: 10mm;
+    padding-top: 5mm;
+    border-top: var(--border-width) solid var(--border);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 8pt;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    display: flex;
+    justify-content: space-between;
+  }
+</style>
+</head>
+<body>
+
+<!-- ===================== PAGE 1 · COVER ============================== -->
+
+<div class="cover">
+
+  <header class="masthead">
+    <!-- The app icon's own geometry, inlined so the PDF needs no asset
+         pipeline. Mirrors assets/brand/icon.svg and BOLT in Monogram.tsx. -->
+    <div class="mark">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+        <defs>
+          <linearGradient id="ray" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#FFB400"/>
+            <stop offset="0.62" stop-color="#FF5A47"/>
+            <stop offset="1" stop-color="#C4402E"/>
+          </linearGradient>
+        </defs>
+        <rect x="0" y="0" width="100" height="100" fill="#14213A"/>
+        <g transform="translate(19.1 20.3) scale(0.594)">
+          <polygon points="56,-14 20,44 46,44 33,114 84,32 54,32 73,-14" fill="url(#ray)"/>
+        </g>
+      </svg>
+    </div>
+    <div>
+      <h1>Storm Chaser</h1>
+      <p class="strapline">Field Instrument · Assessment Submission</p>
+    </div>
+  </header>
+
+  <div class="rule"></div>
+
+  <section class="card">
+    <p class="card-label">Submission details</p>
+    <dl>
+      <dt>Candidate</dt>
+      <dd>Melanie Baratto</dd>
+
+      <dt>Assessment</dt>
+      <dd>Mobile: React Native — Senior React Native Developer</dd>
+
+      <dt>Repository</dt>
+      <dd><a href="https://github.com/melaniesigrid/storm-chaser">github.com/melaniesigrid/storm-chaser</a></dd>
+
+      <dt>Screen recording</dt>
+      <dd><a href="https://drive.google.com/file/d/1hHfLGWvkn_EwCxRvGiozFD_H-ZrF_eAD/view?usp=sharing">Google Drive</a></dd>
+
+      <dt>Portfolio</dt>
+      <dd><a href="https://melaniesigrid.com">melaniesigrid.com</a></dd>
+
+      <dt>Email</dt>
+      <dd><a href="mailto:melaniesigrid@protonmail.com">melaniesigrid@protonmail.com</a></dd>
+    </dl>
+  </section>
+
+  <section class="scope">
+    <div class="tally">
+      <p class="tally-number">7 / 7</p>
+      <p class="tally-caption">Required features</p>
+    </div>
+    <div class="tally">
+      <p class="tally-number">7 / 7</p>
+      <p class="tally-caption">Bonus features</p>
+    </div>
+  </section>
+
+  <section class="card">
+    <p class="card-label">Time spent on assessment</p>
+    <div class="total">
+      <span class="total-figure">10 h 15 m</span>
+      <span class="total-note">Inside the 24 hour window</span>
+    </div>
+    <table class="sessions">
+      <tbody>
+        <tr><th>Session one — build</th><td>7 h 45 m</td></tr>
+        <tr><th>Session two — themes, identity and accessibility</th><td>1 h 20 m</td></tr>
+        <tr><th>Session three — community, legends, charts and review</th><td>1 h 10 m</td></tr>
+      </tbody>
+    </table>
+    <p class="card-label" style="margin: 3.5mm 0 0;">Block-by-block breakdown in docs/TIME_LOG.md</p>
+  </section>
+
+  <section class="status">
+    Assessment complete. The repository is private, as required, and
+    <strong>developer@speer.io</strong> has collaborator access.
+  </section>
+
+  <footer>
+    <span>Storm Chaser</span>
+    <span>Expo SDK 57 · TypeScript strict</span>
+  </footer>
+
+</div>
+
+<!-- ===================== PAGE 2 ONWARDS ============================== -->
+
+<main>
+
+  <section class="chapter">
+    <div class="chapter-head">
+      <span class="chapter-number">01</span>
+      <h2>What was built</h2>
+    </div>
+    <p>
+      A React Native application for storm-chasing hobbyist meteorologists, built with
+      Expo SDK 57, Expo Router and TypeScript in strict mode. It fetches live weather for
+      the device's position, scores how interesting the atmosphere actually is, and turns
+      a photograph into a timestamped, geotagged, weather-stamped field report held on
+      the device.
+    </p>
+    <p>
+      All four required feature areas are complete, along with every one of the seven
+      listed bonus features.
+    </p>
+  </section>
+
+  <section class="chapter">
+    <div class="chapter-head">
+      <span class="chapter-number">02</span>
+      <h2>Running the project</h2>
+    </div>
+    <p style="margin-bottom: 5mm;">
+      No API keys and no accounts. Open-Meteo is keyless, and cloud sync stays off unless
+      it is pointed somewhere. Node 20 or newer.
+    </p>
+<pre>git clone https://github.com/melaniesigrid/storm-chaser.git
+cd storm-chaser
+npm install
+npx expo start</pre>
+    <p style="margin-top: 5mm;">
+      Then press <span class="mono">i</span> for iOS, <span class="mono">a</span> for
+      Android, or scan the QR code with Expo Go. Camera, location and maps need a real
+      device or a development build; for a native build with the full map provider, run
+      <span class="mono">npm run ios</span> or <span class="mono">npm run android</span>.
+    </p>
+    <p>
+      The web build is also live at
+      <a href="https://stormchaser-field.vercel.app/app">stormchaser-field.vercel.app/app</a>
+      — the real app, minus the native camera and map.
+    </p>
+  </section>
+
+  <section class="chapter">
+    <div class="chapter-head">
+      <span class="chapter-number">03</span>
+      <h2>Required features</h2>
+    </div>
+    <table class="grid">
+      <thead>
+        <tr><th>Requirement</th><th>Status</th><th>Implementation</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="feature-name">Current weather from device location</td>
+          <td class="done">Complete</td>
+          <td>Open-Meteo, keyless, live. <span class="mono">expo-location</span> for the fix.</td>
+        </tr>
+        <tr>
+          <td class="feature-name">Meteorological detail for chasers</td>
+          <td class="done">Complete</td>
+          <td>Temperature, apparent temperature, wind speed, gusts, bearing, pressure, humidity, cloud cover, precipitation, CAPE and lifted index.</td>
+        </tr>
+        <tr>
+          <td class="feature-name">“Not found” view</td>
+          <td class="done">Complete</td>
+          <td>A dedicated component with a retry action and a bundled sample-data fallback, reached whenever the fetch cannot resolve.</td>
+        </tr>
+        <tr>
+          <td class="feature-name">Camera capture</td>
+          <td class="done">Complete</td>
+          <td><span class="mono">expo-camera</span>, two-phase flow: photo first, metadata second.</td>
+        </tr>
+        <tr>
+          <td class="feature-name">Photo metadata</td>
+          <td class="done">Complete</td>
+          <td>Weather conditions, coordinates, accuracy, date and time, notes and classification. Everything but notes and classification is captured automatically and shown read-only for verification.</td>
+        </tr>
+        <tr>
+          <td class="feature-name">Local persistence</td>
+          <td class="done">Complete</td>
+          <td>Versioned AsyncStorage envelope behind a repository, plus photo files copied into the app document directory.</td>
+        </tr>
+        <tr>
+          <td class="feature-name">Navigation between sections</td>
+          <td class="done">Complete</td>
+          <td>Expo Router with typed routes: three tabs, a modal capture flow, and detail routes for reports and storm legends.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="chapter">
+    <div class="chapter-head">
+      <span class="chapter-number">04</span>
+      <h2>Bonus features</h2>
+    </div>
+    <p style="margin-bottom: 5mm;">
+      Senior roles are asked to implement a few of these. All seven are present.
+    </p>
+    <table class="grid">
+      <thead>
+        <tr><th>Bonus feature</th><th>Implementation</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="feature-name">Weather forecast integration</td>
+          <td>A 12-hour strip and a 7-day outlook, both drawn as charts over shared scaling geometry.</td>
+        </tr>
+        <tr>
+          <td class="feature-name">Map visualisation</td>
+          <td><span class="mono">react-native-maps</span>, severity-coloured pins, viewport auto-fitted to your own reports. Three distinct pin shapes for your reports, community reports and storm legends.</td>
+        </tr>
+        <tr>
+          <td class="feature-name">Offline functionality</td>
+          <td>A persisted query cache with a 24-hour horizon, offline and stale banners, and a bundled sample dataset. The field log itself needs no network at all.</td>
+        </tr>
+        <tr>
+          <td class="feature-name">Dark mode support</td>
+          <td>Four themes including two dark ones, system-aware until the user chooses explicitly.</td>
+        </tr>
+        <tr>
+          <td class="feature-name">Skeleton screens</td>
+          <td>Layout-matched skeletons on both data screens.</td>
+        </tr>
+        <tr>
+          <td class="feature-name">Pull to refresh</td>
+          <td>On Conditions and on the field log.</td>
+        </tr>
+        <tr>
+          <td class="feature-name">Cloud integration</td>
+          <td>A signed-upload client and a community feed, resolving through the same <span class="mono">Result</span> boundary as a real fetch. No keys and no credentials, as the brief requires.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="chapter">
+    <div class="chapter-head">
+      <span class="chapter-number">05</span>
+      <h2>Architecture and decisions</h2>
+    </div>
+    <ul>
+      <li>
+        <span class="decision-term">Feature slices over layer folders.</span>
+        <span class="mono">src/features/&lt;domain&gt;/</span> each own their
+        <span class="mono">model/</span>, <span class="mono">data/</span>,
+        <span class="mono">hooks/</span> and <span class="mono">components/</span>.
+        <span class="mono">model/</span> is the bottom layer and contains no React and no
+        I/O, which is why the interesting logic is testable without a renderer or a device.
+      </li>
+      <li>
+        <span class="decision-term">A <span class="mono">Result&lt;T, AppError&gt;</span> at every boundary.</span>
+        Data access and network code return a result rather than throwing, so callers are
+        forced to handle the failure branch and the UI always has something concrete to
+        render. Error kinds map onto specific UI responses rather than a single generic
+        error state.
+      </li>
+      <li>
+        <span class="decision-term">A repository behind an injected store port.</span>
+        <span class="mono">StormRepository</span> takes a <span class="mono">KeyValueStore</span>
+        interface rather than calling AsyncStorage directly, so the whole data layer is
+        testable with an in-memory store and no native modules. Its clock and id generator
+        are injected for the same reason.
+      </li>
+      <li>
+        <span class="decision-term">The weather snapshot is denormalised onto each report.</span>
+        A field log entry has to stay readable years later without re-querying a forecast
+        API that no longer holds historical data for that timestamp, so the conditions at
+        capture are copied onto the record rather than referenced.
+      </li>
+      <li>
+        <span class="decision-term">Photo first, record second.</span>
+        If the image cannot be copied into permanent storage the mutation stops before a
+        report is written, so the log can never point at a file that is not there. Deletion
+        runs the other way round: the record goes first, because an orphaned file is
+        recoverable and a record pointing at nothing is not.
+      </li>
+      <li>
+        <span class="decision-term">A theme is data.</span>
+        Colour, typography, motion, brand and atmosphere are all tokens on a theme object.
+        Components never test a theme by name; a theme opts into a behaviour by defining
+        the token for it. This document is drawn in one of them.
+      </li>
+    </ul>
+  </section>
+
+  <section class="chapter">
+    <div class="chapter-head">
+      <span class="chapter-number">06</span>
+      <h2>Testing</h2>
+    </div>
+    <p>
+      734 unit tests across 33 suites, run under TypeScript strict mode. They target logic
+      rather than pixels: formatting, the severity model, API mapping, the repository and
+      its migrations, the theme and typography contracts, WCAG contrast, icon mapping, the
+      community layer, storm legends and EXIF date resolution.
+    </p>
+    <p>
+      The suite runs in two timezones, the default UTC and, via
+      <span class="mono">npm run test:tz</span>, <span class="mono">America/Toronto</span>,
+      because a whole class of date bug in this app is invisible under UTC.
+    </p>
+<pre>npm test          # 734 tests
+npm run test:tz   # the same suite at a negative UTC offset
+npm run typecheck # tsc --noEmit, clean
+npm run lint      # eslint, clean</pre>
+  </section>
+
+  <section class="chapter">
+    <div class="chapter-head">
+      <span class="chapter-number">07</span>
+      <h2>AI tool disclosure</h2>
+    </div>
+    <p>
+      The assessment permits AI assistance and requires disclosure. The full account is in
+      <span class="mono">docs/AI_DISCLOSURE.md</span>, which names the tools, separates
+      what was directed from what was generated, and lists specific cases where the
+      model's output was wrong and was corrected.
+    </p>
+    <p>
+      In summary: Claude and Claude Code were used throughout as an implementation partner.
+      The architecture, the product decisions, the data model and the acceptance bar were
+      mine; a large share of the implementation was generated to that direction and then
+      reviewed, run and corrected. No other AI tools were used, and no code was copied from
+      an existing weather or storm-chasing application.
+    </p>
+  </section>
+
+  <section class="chapter">
+    <div class="chapter-head">
+      <span class="chapter-number">08</span>
+      <h2>Time log</h2>
+    </div>
+    <p style="margin-bottom: 5mm;">
+      Total <strong>10 h 15 m</strong>, inside the 24-hour window. Where git history can
+      bound a session, it does, and the log says so. Session one landed as a single commit
+      and its figures are estimates. The block-by-block breakdown is in
+      <span class="mono">docs/TIME_LOG.md</span>.
+    </p>
+    <table class="grid">
+      <thead>
+        <tr><th>Session</th><th>Duration</th><th>Work</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="feature-name">One: build</td>
+          <td class="duration">7 h 45 m</td>
+          <td>Stack, design system, weather domain and feature, storm capture, persistence, field log, map, offline, dark mode, cloud client, tests, documentation.</td>
+        </tr>
+        <tr>
+          <td class="feature-name">Two: themes and accessibility</td>
+          <td class="duration">1 h 20 m</td>
+          <td>The theme system, brand identity, onboarding, landing page, and three accessibility defects closed.</td>
+        </tr>
+        <tr>
+          <td class="feature-name">Three: community, legends and charts</td>
+          <td class="duration">1 h 10 m</td>
+          <td>Community layer, 22 storm legends, the chart primitives, brand marks, and a pre-landing review pass.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="chapter">
+    <div class="chapter-head">
+      <span class="chapter-number">09</span>
+      <h2>Contact</h2>
+    </div>
+    <div class="card">
+      <p class="card-label">Candidate</p>
+      <dl>
+        <dt>Name</dt>
+        <dd>Melanie Baratto</dd>
+        <dt>Portfolio</dt>
+        <dd><a href="https://melaniesigrid.com">melaniesigrid.com</a></dd>
+        <dt>Email</dt>
+        <dd><a href="mailto:melaniesigrid@protonmail.com">melaniesigrid@protonmail.com</a></dd>
+      </dl>
+    </div>
+  </section>
+
+  <div class="colophon">
+    <span>Storm Chaser · Assessment submission</span>
+    <span>Set in Archivo Black &amp; IBM Plex Mono</span>
+  </div>
+
+</main>
+
+</body>
+</html>
