@@ -75,6 +75,20 @@ All notable changes to this project are documented here. Dates are YYYY-MM-DD.
 
 ### Fixed
 
+- **A missing hourly temperature was drawn as a freezing one.** The mapper
+  substituted 0 for a null reading, and 0 is finite, so the chart could not
+  tell a gap from a measurement: a 24 to 31 degree day with one null hour drew
+  a spike to the floor and dragged the whole domain down with it.
+  `HourlyPoint.temperatureC` is nullable now, `Point` carries a `defined` flag,
+  and the line, curve and area builders break around a gap rather than drawing
+  through it. `ScaleOptions.min`/`max` went with it: dead in production, and
+  what they covered is `normalise`, which is still live.
+- **Map markers were unbounded.** Every stored report, every community report
+  and all twenty-two legends mounted a native marker view at once, whatever the
+  map was showing. `model/viewport.ts` culls to the padded viewport and caps
+  each layer at 60, keeping the pins nearest the centre, including on the first
+  frame before the map has reported a region. Longitude is measured the short
+  way round, so the antimeridian no longer hides half the world.
 - **The seven day outlook overlapped itself on every phone.** The row was six
   fixed-width columns totalling 408dp inside a panel 326dp wide, and React
   Native overlaps an overflowing row rather than clipping it, so the gust

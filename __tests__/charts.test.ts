@@ -55,12 +55,6 @@ describe('scaleSeries', () => {
     }
   });
 
-  it('honours a forced domain so sibling charts share an axis', () => {
-    const points = scaleSeries([5], { ...BOX, min: 0, max: 10 });
-
-    expect(points[0]?.y).toBe(25);
-  });
-
   /**
    * One null temperature used to make Math.min/Math.max NaN for the whole
    * series, which blanked the entire chart rather than losing one reading.
@@ -85,15 +79,6 @@ describe('scaleSeries', () => {
     for (const point of scaleSeries([Number.NaN, Number.POSITIVE_INFINITY], BOX)) {
       expect(Number.isFinite(point.x)).toBe(true);
       expect(Number.isFinite(point.y)).toBe(true);
-    }
-  });
-
-  it('keeps a value outside a forced domain inside the box', () => {
-    const points = scaleSeries([-50, 200], { ...BOX, min: 0, max: 10 });
-
-    for (const point of points) {
-      expect(point.y).toBeGreaterThanOrEqual(0);
-      expect(point.y).toBeLessThanOrEqual(50);
     }
   });
 
@@ -228,35 +213,92 @@ describe('scaleSeries degenerate boxes and domains', () => {
     }
   });
 
-  it('stays inside the box when a forced domain is inverted', () => {
-    // min above max is a caller bug, but it must not paint outside the chart.
-    for (const point of scaleSeries([2, 5, 8], { ...BOX, min: 10, max: 0 })) {
-      expect(point.y).toBeGreaterThanOrEqual(0);
-      expect(point.y).toBeLessThanOrEqual(50);
-    }
-  });
-
-  it('centres every point when a forced domain has collapsed', () => {
-    for (const point of scaleSeries([2, 5, 8], { ...BOX, min: 7, max: 7 })) {
-      expect(point.y).toBe(25);
-    }
-  });
-
-  it('places a lone non-finite reading at the bottom rather than dropping it', () => {
-    // `normalise` returns 0 for a non-finite value, and 0 is the floor of the
-    // box, so the gap in the series reads as "no reading" instead of NaN.
+  it('parks a lone missing reading on the centre line, not the floor', () => {
+    // It used to land at the floor, because `normalise` returns 0 for a
+    // non-finite value and 0 is the bottom of the box. The point is marked
+    // undefined now, so nothing draws it; the centre is only the value
+    // anything that ignores `defined` would fall back to.
     const [only] = scaleSeries([Number.NaN], BOX);
 
-    expect(only?.y).toBe(50);
+    expect(only?.defined).toBe(false);
+    expect(only?.y).toBe(25);
     expect(only?.x).toBe(50);
   });
+});
 
-  it('keeps the domain honest when only a forced minimum is supplied', () => {
-    // max still comes from the data, so 20 is the top of the box.
-    const points = scaleSeries([10, 20], { ...BOX, min: 0 });
+describe('gaps in a series', () => {
+  /*
+   * REGRESSION. `mappers.ts` used to substitute 0 for a missing hourly
+   * temperature. 0 is finite, so the chart could not tell it from a reading:
+   * a 24 to 31 degree day with one null hour drew a spike to the floor and
+   * dragged the domain down with it, flattening the real curve into the top
+   * of the box. The mapper emits null now, and the chart has to carry it all
+   * the way through without inventing a temperature.
+   */
+  it('marks a missing reading undefined and leaves the rest defined', () => {
+    const points = scaleSeries([24, null, 31], BOX);
 
-    expect(points[1]?.y).toBe(0);
-    expect(points[0]?.y).toBe(25);
+    expect(points.map((point) => point.defined)).toEqual([true, false, true]);
+  });
+
+  it('keeps the domain off the missing hour', () => {
+    // 24 is the floor and 31 the ceiling. If null were still 0, the 24 would
+    // sit near the top of the box instead of at the bottom of it.
+    const points = scaleSeries([24, null, 31], BOX);
+
+    expect(points[0]?.y).toBe(50);
+    expect(points[2]?.y).toBe(0);
+  });
+
+  it('holds every later point on its own slot', () => {
+    // The x positions must not shift: the strip labels hour N under point N.
+    const complete = scaleSeries([24, 27, 31], BOX);
+    const sparse = scaleSeries([24, null, 31], BOX);
+
+    expect(sparse.map((point) => point.x)).toEqual(complete.map((point) => point.x));
+  });
+
+  it('breaks the line rather than drawing across the gap', () => {
+    const path = toLinePath(scaleSeries([24, null, 31], BOX));
+
+    // Two subpaths, so two moves: one per run of real readings.
+    expect(path.match(/M/g)?.length).toBe(2);
+  });
+
+  it('breaks the curve rather than bending through the gap', () => {
+    const path = toSmoothPath(scaleSeries([1, 5, 2, null, 8, 4, 9], BOX));
+
+    expect(path.match(/M/g)?.length).toBe(2);
+  });
+
+  it('fills each run of readings separately', () => {
+    const path = toAreaPath(scaleSeries([1, 5, null, 8, 4], BOX), 50);
+
+    // One closed shape per run: ink under an unmeasured hour is the same lie
+    // the line would have told.
+    expect(path.match(/Z/g)?.length).toBe(2);
+  });
+
+  it('draws nothing at all when every reading is missing', () => {
+    const points = scaleSeries([null, null, null], BOX);
+
+    expect(toLinePath(points)).toBe('');
+    expect(toSmoothPath(points)).toBe('');
+    expect(toAreaPath(points, 50)).toBe('');
+  });
+
+  it('refuses to fill a run of one', () => {
+    // A single reading between two gaps has no area under it.
+    expect(toAreaPath(scaleSeries([null, 7, null], BOX), 50)).toBe('');
+  });
+
+  it('is unchanged for a complete series', () => {
+    // The common case must take exactly the path it always did.
+    const points = scaleSeries([1, 5, 2, 8], BOX);
+
+    expect(points.every((point) => point.defined)).toBe(true);
+    expect(toLinePath(points).match(/M/g)?.length).toBe(1);
+    expect(toAreaPath(points, 50).match(/Z/g)?.length).toBe(1);
   });
 });
 

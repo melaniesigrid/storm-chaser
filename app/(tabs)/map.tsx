@@ -17,6 +17,7 @@ import {
   type StormLegend,
 } from '@/features/storms/model/legends';
 import { boundingRegion } from '@/features/storms/model/mapRegion';
+import { visibleMarkers, type Viewport } from '@/features/storms/model/viewport';
 import { chaseLevelForTier, describeStormType } from '@/features/storms/model/stormTypes';
 import type { StormReport } from '@/features/storms/model/types';
 import { toLevel } from '@/features/weather/model/severity';
@@ -59,6 +60,30 @@ export default function MapScreen() {
 
   const region = useMemo<Region | undefined>(() => boundingRegion(located), [located]);
 
+  /**
+   * What the map is currently showing, which is what decides how many pins are
+   * worth mounting. Seeded from the initial region so the very first frame is
+   * already culled rather than mounting everything once and then correcting.
+   *
+   * `onRegionChangeComplete` rather than `onRegionChange`: the latter fires
+   * continuously through a drag, and re-culling three layers on every frame of
+   * a pan costs more than the markers it saves.
+   */
+  const [viewport, setViewport] = useState<Viewport | undefined>(region);
+
+  const ownPins = useMemo(
+    () => visibleMarkers(located, (report) => report.coordinates, viewport),
+    [located, viewport],
+  );
+  const communityPins = useMemo(
+    () => visibleMarkers(others, (report) => report.coordinates, viewport),
+    [others, viewport],
+  );
+  const lorePins = useMemo(
+    () => visibleMarkers(loreMarkers, (legend) => legend.coordinates, viewport),
+    [loreMarkers, viewport],
+  );
+
   const openReport = useCallback((id: string) => router.push(`/storm/${id}`), [router]);
   const openLegend = useCallback(
     (id: string) => router.push({ pathname: '/legend/[id]', params: { id } }),
@@ -84,11 +109,12 @@ export default function MapScreen() {
         provider={PROVIDER_DEFAULT}
         style={{ flex: 1 }}
         initialRegion={region}
+        onRegionChangeComplete={setViewport}
         showsUserLocation
         showsCompass
       >
-        <OwnReportMarkers reports={located} onOpen={openReport} />
-        <CommunityMarkers reports={others} />
+        <OwnReportMarkers reports={ownPins} onOpen={openReport} />
+        <CommunityMarkers reports={communityPins} />
         {/*
           Always mounted, with an empty list when lore is off, rather than
           unmounted behind a condition. Unmounting a fragment-returning child of
@@ -97,7 +123,7 @@ export default function MapScreen() {
           Varying the array instead goes through the marker diff that both
           platforms handle.
         */}
-        <LoreMarkers legends={loreMarkers} onOpen={openLegend} />
+        <LoreMarkers legends={lorePins} onOpen={openLegend} />
       </MapView>
 
       <View style={{ position: 'absolute', bottom: 24, left: 16, right: 16 }}>

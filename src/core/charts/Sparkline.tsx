@@ -4,7 +4,11 @@ import Svg, { Circle, Defs, LinearGradient, Path, Stop } from 'react-native-svg'
 import { scaleSeries, toAreaPath, toSmoothPath } from './geometry';
 
 export interface SparklineProps {
-  values: number[];
+  /**
+   * A null is a gap, not a zero. The chart keeps the slot and breaks the line
+   * around it; see `Point.defined` in `geometry.ts`.
+   */
+  values: (number | null | undefined)[];
   width: number;
   height: number;
   color: string;
@@ -77,7 +81,9 @@ export const Sparkline = memo(function Sparkline({
         fill="none"
       />
 
-      {showLast && last ? (
+      {/* Only when the last hour was actually measured. A dot on an undefined
+          point is a reading the API never returned. */}
+      {showLast && last?.defined ? (
         <Circle cx={last.x} cy={last.y} r={strokeWidth + 1.2} fill={color} />
       ) : null}
     </Svg>

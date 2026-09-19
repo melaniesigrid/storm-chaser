@@ -30,10 +30,9 @@ export function ForecastStrip({ hours }: { hours: HourlyPoint[] }) {
   // is handed, so a fresh array every render is a fresh chart every render.
   // NOT compacted, unlike the CAPE series below: the sparkline spreads points
   // evenly across a width derived from `hours.length`, so dropping one would
-  // slide every later point off the hour it describes. `scaleSeries` already
-  // refuses to emit NaN for a non-finite reading. The real hazard is upstream:
-  // `mappers.ts` substitutes 0 for a missing temperature, which is finite, so
-  // a null hour still drags the domain down to 0 rather than being skipped.
+  // slide every later point off the hour it describes. A missing hour arrives
+  // as null and stays null all the way into `scaleSeries`, which keeps its
+  // slot, marks the point undefined and breaks the curve around it.
   const temperatures = useMemo(() => hours.map((hour) => hour.temperatureC), [hours]);
 
   // CAPE bars share one domain across the strip, so a tall bar means real

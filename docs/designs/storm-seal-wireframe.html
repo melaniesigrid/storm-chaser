@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Storm Seal Wireframe</title>
+<!--
+  WIREFRAME, not a mockup. Deliberately rough: system fonts, flat fills, no
+  real typography. What it is testing is layout and information hierarchy for
+  the three seal templates, plus the picker and the collection grid.
+
+  Palette is not decoration here: cream #FFF8EC and 3px ink outlines are the
+  shipped Field Card theme, so they are a constraint, not a proposal.
+-->
+<style>
+  :root {
+    --paper: #FFF8EC;
+    --ink: #14213A;
+    --rule: #14213A;
+    --sketch: #9A9A9A;
+    --severe: #C2410C;
+    --notable: #B45309;
+    --routine: #4B5563;
+    --bg: #E8E4DB;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --bg: #1A1917; }
+  }
+  :root[data-theme="dark"] { --bg: #1A1917; }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 24px 16px 64px;
+    background: var(--bg);
+    font: 13px/1.45 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    color: var(--ink);
+  }
+  .wrap { max-width: 1120px; margin: 0 auto; }
+  h1 { font-size: 18px; margin: 0 0 4px; letter-spacing: .02em; }
+  .sub { color: #5A5A5A; margin: 0 0 28px; font-size: 12px; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) h1,
+    :root:not([data-theme="light"]) .sub { color: #D8D4CB; }
+  }
+  h2 {
+    font-size: 11px; text-transform: uppercase; letter-spacing: .12em;
+    margin: 36px 0 12px; color: #6B6B6B;
+    border-bottom: 1px dashed var(--sketch); padding-bottom: 6px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) h2 { color: #B8B4AB; border-color: #555; }
+  }
+
+  .row { display: flex; gap: 20px; flex-wrap: wrap; align-items: flex-start; }
+
+  /* A seal is a 4:5 printed card. 300px wide keeps three across on desktop. */
+  .seal {
+    width: 300px; background: var(--paper); color: var(--ink);
+    border: 3px solid var(--ink); box-shadow: 7px 7px 0 var(--ink);
+    padding: 0; position: relative;
+  }
+  .seal .cap {
+    font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
+    padding: 7px 10px; border-bottom: 3px solid var(--ink);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .photo {
+    height: 168px; background:
+      repeating-linear-gradient(135deg, #C9C4BA 0 9px, #BDB8AE 9px 18px);
+    display: flex; align-items: center; justify-content: center;
+    color: #4A4A4A; font-size: 10px; letter-spacing: .14em;
+  }
+  .body { padding: 11px 12px 14px; }
+  .type {
+    font-size: 27px; font-weight: 900; letter-spacing: -.015em;
+    line-height: .95; margin: 0 0 7px; text-transform: uppercase;
+  }
+  .meta { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 10.5px; line-height: 1.6; }
+  .rule { border: 0; border-top: 3px solid var(--ink); margin: 9px 0; }
+  .instr {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 10px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1px 10px;
+  }
+  .footer {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    margin-top: 12px;
+  }
+  .mark { font-size: 10px; font-weight: 800; letter-spacing: .09em; }
+
+  /* The circular stamp. Ring lettering is faked here with a dashed circle and
+     a label; in the real SVG it is textPath around a <circle>. */
+  .stamp {
+    width: 74px; height: 74px; border-radius: 50%;
+    border: 3px solid var(--severe); color: var(--severe);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    transform: rotate(-11deg); opacity: .88; text-align: center; flex: none;
+  }
+  .stamp .bolt { font-size: 19px; line-height: 1; }
+  .stamp .sc { font-size: 8px; letter-spacing: .06em; font-weight: 800; margin-top: 2px; }
+  .stamp .ring {
+    position: absolute; inset: 4px; border: 1px dashed currentColor; border-radius: 50%;
+  }
+  .stampwrap { position: relative; }
+
+  .tierbadge {
+    font-size: 9px; font-weight: 800; letter-spacing: .1em;
+    border: 2px solid currentColor; padding: 2px 5px;
+  }
+  .t-severe { color: var(--severe); }
+  .t-notable { color: var(--notable); }
+
+  /* Template A overlays the stamp directly on the photograph. */
+  .overlay { position: relative; }
+  .overlay .stampwrap { position: absolute; right: 10px; bottom: 10px; }
+  /* Revised A: the seal is the subject, centred and large, not a corner badge. */
+  .bigseal {
+    position: absolute; inset: 0; display: flex;
+    align-items: center; justify-content: center;
+    transform: rotate(-6deg);
+  }
+
+  .note {
+    width: 300px; font-size: 11.5px; color: #555; line-height: 1.5;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .note { color: #C4C0B7; }
+  }
+  .note b { color: inherit; }
+
+  /* Phone-frame sketches for the picker and the grid. */
+  .phone {
+    width: 230px; border: 2px solid var(--sketch); border-radius: 18px;
+    background: var(--paper); padding: 10px; color: var(--ink);
+  }
+  .phone .bar {
+    font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
+    color: #777; margin-bottom: 9px;
+  }
+  .swatches { display: flex; gap: 7px; }
+  .sw {
+    flex: 1; height: 82px; border: 2px solid var(--ink); font-size: 8px;
+    display: flex; align-items: flex-end; justify-content: center; padding-bottom: 3px;
+    letter-spacing: .06em;
+  }
+  .sw.on { box-shadow: 3px 3px 0 var(--ink); }
+  .sw.off { opacity: .45; }
+  .btnrow { display: flex; gap: 7px; margin-top: 11px; }
+  .btn {
+    flex: 1; border: 2px solid var(--ink); text-align: center; padding: 7px 0;
+    font-size: 10px; font-weight: 800; letter-spacing: .06em;
+  }
+  .btn.primary { background: var(--ink); color: var(--paper); }
+
+  .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .cell {
+    aspect-ratio: 1; border: 2px solid var(--ink); display: flex;
+    align-items: center; justify-content: center; font-size: 15px;
+  }
+  .cell.locked { border-style: dashed; border-color: var(--sketch); color: var(--sketch); font-size: 11px; }
+  /* An unearned seal is the same ring, pressed faintly into the paper. Not a
+     padlock: the grid should read as a plate of engravings with gaps. */
+  .cell.ghost {
+    border-color: rgba(20, 33, 58, .18);
+    background:
+      radial-gradient(circle at 50% 50%,
+        transparent 0 26%,
+        rgba(20, 33, 58, .11) 26% 30%,
+        transparent 30% 38%,
+        rgba(20, 33, 58, .08) 38% 40%,
+        transparent 40%);
+  }
+  .count { font-size: 10px; letter-spacing: .08em; margin-top: 9px; font-weight: 800; }
+
+  .steps { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .step {
+    border: 2px dashed var(--sketch); padding: 8px 10px; font-size: 10px;
+    background: var(--paper); color: var(--ink); min-width: 92px; text-align: center;
+  }
+  .arrow { color: var(--sketch); font-size: 15px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Storm Seal &mdash; layout wireframe</h1>
+  <p class="sub">
+    Rough sketch. Testing information hierarchy and layout only &mdash; type is system fonts,
+    not Archivo Black. Cream stock and 3px ink outlines are the shipped Field Card theme,
+    so they are a constraint rather than a proposal.
+  </p>
+
+  <h2>The three seal templates &mdash; same report, same data, three objects</h2>
+  <div class="row">
+
+    <!-- TEMPLATE A, REVISED: the post is still the photograph, but the seal is
+         now large and centred, and the ring lettering is real SVG textPath
+         carrying the actual coordinates and timestamp. Previously it was a
+         small corner badge, which read as a logo watermark rather than a seal. -->
+    <div>
+      <div class="seal">
+        <div class="cap"><span>Template A &middot; Wax seal</span><span class="tierbadge t-severe">SEVERE</span></div>
+        <div class="overlay">
+          <div class="photo" style="height:300px">PHOTOGRAPH &mdash; FULL BLEED</div>
+          <div class="bigseal">
+            <svg viewBox="0 0 200 200" width="186" height="186" aria-label="Wax seal">
+              <defs>
+                <!-- Upper arc runs clockwise so text sits upright over the top. -->
+                <path id="ringTop" d="M 100,100 m -74,0 a 74,74 0 1,1 148,0" fill="none" />
+                <!-- Lower arc runs anticlockwise so text is not upside down. -->
+                <path id="ringBot" d="M 100,100 m -66,0 a 66,66 0 1,0 132,0" fill="none" />
+              </defs>
+              <circle cx="100" cy="100" r="92" fill="var(--paper)" stroke="var(--severe)" stroke-width="5" />
+              <circle cx="100" cy="100" r="82" fill="none" stroke="var(--severe)" stroke-width="1.5"
+                      stroke-dasharray="1.5 3.5" />
+              <circle cx="100" cy="100" r="52" fill="none" stroke="var(--severe)" stroke-width="2.5" />
+              <text fill="var(--severe)" font-size="11.5" font-weight="800" letter-spacing="1.1"
+                    font-family="ui-monospace, Menlo, monospace">
+                <textPath href="#ringTop" startOffset="50%" text-anchor="middle">
+                  49.2827&#176;N &#183; 123.1207&#176;W
+                </textPath>
+              </text>
+              <text fill="var(--severe)" font-size="10" font-weight="700" letter-spacing="1.3"
+                    font-family="ui-monospace, Menlo, monospace">
+                <textPath href="#ringBot" startOffset="50%" text-anchor="middle">
+                  19 SEP 2026 &#183; 16:42 PDT
+                </textPath>
+              </text>
+              <text x="100" y="92" text-anchor="middle" font-size="30" fill="var(--severe)">&#9889;</text>
+              <text x="100" y="118" text-anchor="middle" font-size="14" font-weight="900"
+                    letter-spacing="1" fill="var(--severe)">TORNADO</text>
+              <text x="100" y="132" text-anchor="middle" font-size="8.5" font-weight="700"
+                    letter-spacing="1.4" fill="var(--severe)"
+                    font-family="ui-monospace, Menlo, monospace">CHASE 94</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <p class="note">
+        <b>A. Revised.</b> The seal is now the subject, not a corner badge, and
+        the ring lettering is real <code>textPath</code> carrying the actual
+        coordinates and timestamp &mdash; which is what makes it a seal rather
+        than a logo. Six fields is its ceiling: coords, date, time, type, chase
+        score, monogram. Everything else is dropped on purpose.
+      </p>
+    </div>
+
+    <!-- TEMPLATE B: the full printed record. Everything captured gets printed. -->
+    <div>
+      <div class="seal">
+        <div class="cap"><span>Template B &middot; Field Card</span><span class="tierbadge t-severe">SEVERE</span></div>
+        <div class="photo">PHOTOGRAPH</div>
+        <div class="body">
+          <p class="type">Tornado</p>
+          <div class="meta">
+            49.2827&deg;N 123.1207&deg;W &plusmn;6m<br />
+            19 SEP 2026 &middot; 16:42 PDT
+          </div>
+          <hr class="rule" />
+          <div class="instr">
+            <span>TEMP 22&deg;C</span><span>GUST 94 km/h</span>
+            <span>WIND 61 km/h</span><span>DIR WSW 247&deg;</span>
+            <span>PRES 998 hPa</span><span>RH 81%</span>
+            <span>CAPE 2840</span><span>PRCP 14.2 mm</span>
+          </div>
+          <div class="footer">
+            <span class="mark">&#9889; STORM CHASER</span>
+            <span class="mark">CHASE 94</span>
+          </div>
+        </div>
+      </div>
+      <p class="note">
+        <b>B.</b> Prints every field in <code>CapturedConditions</code>. The
+        receipt-from-the-atmosphere version. Densest, so it needs the largest
+        type on the classification to survive a feed thumbnail.
+      </p>
+    </div>
+
+    <!-- TEMPLATE C: B plus the collectible signals. Tier, serial, stamp. -->
+    <div>
+      <div class="seal">
+        <div class="cap"><span>Template C &middot; Collectible</span><span class="tierbadge t-severe">SEVERE &middot; 07/36</span></div>
+        <div class="photo">PHOTOGRAPH</div>
+        <div class="body">
+          <p class="type">Tornado</p>
+          <div class="meta">
+            49.2827&deg;N 123.1207&deg;W<br />
+            19 SEP 2026 &middot; 16:42 PDT
+          </div>
+          <hr class="rule" />
+          <div style="display:flex; gap:10px; align-items:center;">
+            <div class="instr" style="flex:1">
+              <span>G94 km/h</span><span>998 hPa</span>
+              <span>CAPE 2840</span><span>RH 81%</span>
+            </div>
+            <div class="stampwrap">
+              <div class="stamp"><div class="ring"></div><div class="bolt">&#9889;</div><div class="sc">No. 007</div></div>
+            </div>
+          </div>
+          <div class="footer">
+            <span class="mark">&#9889; STORM CHASER</span>
+            <span class="mark">CHASE 94 / 100</span>
+          </div>
+        </div>
+      </div>
+      <p class="note">
+        <b>C.</b> B plus the collectible signals: tier band in the cap, serial
+        derived from log position, wax stamp inline. Tier colour is the only
+        thing that changes between a severe and a routine seal.
+      </p>
+    </div>
+  </div>
+
+  <h2>Tier changes the seal, not just a label &mdash; same template, three tiers</h2>
+  <div class="row">
+    <div class="seal" style="width:196px">
+      <div class="cap"><span>Severe</span><span class="tierbadge t-severe">TIER 1</span></div>
+      <div class="photo" style="height:96px">PHOTO</div>
+      <div class="body"><p class="type" style="font-size:20px">Tornado</p>
+        <div class="meta">CHASE 94 &middot; No. 007</div></div>
+    </div>
+    <div class="seal" style="width:196px; border-color:var(--notable); box-shadow:7px 7px 0 var(--notable)">
+      <div class="cap" style="border-color:var(--notable)"><span>Notable</span><span class="tierbadge t-notable">TIER 2</span></div>
+      <div class="photo" style="height:96px">PHOTO</div>
+      <div class="body"><p class="type" style="font-size:20px">Shelf cloud</p>
+        <div class="meta">CHASE 58 &middot; No. 012</div></div>
+    </div>
+    <div class="seal" style="width:196px; border-width:2px; border-color:var(--routine); box-shadow:none">
+      <div class="cap" style="border-width:2px; border-color:var(--routine)"><span>Routine</span><span class="tierbadge" style="color:var(--routine)">TIER 3</span></div>
+      <div class="photo" style="height:96px">PHOTO</div>
+      <div class="body"><p class="type" style="font-size:20px">Other</p>
+        <div class="meta">CHASE 31 &middot; No. 019</div></div>
+    </div>
+    <p class="note">
+      Severe gets the heaviest outline and hard shadow. Routine loses the shadow
+      and drops to a 2px rule. The hierarchy is physical &mdash; a severe seal is
+      literally heavier stock &mdash; so it survives being seen small and in greyscale.
+    </p>
+  </div>
+
+  <h2>The flow &mdash; from a report to a file on the camera roll</h2>
+  <div class="row">
+    <div class="phone">
+      <div class="bar">Storm detail &rarr; Stamp this</div>
+      <div class="swatches">
+        <div class="sw off">WAX</div>
+        <div class="sw on">CARD</div>
+        <div class="sw off">COLLECT</div>
+      </div>
+      <div style="height:110px; border:2px solid var(--ink); margin-top:10px; display:flex; align-items:center; justify-content:center; font-size:10px; letter-spacing:.1em;">
+        LIVE PREVIEW
+      </div>
+      <div class="btnrow">
+        <div class="btn">Save</div>
+        <div class="btn primary">Share</div>
+      </div>
+      <p style="font-size:10px; color:#777; margin:9px 0 0">
+        Tapping a swatch re-runs the animation on the preview: the stamp drops,
+        impacts with a haptic, ink spreads, settles.
+      </p>
+    </div>
+
+    <div class="phone">
+      <div class="bar">Collection &mdash; 12 types &times; 3 tiers</div>
+      <div class="grid">
+        <div class="cell">&#127786;</div><div class="cell">&#9889;</div>
+        <div class="cell ghost"></div><div class="cell">&#127785;</div>
+        <div class="cell ghost"></div><div class="cell">&#127784;</div>
+        <div class="cell ghost"></div><div class="cell ghost"></div>
+        <div class="cell">&#127746;</div><div class="cell ghost"></div>
+        <div class="cell ghost"></div><div class="cell ghost"></div>
+      </div>
+      <div class="count">14 / 36 SEALED</div>
+      <p style="font-size:10px; color:#777; margin:9px 0 0">
+        <b>Revised.</b> Unearned cells are ghosted seal silhouettes, not
+        padlocks &mdash; the same concentric ring pressed faintly into the
+        paper. The grid reads as a plate of engravings with gaps rather than
+        twenty-two locked doors, and day one at 1/36 is an invitation instead
+        of a scoreboard.
+      </p>
+    </div>
+
+    <div style="flex:1; min-width:280px">
+      <div class="steps">
+        <div class="step">sealSvg(report,&nbsp;template)</div><span class="arrow">&rarr;</span>
+        <div class="step">&lt;Svg 1080&times;1350&gt;</div><span class="arrow">&rarr;</span>
+        <div class="step">captureRef()</div><span class="arrow">&rarr;</span>
+        <div class="step">file://seal.png</div>
+      </div>
+      <div class="steps" style="margin-top:9px">
+        <span class="arrow" style="margin-left:6px">&#8627;</span>
+        <div class="step">MediaLibrary.saveToLibraryAsync()</div>
+        <div class="step">Sharing.shareAsync()</div>
+      </div>
+      <p class="note" style="width:auto; margin-top:12px">
+        The pure function is the whole point: <code>sealSvg</code> takes a
+        <code>StormReport</code> and a template id and returns an SVG tree with
+        no renderer involved, so all 36 variants snapshot-test in Jest. Only the
+        last two boxes need a device.
+      </p>
+      <p class="note" style="width:auto">
+        <b>Unresolved:</b> the 1080&times;1350 export needs its own type scale
+        &mdash; the on-screen preview is roughly 340px wide, so every size in the
+        seal has to be defined in viewBox units, not points.
+      </p>
+    </div>
+  </div>
+</div>
+</body>
+</html>

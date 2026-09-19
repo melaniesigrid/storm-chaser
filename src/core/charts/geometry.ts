@@ -14,6 +14,20 @@ import { clamp } from '@/core/utils/clamp';
 export interface Point {
   x: number;
   y: number;
+  /**
+   * Whether this point came from a real reading.
+   *
+   * A sparse series still needs an x for every slot, because the sparkline
+   * spreads points evenly across a width derived from the series length:
+   * dropping a null would slide every later point onto the wrong hour. So a
+   * missing reading keeps its place and says so here, and the path builders
+   * break the line around it rather than drawing through it.
+   *
+   * Without this the gap was worse than invisible. `normalise` returns 0 for a
+   * non-finite value, and 0 maps to the BOTTOM of the box, so one null hour
+   * drew a spike to the floor of the chart and read as a real temperature.
+   */
+  defined: boolean;
 }
 
 export interface ScaleOptions {
@@ -21,9 +35,6 @@ export interface ScaleOptions {
   height: number;
   /** Keeps stroke width and dots from being clipped at the edges. */
   padding?: number;
-  /** Forces the domain instead of deriving it from the values. */
-  min?: number;
-  max?: number;
 }
 
 /**
@@ -33,7 +44,7 @@ export interface ScaleOptions {
  * along the vertical centre rather than at the top, which is what a reader
  * expects from "nothing is changing".
  */
-export function scaleSeries(values: number[], options: ScaleOptions): Point[] {
+export function scaleSeries(values: (number | null | undefined)[], options: ScaleOptions): Point[] {
   const { width, height } = options;
   const padding = options.padding ?? 0;
 
@@ -46,27 +57,68 @@ export function scaleSeries(values: number[], options: ScaleOptions): Point[] {
   // series would otherwise make Math.min/Math.max NaN, which propagates into
   // every point and blanks the whole chart rather than losing one reading.
   const finite = compact(values);
-  const min = options.min ?? (finite.length ? Math.min(...finite) : 0);
-  const max = options.max ?? (finite.length ? Math.max(...finite) : 0);
+  const min = finite.length ? Math.min(...finite) : 0;
+  const max = finite.length ? Math.max(...finite) : 0;
 
   return values.map((value, index) => {
     const t = values.length === 1 ? 0.5 : index / (values.length - 1);
+    const defined = typeof value === 'number' && Number.isFinite(value);
 
     return {
       x: padding + t * usableWidth,
       // `normalise` already centres a flat series, clamps to the box and
-      // refuses to emit NaN, which is exactly the behaviour wanted here.
-      y: padding + (1 - normalise(value, min, max)) * usableHeight,
+      // refuses to emit NaN, which is exactly the behaviour wanted here. An
+      // undefined point is parked on the centre line rather than the floor, so
+      // that anything which ignores `defined` degrades to a flat gap instead
+      // of a spike.
+      y: defined
+        ? padding + (1 - normalise(value as number, min, max)) * usableHeight
+        : padding + 0.5 * usableHeight,
+      defined,
     };
   });
 }
 
-/** An open polyline through the points. Empty string for an empty series. */
+/**
+ * The contiguous runs of real readings, in order.
+ *
+ * One run for a complete series, which is the common case and the reason every
+ * helper below still behaves exactly as it did before nulls were allowed.
+ */
+export function definedRuns(points: Point[]): Point[][] {
+  const runs: Point[][] = [];
+  let run: Point[] = [];
+
+  for (const point of points) {
+    if (point.defined) {
+      run.push(point);
+      continue;
+    }
+    if (run.length) runs.push(run);
+    run = [];
+  }
+
+  if (run.length) runs.push(run);
+  return runs;
+}
+
+/**
+ * An open polyline through the points, broken at every gap.
+ *
+ * A gap starts a fresh subpath with `M` rather than continuing with `L`, which
+ * is what stops a missing hour being drawn as a straight line across the hole.
+ * One `d` string can hold as many subpaths as it needs.
+ */
 export function toLinePath(points: Point[]): string {
   if (!points.length) return '';
 
-  return points
-    .map((point, index) => `${index === 0 ? 'M' : 'L'}${round(point.x)} ${round(point.y)}`)
+  return definedRuns(points)
+    .map((run) =>
+      run
+        .map((point, index) => `${index === 0 ? 'M' : 'L'}${round(point.x)} ${round(point.y)}`)
+        .join(' '),
+    )
+    .filter(Boolean)
     .join(' ');
 }
 
@@ -77,12 +129,19 @@ export function toLinePath(points: Point[]): string {
 export function toAreaPath(points: Point[], baselineY: number): string {
   if (points.length < 2) return '';
 
-  const first = points[0] as Point;
-  const last = points[points.length - 1] as Point;
+  // One closed shape per run. Filling across a gap would put ink under an hour
+  // that has no reading, which is the same lie the line would have told.
+  return definedRuns(points)
+    .filter((run) => run.length >= 2)
+    .map((run) => {
+      const first = run[0] as Point;
+      const last = run[run.length - 1] as Point;
 
-  return `${toLinePath(points)} L${round(last.x)} ${round(baselineY)} L${round(first.x)} ${round(
-    baselineY,
-  )} Z`;
+      return `${toLinePath(run)} L${round(last.x)} ${round(baselineY)} L${round(first.x)} ${round(
+        baselineY,
+      )} Z`;
+    })
+    .join(' ');
 }
 
 /**
@@ -94,6 +153,16 @@ export function toAreaPath(points: Point[], baselineY: number): string {
  * smoothing never invents a reading that was not measured.
  */
 export function toSmoothPath(points: Point[]): string {
+  const runs = definedRuns(points);
+  if (!runs.length) return '';
+
+  // Each run is smoothed against its own neighbours only. Carrying the control
+  // points across a gap would bend the curve towards a reading on the far side
+  // of an hour nobody measured.
+  return runs.map(smoothRun).filter(Boolean).join(' ');
+}
+
+function smoothRun(points: Point[]): string {
   if (points.length < 3) return toLinePath(points);
 
   const first = points[0] as Point;

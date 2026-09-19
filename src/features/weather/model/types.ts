@@ -62,7 +62,14 @@ export interface CurrentConditions {
 
 export interface HourlyPoint {
   time: string;
-  temperatureC: number;
+  /**
+   * Null when the API had no reading for the hour.
+   *
+   * This was a `number` defaulted to 0, which is finite, so the chart could not
+   * tell a missing hour from a freezing one: a 24 to 31 degree day with one
+   * null hour drew a spike to the floor and dragged the whole domain with it.
+   */
+  temperatureC: number | null;
   precipitationProbabilityPct: number;
   precipitationMm: number;
   windGustKmh: number;

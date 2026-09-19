@@ -91,7 +91,8 @@ function toHourlyPoints(raw: OpenMeteoResponse, startIndex: number): HourlyPoint
 
     points.push({
       time,
-      temperatureC: numberOr(pick(hourly.temperature_2m, index), 0),
+      // Null rather than 0: a missing hour is a gap in the chart, not a reading.
+      temperatureC: pick(hourly.temperature_2m, index),
       precipitationProbabilityPct: numberOr(
         pick(hourly.precipitation_probability, index),
         0,

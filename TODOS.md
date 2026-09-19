@@ -40,35 +40,31 @@ The 44px hit area sets an explicit centre anchor because the marker default is
 bottom centre. Confirm the diamond sits on its coordinate and in register with
 the community rings.
 
-## Performance
-
-### Markers are unbounded
-**Priority:** P3
-**Files:** `app/(tabs)/map.tsx`
-Every stored and community report mounts a native marker with no viewport culling
-or clustering, on top of 22 always mounted legend pins. A chaser with a few
-hundred logged reports mounts a few hundred marker views at once.
-
-## Data
-
-### A missing hourly temperature becomes 0
-**Priority:** P3
-**Files:** `src/features/weather/model/mappers.ts`, `src/features/weather/components/ForecastStrip.tsx`
-`mappers.ts` substitutes `0` for a null temperature, which is finite, so the chart
-cannot filter it. A 24 to 31 °C day with one null hour collapses the curve into the
-top of the chart with a spike to the floor. Make `HourlyPoint.temperatureC`
-nullable and let the chart's existing non-finite handling do its job.
-
-## Charts
-
-### `ScaleOptions.min`/`max` are dead in production
-**Priority:** P4
-**Files:** `src/core/charts/geometry.ts`
-The forced domain branch is now exercised only by tests. The Sparkline
-passthrough that used it was removed as dead config. Either delete it or note why
-it stays.
-
 ## Completed
+
+### Markers were unbounded
+**Completed:** v1.3.0 (2026-09-19)
+Two bounds in `src/features/storms/model/viewport.ts`, pure and unit tested:
+the padded viewport drops what is off screen, and a hard cap of 60 per layer
+catches the zoomed-all-the-way-out case where everything is on screen. Over
+the cap, the pins nearest the centre win. The first frame is capped too, before
+the map has reported a region. Longitude is measured the short way round, so a
+pin across the antimeridian is 0.2 degrees away rather than 359.8.
+
+### A missing hourly temperature became 0
+**Completed:** v1.3.0 (2026-09-19)
+`HourlyPoint.temperatureC` is `number | null`, and the chart carries the null
+all the way through: `Point` gained a `defined` flag, and the line, curve and
+area builders break around a gap instead of drawing through it. A missing hour
+used to be plotted at the floor of the box, which is what `normalise` returns
+for a non-finite value, so it read as a real freezing reading.
+
+### `ScaleOptions.min`/`max` were dead in production
+**Completed:** v1.3.0 (2026-09-19)
+Deleted. The clamping and flat-domain behaviour they were covering lives in
+`normalise`, which `RangeBar` still uses, so the assertions moved there rather
+than being dropped.
+
 
 ### Screen recording link was a placeholder
 **Completed:** v1.3.0 (2026-09-19)
