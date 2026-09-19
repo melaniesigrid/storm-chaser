@@ -65,8 +65,11 @@ thesis holds; the earlier arithmetic behind it did not.
   shadows, display face **Big Shoulders Display 900**, light display
   **Big Shoulders Display 300**, mono IBM Plex Mono.
   *(Not Archivo Black. `themes.ts:462` records that Big Shoulders replaced it
-  precisely because it carries a real 100–900 range. `README.md:358` and
-  `README.md:436` still say Archivo Black and are stale — worth fixing
+  precisely because it carries a real 100–900 range. Five README lines still
+  say Archivo Black and are stale — **333, 358, 436, 477, 815**. Line 436 is
+  the damaging one: it claims Field Card "ships one weight, so the light
+  display role falls back to Instrument Sans 700", which is no longer true and
+  directly contradicts this design's use of Big Shoulders 300. Worth fixing
   separately, since the README is what an assessor reads.)*
   The seal adopts this theme wholesale; no new art direction. It should use
   the weight range, which the previous single-weight face could not offer.
@@ -147,13 +150,25 @@ src/features/storms/seal/
                      viewBox units. This is the snapshot-tested surface.
   sealSvg.tsx        SealLayout -> <Svg viewBox="0 0 1080 1350">. A dumb
                      mapper with no logic worth testing.
-  sealExport.ts      Svg.toDataURL -> FileSystem write
+  sealSerial.ts      FNV-1a over report.id -> six uppercase hex digits. Pure.
+  sealExport.ts      Svg.toDataURL (offscreen, no size options)
+                                   -> base64 decode -> File.write
                                    -> MediaLibrary.saveToLibraryAsync
                                    -> Sharing.shareAsync
   SealPreview.tsx    Mounts sealSvg at preview scale, runs the animation
+  SealExportSvg.tsx  Mounts sealSvg offscreen at full size, holds the ref
   SealPicker.tsx     Maps over SEAL_TEMPLATES, three swatches
-app/seal/[id].tsx    The stamp screen
+app/seal/[id].tsx          The stamp screen
+app/(tabs)/collection.tsx  The 12-cell plate
 ```
+
+**Base64 to disk.** `MediaLibrary.saveToLibraryAsync` needs a file URI, so
+`toDataURL`'s base64 must hit disk first, and the two file APIs differ here.
+`src/features/storms/data/photoStore.ts` already uses the modern
+`File`/`Paths`/`Directory` API, which has no base64 write mode; base64 writing
+lives in `expo-file-system/legacy`. **Decode the base64 to a `Uint8Array` and
+use `File.write()`**, staying on the modern API the repo already standardised
+on rather than importing a deprecated path into an assessment build.
 
 Splitting `sealLayout` from `sealSvg` is the change that makes premise 3 real:
 the layout model is genuinely rendererless and table-driven, and having one
@@ -162,20 +177,44 @@ matter of discipline.
 
 ### The export path
 
-`Svg.toDataURL(callback, { width: 1080, height: 1350 })` rasterises through
-react-native-svg's own renderer at the size passed, at vector level. This is
-the load-bearing decision:
+Rasterise with `Svg.toDataURL`, from an export `Svg` mounted offscreen at its
+full layout size, **called with no size options.**
 
-- It removes `react-native-view-shot` from the dependency list entirely — one
-  fewer native module in an Expo Go build.
-- It solves the resolution problem properly. Capturing a ~340px preview and
-  resampling to 1080 gives soft type, which is fatal for a share card. There is
-  no offscreen mount and no second render tree.
+The second half of that sentence is load-bearing and was wrong in an earlier
+draft. `toDataURL(cb, { width, height })` is not portable:
 
-Fallback if `toDataURL` disappoints on a device: `captureRef` on a plain
-wrapping `<View collapsable={false}>` (not on the `Svg` ref, which has a
-history of returning blank bitmaps on Android). This fallback is why step 1 is
-a spike and not an assumption.
+- **Android** (`SvgView.java:365`) allocates a `width × height` bitmap and
+  draws into it, computing the viewBox transform from `canvas.getWidth()`.
+  Renders at the requested size, as expected.
+- **iOS** (`RNSVGSvgViewModule.mm:54`, `RNSVGSvgView.mm:376`) creates a
+  `UIGraphicsImageRenderer` at the requested size but then calls `drawRect:`,
+  which at `RNSVGSvgView.mm:331` **ignores its own rect** and passes
+  `[self bounds]` — the mounted view's on-screen frame. A seal mounted at 340pt
+  is drawn at 340pt in the corner of a 1080pt canvas, and
+  `UIGraphicsImageRenderer` applies screen scale on top, so the file is
+  3240×4050 px on a @3x device.
+
+Called with no options, iOS uses `svg.boundingBox` and Android uses
+`getWidth()/getHeight()`, and both agree with the mount. So the export `Svg` is
+mounted offscreen (`position: 'absolute', left: -20000`) at full size, separate
+from the preview.
+
+What this means honestly: `toDataURL` does **not** remove the offscreen mount.
+It is still the right choice, for two reasons that survive — it drops
+`react-native-view-shot` from the dependency list, and it rasterises at vector
+level so type stays sharp rather than being resampled from a 340px capture.
+But Approach A's offscreen-mount awkwardness is inherited here, and the doc
+should not pretend otherwise.
+
+**Residual scale difference.** An offscreen mount of 1080 *points* yields
+`1080 × PixelRatio.get()` pixels on iOS and 1080 device-pixels on Android.
+Either mount at `1080 / PixelRatio.get()` dp to land on exactly 1080 px, or
+accept the difference — a larger file on iOS is not a defect. The success
+criterion below is written as "at least 1080 px wide, 4:5" for this reason.
+
+Fallback if the offscreen `toDataURL` still disappoints on a device:
+`captureRef` on a plain wrapping `<View collapsable={false}>` — not on the
+`Svg` ref, which has a history of returning blank bitmaps on Android.
 
 ### The three templates
 
@@ -196,11 +235,26 @@ conditions and position of the import, not of the storm, and a field log that
 cannot tell the two apart is not evidence of anything."* A seal is that record
 made public, so it inherits the obligation.
 
-A report with `photoSource: 'library'` prints `FILED FROM LIBRARY` in the cap
-on Field Card and Collectible, and in the ring's lower arc on Wax Seal, and the
-instrument block is rendered in the light display weight rather than the heavy
-one. The data is still shown — it is real data about the moment of filing —
-but the seal never claims it was measured under that sky.
+A report with `photoSource: 'library'` is marked:
+
+- **Field Card and Collectible:** `FILED FROM LIBRARY` in the cap, and the
+  instrument grid's enclosing rules switch from solid to dashed.
+- **Wax Seal:** a straight `FILED FROM LIBRARY` caption in the centre block
+  beneath the classification. Not the lower arc — that carries the timestamp
+  in the ordinary case and the two would collide.
+
+The data is still shown, because it is real data about the moment of filing;
+the seal simply never claims it was measured under that sky.
+
+**Two channels provenance must not use**, both because they already carry
+other meaning:
+
+- **Weight.** Tier owns weight (see below). A severe tornado filed from the
+  library cannot be both the heaviest and the lightest thing on the card.
+- **Type family.** Field Card's instruments are IBM Plex Mono. Switching them
+  to Big Shoulders 300 would be a family change dressed up as a weight change,
+  which reads as a bug. Dashed rules carry the same signal without touching
+  the type.
 
 This is the most interesting product question the feature raises, and the
 codebase had already answered it.
@@ -218,10 +272,18 @@ Log position is not a stable identity: delete one report and every seal already
 shared with a higher serial is wrong about itself. For an artifact framed as
 collectible that is a correctness bug.
 
-The serial is a short uppercase hash of `report.id`, rendered as
-`No. 4F2A`. Stable forever, requires no access to the log, and keeps
-`sealData` pure. `sealData(report, { serial })` still takes it as a parameter
-so the derivation stays outside the pure transform and remains swappable.
+The serial is **FNV-1a over `report.id`, rendered as six uppercase hex
+digits** — `No. 4F2A9C`. Stable forever, requires no access to the log, keeps
+`sealData` pure, and FNV-1a is six lines with no dependency, matching the habit
+`src/core/utils/id.ts` already sets. (`src/core/utils/random.ts` is a mulberry32
+PRNG, not a hash, so it is the wrong tool here.)
+
+Six hex digits, not four: four is 16 bits, where a duplicate becomes more
+likely than not somewhere around 300 reports. Duplicate serials on an artifact
+whose stated purpose is collectibility would undercut the whole idea.
+
+`sealData(report, { serial })` still takes it as a parameter so the derivation
+stays outside the pure transform and remains swappable.
 
 ### The collection
 
@@ -272,10 +334,17 @@ the display face has a weight range.
 1. **The ring has a character budget.** `49.2827°N · 123.1207°W` only just fits
    the upper arc at the sketched radius. The sharper risk is not decimal places
    but that the same string lays out at a different arc length on iOS and
-   Android, which no choice of precision fixes. Resolution: assert the
-   worst-case string (`-123.1207°W` at three integer digits plus sign) against
-   a measured arc budget in a test, and render it on both platforms during the
-   step 1 spike, before the Wax Seal template is designed around it.
+   Android, which no choice of precision fixes.
+
+   Convention: hemisphere letters, no minus sign (`123.1207°W`, never
+   `-123.1207°`). Pick one and hold it — the app's `formatCoordinates` already
+   decides this. Worst case is 10 glyphs per hemisphere at four decimal places,
+   which is the same length either way, so the convention is a legibility
+   choice rather than a budget one.
+
+   Resolution: assert the worst-case string against a measured arc budget in a
+   test, and render it on both platforms during the step 1 spike, before the
+   Wax Seal template is designed around it.
 2. **Collection day one.** At 1/12 the grid is mostly ghosts. Does it hide
    behind a threshold of three seals, or ship visible from the first report as
    an invitation? Leaning visible; the ghost treatment exists to make that
@@ -289,8 +358,11 @@ the display face has a weight range.
 
 ## Success Criteria
 
-- From a storm report, the seal screen produces a `1080×1350` PNG in the camera
-  roll, and separately can open the native share sheet.
+- From a storm report, the seal screen produces a PNG in the camera roll that
+  is **at least 1080 px wide and 4:5**, and separately can open the native
+  share sheet. (Not "exactly 1080×1350": iOS applies screen scale to an
+  offscreen point-sized mount, so a @3x device legitimately yields a larger
+  file. See "The export path".)
 - All 36 type × template combinations have a passing `sealLayout` snapshot,
   with no renderer and no device.
 - `sealLayout` output is independent of the active app theme — asserted by
@@ -299,7 +371,15 @@ the display face has a weight range.
   achievable nor testable.)*
 - Every template renders correctly for a report with `conditions: null` and
   `coordinates: null`, asserted in tests.
-- A `photoSource: 'library'` report is visibly marked on all three templates.
+- A `photoSource: 'library'` report is visibly marked on all three templates,
+  including the combined case of library origin **and** null coordinates on
+  the Wax Seal, where the ring loses its upper arc and the centre block gains
+  a line.
+- The collection plate shows 12 cells; every storm type the user has filed is
+  earned, every type they have not is a ghost silhouette, and the count line
+  agrees with the number of distinct types in the log. Asserted against a
+  fixture log in Jest — the plate's state is derived, so it is testable without
+  a device.
 - The seal is legible as a 150px thumbnail: classification and tier readable,
   coordinates present where they exist.
 - Denying the media library permission still leaves Share working, with a
@@ -342,10 +422,13 @@ Configuration, corrected from an earlier draft:
 
 1. **Spike the risky three before designing anything.** One throwaway screen,
    half a day, answering questions that can each invalidate the architecture:
-   - Does `Svg.toDataURL(cb, {width: 1080, height: 1350})` return a real
-     1080-wide PNG on both iOS and Android? Save it and inspect the dimensions.
-     The test subject must be an **SVG**, not a plain View — a red-square View
-     proves nothing about the actual risk.
+   - Does an **offscreen-mounted** `Svg` at full size, rasterised with
+     `toDataURL(cb)` and no size options, produce a correctly composed image
+     of the right dimensions on both platforms? Save it and inspect. The test
+     subject must be an **SVG**, not a plain View — a red-square View proves
+     nothing about the actual risk. *(The `{width, height}` variant is already
+     known to be wrong on iOS; see "The export path". Do not re-test it,
+     confirm the offscreen approach instead.)*
    - Does `<Image href={{uri: 'file://…document directory…'}}/>` inside an
      `<Svg>` actually draw the photograph on both platforms? Historically
      flaky with document-directory URIs.
