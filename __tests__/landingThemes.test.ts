@@ -160,3 +160,39 @@ describe('the full-bleed flash', () => {
     expect(flashAt).toBeLessThan(end);
   });
 });
+
+/**
+ * The rain is the last beat of the hero's sequence -- ray, bolt, then the
+ * downpour -- and that ordering is the whole reason it looks composed rather
+ * than busy. It lives in a delay, and a delay is the first thing a later hand
+ * rounds to zero.
+ */
+describe('the hero rain', () => {
+  /** The bolt's bloom peaks halfway through its own 3s cycle. */
+  const BOLT_BLOOM_MS = 1500;
+
+  function rainArrivalMs(): number {
+    const shorthand = PAGE.match(/rain-arrive\s+(\d+)ms\s+var\(--ease\)\s+(\d+)ms/);
+    expect(shorthand).not.toBeNull();
+    return Number(shorthand![2]);
+  }
+
+  it('falls only where a direction asks for it', () => {
+    const declared = [...PAGE.matchAll(/--rain-on:\s*([01]);/g)].map((m) => Number(m[1]));
+    expect(declared.length).toBeGreaterThan(0);
+    // Broadcast and Signage draw no sky at all, so exactly one direction rains.
+    expect(declared.filter((on) => on === 1)).toHaveLength(1);
+  });
+
+  it('waits for the strike before it starts', () => {
+    expect(rainArrivalMs()).toBeGreaterThan(BOLT_BLOOM_MS);
+  });
+
+  it('arrives once and stays, rather than restarting every cycle', () => {
+    // `both` is what holds the arrived opacity; without it the bands snap back
+    // to the static rule the moment the fade ends.
+    const shorthand = PAGE.match(/rain-arrive\s+\d+ms\s+var\(--ease\)\s+\d+ms\s+(\w+);/);
+    expect(shorthand).not.toBeNull();
+    expect(shorthand![1]).toBe('both');
+  });
+});

@@ -100,10 +100,11 @@
     --flash: rgba(190, 220, 255, 0.9);
     --sky-tint: #8FA3C8;
     --sky-density: 0.28;
-    /* No rain. The Bricolage board has none -- its weather is a bolt dropping
-       into the word, not a downpour behind it -- and a night sky reads as
-       night from its gradient and its bloom without streaking the copy. */
-    --rain-on: 0;
+    /* Rain, but late. The night sky finishes the lockup's own sequence: the
+       ray draws, the bolt strikes, and the downpour arrives after it rather
+       than under it. Held off until the strike has read so the copy is never
+       being streaked while someone is still meeting the wordmark. */
+    --rain-on: 1;
     --shaft-on: 0;
     --bloom-on: 1;
     --hazard-w: 0px;
@@ -1124,7 +1125,22 @@
     );
     opacity: calc(var(--o, 0.5) * var(--rain-on, 0));
     will-change: transform;
-    animation: rain-fall var(--d, 900ms) linear infinite;
+    /*
+     * Two animations, two jobs. `rain-fall` is the endless slide; `rain-arrive`
+     * runs ONCE and only fades the bands in, 1.7s after load -- past the ray's
+     * 0.84s draw and past the bolt's bloom at 1.5s. It is a one-shot rather
+     * than a beat in the 6s cycle because rain that stops and restarts every
+     * six seconds reads as a rendering fault, not as weather. `both` holds the
+     * final opacity so the storm stays once it has arrived.
+     */
+    animation:
+      rain-fall var(--d, 900ms) linear infinite,
+      rain-arrive 1100ms var(--ease) 1700ms both;
+  }
+
+  @keyframes rain-arrive {
+    from { opacity: 0; }
+    to { opacity: calc(var(--o, 0.5) * var(--rain-on, 0)); }
   }
 
   /*
