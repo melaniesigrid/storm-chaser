@@ -91,29 +91,68 @@ jobs:
           grep -q 'Big Shoulders' "$page" || { echo "::error::Big Shoulders is not in $page"; exit 1; }
           echo "three themes ($(printf '%s ' $themes)) and three display faces present"
 
-      # Run from the repo root, not from `landing/`.
-      #
-      # The Vercel project carries its own Root Directory setting, and it is
-      # already `landing`. Running the CLI inside `landing/` made it resolve
-      # that a second time, to `landing/landing`, which does not exist -- so
-      # `vercel build` finished in 20ms with an empty `.vercel/output`, the
-      # deploy reported success, and the alias served a 404 at `/` while
-      # production went on showing the old page. A green run is not a deploy.
       - name: Pull the project settings
         run: vercel pull --yes --environment=production --token="${{ secrets.VERCEL_TOKEN }}"
 
-      - name: Build
-        run: vercel build --prod --token="${{ secrets.VERCEL_TOKEN }}"
+      # Assemble the Build Output API directory by hand instead of running
+      # `vercel build`.
+      #
+      # Two green runs and one red one were all the same bug wearing different
+      # clothes: nobody here knows what the project's Root Directory setting is,
+      # and `vercel build` resolves the whole build against it. Run from
+      # `landing/` it produced an empty `.vercel/output` in 20ms and deployed
+      # nothing. Run from the repo root -- the "fix" for that -- it decided the
+      # REPOSITORY was the static site and copied `__tests__/`, `app/` and every
+      # source file into the output, with no `index.html` anywhere in it. The
+      # page guard caught that one before it shipped the source tree to a public
+      # URL.
+      #
+      # So this step stops asking. `.vercel/output` is a documented contract --
+      # static files in `static/`, routing in `config.json` -- and writing it
+      # directly means the deploy publishes exactly the directory named here and
+      # cannot be re-pointed by a dashboard setting nobody can see from CI.
+      - name: Assemble the build output
+        run: |
+          set -euo pipefail
+          rm -rf .vercel/output
+          mkdir -p .vercel/output/static
+          cp -R landing/. .vercel/output/static/
+          # Repo plumbing that is not part of the site. `vercel.json` in
+          # particular would otherwise be served at /vercel.json, which is
+          # config published as content.
+          rm -rf .vercel/output/static/.vercel \
+                 .vercel/output/static/.gitignore \
+                 .vercel/output/static/vercel.json
 
-      # An empty build is the failure that hid here for two green runs: the
-      # page guard above passed, the deploy passed, and nothing served.
+          # `landing/vercel.json` is a project-level config and is NOT read from
+          # a prebuilt output, so its one real behaviour is restated here as a
+          # route. `cleanUrls` is not carried over because it has nothing to act
+          # on: the site is a single index.html plus an icon directory.
+          cat > .vercel/output/config.json <<'JSON'
+          {
+            "version": 3,
+            "routes": [
+              {
+                "src": "^/icons/(.*)$",
+                "headers": { "cache-control": "public, max-age=31536000, immutable" },
+                "continue": true
+              }
+            ]
+          }
+          JSON
+
+      # An empty output is the failure that hid here for two green runs: the
+      # page guard above passed, the deploy passed, and nothing served. It stays
+      # even now that the output is assembled by hand, because it is what proves
+      # the thing about to be published is the landing page and not a directory
+      # that merely exists.
       - name: Check the build produced a page
         run: |
           set -euo pipefail
           out=.vercel/output/static/index.html
           if [ ! -s "$out" ]; then
-            echo "::error::$out is missing or empty -- vercel build produced no page"
-            echo "what the build did produce:"
+            echo "::error::$out is missing or empty -- the output has no page in it"
+            echo "what the output does contain:"
             find .vercel/output -maxdepth 3 2>/dev/null || echo "  (no .vercel/output at all)"
             exit 1
           fi
