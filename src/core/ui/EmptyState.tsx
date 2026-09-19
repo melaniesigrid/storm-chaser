@@ -30,16 +30,22 @@ export function EmptyState({
   return (
     <View style={{ alignItems: 'center', justifyContent: 'center', paddingHorizontal: 32, paddingVertical: 56 }}>
       {/* Sat on a sunken disc so the icon reads as a deliberate mark rather
-          than a picture dropped onto the sky. */}
+          than a picture dropped onto the sky -- except on Field Card, where
+          the panel radius blows the disc up into a circle and print does not
+          put a ring around its own artwork. */}
       {illustration ? (
         <View
           style={{
             marginBottom: 22,
-            padding: 20,
-            borderRadius: Math.min(96, theme.radius.panel * 3),
-            backgroundColor: theme.colors.surfaceSunken,
-            borderWidth: theme.borderWidth,
-            borderColor: theme.colors.border,
+            ...(theme.name === 'field-card'
+              ? null
+              : {
+                  padding: 20,
+                  borderRadius: Math.min(96, theme.radius.panel * 3),
+                  backgroundColor: theme.colors.surfaceSunken,
+                  borderWidth: theme.borderWidth,
+                  borderColor: theme.colors.border,
+                }),
           }}
         >
           {illustration}

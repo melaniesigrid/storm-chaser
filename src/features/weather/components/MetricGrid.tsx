@@ -24,6 +24,7 @@ export interface Metric {
  */
 export function MetricGrid({ metrics }: { metrics: Metric[] }) {
   const { theme } = useAppTheme();
+  const bare = theme.name === 'field-card';
 
   return (
     <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
@@ -39,13 +40,23 @@ export function MetricGrid({ metrics }: { metrics: Metric[] }) {
                   height: 48,
                   alignItems: 'center',
                   justifyContent: 'center',
-                  // Square in the themes that refuse a curve, round in the ones
-                  // that do not: the disc takes the theme's control radius
-                  // rather than inventing a shape of its own.
-                  borderRadius: Math.min(24, theme.radius.control),
-                  backgroundColor: theme.colors.surfaceSunken,
-                  borderWidth: theme.borderWidth,
-                  borderColor: theme.colors.border,
+                  // Field Card prints its icons straight onto the stock. Its
+                  // control radius would round the disc into a circle, and a
+                  // circle drawn behind a weather glyph is a second shape
+                  // competing with the one that carries the reading. The box
+                  // stays for alignment; only its surface goes.
+                  ...(bare
+                    ? null
+                    : {
+                        // Square in the themes that refuse a curve, round in
+                        // the ones that do not: the disc takes the theme's
+                        // control radius rather than inventing a shape of its
+                        // own.
+                        borderRadius: Math.min(24, theme.radius.control),
+                        backgroundColor: theme.colors.surfaceSunken,
+                        borderWidth: theme.borderWidth,
+                        borderColor: theme.colors.border,
+                      }),
                 }}
               >
                 <WeatherIcon name={metric.icon} size={36} />
