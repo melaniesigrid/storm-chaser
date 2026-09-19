@@ -18,6 +18,21 @@ export type TextVariant =
 
 export type TextTone = 'default' | 'muted' | 'onAccent';
 
+/** Every variant, so a test can walk the scale without restating it. */
+export const TEXT_VARIANTS: TextVariant[] = [
+  'hero',
+  'score',
+  'display',
+  'title',
+  'heading',
+  'body',
+  'message',
+  'caption',
+  'figure',
+  'label',
+  'readout',
+];
+
 /**
  * The type scale.
  *
@@ -33,7 +48,7 @@ export type TextTone = 'default' | 'muted' | 'onAccent';
  * one figure with nothing to align to, and setting it in the display face is
  * what makes it read as the app's own number rather than as instrument output.
  */
-function variantStyle(variant: TextVariant, theme: Theme): TextStyle {
+export function variantStyle(variant: TextVariant, theme: Theme): TextStyle {
   const { type, colors } = theme;
 
   // Display tracking is a theme's to refuse: a face as tight as Anton clips
@@ -42,9 +57,12 @@ function variantStyle(variant: TextVariant, theme: Theme): TextStyle {
 
   switch (variant) {
     case 'hero':
-      return { fontFamily: type.monoBold, fontSize: 64, lineHeight: 66, letterSpacing: -2, color: colors.text };
+      return { fontFamily: type.monoBold, fontSize: 64, lineHeight: 70, letterSpacing: -2, color: colors.text };
     case 'score':
-      return { fontFamily: type.display, fontSize: 56, lineHeight: 54, letterSpacing: track(-2), color: colors.text };
+      // lineHeight was 54 under a 56px face, which cropped every descender and
+      // the top of the caps in Anton. No line box may be shorter than its own
+      // font size; see `assertLineHeights` in the theme test.
+      return { fontFamily: type.display, fontSize: 56, lineHeight: 62, letterSpacing: track(-2), color: colors.text };
     case 'display':
       return { fontFamily: type.display, fontSize: 40, lineHeight: 44, letterSpacing: track(-1), color: colors.text };
     case 'title':
@@ -81,6 +99,39 @@ function variantStyle(variant: TextVariant, theme: Theme): TextStyle {
   }
 }
 
+/**
+ * Horizontal breathing room for a variant, in points.
+ *
+ * React Native measures a text box from the font's advance widths and then
+ * clips to that box. A display face with real side bearings — Anton especially,
+ * and worse once negative tracking pulls the glyphs tighter — paints outside
+ * that measurement, so the first and last letters lose a sliver of ink. It is
+ * most obvious on a capital that overhangs, and it gets worse as the size goes
+ * up, which is why it showed on headings and not on body copy.
+ *
+ * The allowance is padding cancelled by an equal negative margin: the drawing
+ * box gets wider, the layout box does not move, and alignment (including the
+ * right-aligned readouts) is unchanged. Sized off the font rather than fixed,
+ * so it holds for any typeface a future theme brings with it.
+ */
+export function bleedFor(variant: TextVariant, fontSize: number): TextStyle | null {
+  switch (variant) {
+    case 'hero':
+    case 'score':
+    case 'display':
+    case 'title': {
+      const bleed = Math.ceil(fontSize * 0.08);
+      return { paddingHorizontal: bleed, marginHorizontal: -bleed };
+    }
+    // Tracked uppercase mono: letterSpacing adds a trailing gap after the last
+    // glyph, so it needs room on the right but never clips on the left.
+    case 'label':
+      return { paddingRight: 2, marginRight: -2 };
+    default:
+      return null;
+  }
+}
+
 function toneColor(tone: TextTone, theme: Theme): string | undefined {
   switch (tone) {
     case 'muted':
@@ -110,10 +161,16 @@ export function Text({
   const { theme } = useAppTheme();
 
   const override = color ?? toneColor(tone, theme);
+  const base = variantStyle(variant, theme);
 
   return (
     <RNText
-      style={[variantStyle(variant, theme), override ? { color: override } : null, style]}
+      style={[
+        base,
+        bleedFor(variant, base.fontSize ?? 17),
+        override ? { color: override } : null,
+        style,
+      ]}
       {...rest}
     />
   );

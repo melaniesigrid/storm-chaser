@@ -1,5 +1,5 @@
 import { eraseAccount } from '@/core/account/eraseAccount';
-import { err, ok } from '@/core/utils/result';
+import { err, ok, type Result } from '@/core/utils/result';
 
 /**
  * Deleting the account is the one action in the app that cannot be undone and
@@ -9,7 +9,9 @@ import { err, ok } from '@/core/utils/result';
  */
 function spies() {
   return {
-    reports: { clear: jest.fn(async () => ok(undefined)) },
+    // Typed at the interface rather than at the happy-path return, so a test
+    // can hand a step a failure without fighting the inferred `never` error.
+    reports: { clear: jest.fn(async (): Promise<Result<void>> => ok(undefined)) },
     deletePhotos: jest.fn(async () => ok(true)),
     profile: { clear: jest.fn(async () => ok(undefined)) },
     theme: { clear: jest.fn(async () => ok(undefined)) },

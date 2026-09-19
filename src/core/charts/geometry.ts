@@ -132,7 +132,7 @@ export function normalise(value: number, min: number, max: number): number {
 }
 
 /** Drops nulls so a sparse API series can still be charted. */
-export function compact(values: Array<number | null | undefined>): number[] {
+export function compact(values: (number | null | undefined)[]): number[] {
   return values.filter((value): value is number => typeof value === 'number' && Number.isFinite(value));
 }
 

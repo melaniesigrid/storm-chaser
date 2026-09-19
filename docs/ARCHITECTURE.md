@@ -85,14 +85,49 @@ The field log itself is local first and needs no network at all.
 
 ## Photo lifecycle
 
-Camera output lands in the OS cache directory, which the system may purge at will.
+A report's photo has two possible origins, and they converge immediately.
+
+**Camera** — `expo-camera` writes to the OS cache directory.
+**Library import** — `expo-image-picker` also hands back a temporary URI.
+
+Either way the URI is temporary and the system is free to purge it, so
 `persistPhoto` copies it to `documentDirectory/storm-photos/<id>.<ext>` before the
 record is written. Deletion removes the record first and the file second: an
 orphaned file is recoverable, a record pointing at nothing is not.
 
+The two paths meet at the metadata phase rather than running in parallel, so
+classification, notes, storage and failure handling have one implementation. The
+metadata phase is also checked *before* the camera permission gate, so a device
+that has refused the camera — or has none, like a simulator — can still file a
+report.
+
+### Provenance
+
+`photoSource` (`'camera' | 'library'`) is stored on every report. An imported
+photo is stamped with the position and conditions of the *import*, not of the
+storm, and a field log that cannot tell the two apart is not evidence of
+anything. The capture form says so plainly when a photo is imported, and the
+detail view carries it in the record panel.
+
+Capture time for an imported photo is resolved in preference order — EXIF
+`DateTimeOriginal`, then `DateTimeDigitized`, then `DateTime`, then the asset's
+creation time, then the clock. EXIF carries no timezone, so it is read as local
+time: the wall clock the photographer was standing in. Anything that does not
+parse cleanly is discarded rather than guessed at, since a wrong timestamp is
+worse than an honest fallback. That resolution is a pure function,
+`resolveCapturedAt`, and it is the one part of the import path under test.
+
+### Schema version 2
+
+Adding `photoSource` moved `SCHEMA_VERSION` to 2 and gave the migration hook its
+first real job. Version 1 predates import, so every report in a version 1
+envelope was necessarily shot on the camera; the migration says so. It runs at
+read time and is non-destructive — the upgraded envelope is written back on the
+next save.
+
 ## Testing approach
 
-304 tests over 15 suites, all targeting logic rather than pixels:
+509 tests over 24 suites, all targeting logic rather than pixels:
 
 - `format.test.ts` covers every readout the user sees, including negative zero,
   compass wrapping and missing values.
@@ -202,3 +237,38 @@ so it is the first thing to check if an animation silently does nothing.
 Every animation reads `useReducedMotion()`. With Reduce Motion on, the chase
 meter snaps to its final state and the confetti does not mount at all, so the
 information conveyed is identical and only the theatre is dropped.
+
+## Theme-owned surfaces
+
+Two pieces of the visual language are theme tokens rather than component
+branches, so no component has to test a theme by name.
+
+`colors.cardTints` is an optional palette of card stocks. Only Field Card
+defines it, because only Field Card argues that a report is a collectible card,
+and a run of identical white rectangles is where that argument visibly failed.
+`cardTint` picks one from a hash of the report id, so a card keeps its colour
+when the list is filtered, reordered or added to — an index-based choice would
+repaint every card above a newly saved report. Every tint is asserted to carry
+the theme's text at AA.
+
+`Starfield` draws only where `theme.isDark`, between the background gradient and
+the content. Positions come from a seeded generator rather than `Math.random`,
+so the sky is identical on every render and every launch; a field that
+reshuffles reads as noise and costs a re-render to do it. It is static, because
+the themes' motion safety budget is already spent on the lightning bloom and a
+twinkle is a second animated brightness change over a large area for no
+informational gain.
+
+## The type scale, and clipping
+
+`variantStyle` is the one place a size, line height or tracking is set. Two
+defects were fixed there rather than at the call sites:
+
+- `score` shipped at 56px inside a 54px line box, which cropped every descender.
+  A test now walks every variant in every theme and fails any line height below
+  its own font size.
+- The display faces paint outside the box React Native measures for them, worse
+  as tracking pulls the glyphs tighter, so large text lost a sliver of ink at
+  each end. `bleedFor` returns padding cancelled by an equal negative margin:
+  the drawing box widens, the layout box does not move, and the right-aligned
+  readouts stay in register. A test asserts the cancellation.

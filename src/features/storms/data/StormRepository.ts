@@ -5,7 +5,7 @@ import type { KeyValueStore } from '@/core/storage/KeyValueStore';
 import type { StormReport, StormReportDraft, SyncState } from '../model/types';
 
 export const STORAGE_KEY = 'storm-chaser/reports';
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 
 interface StoredEnvelope {
   version: number;
@@ -156,14 +156,18 @@ export function createStormRepository(
 }
 
 /**
- * Forward migration hook. Version 1 is the first shape, so this is a pass
- * through; the branch exists so an older envelope is never handed to the UI
- * untouched once the schema moves on.
+ * Forward migration hook.
+ *
+ * Version 2 added `photoSource`. Every version 1 report predates photo import,
+ * so it was necessarily shot on the camera; defaulting it that way is a
+ * statement of fact rather than a guess. Migration is read time and
+ * non-destructive: the envelope is rewritten on the next save.
  */
 function migrate(envelope: StoredEnvelope): StormReport[] {
   if (envelope.version === SCHEMA_VERSION) return envelope.reports;
   return envelope.reports.map((report) => ({
     ...report,
     syncState: report.syncState ?? 'local',
+    photoSource: report.photoSource ?? 'camera',
   }));
 }

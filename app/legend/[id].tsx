@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ScrollView, View } from 'react-native';
+import { Image, ScrollView, View } from 'react-native';
 
 import { WeatherIcon } from '@/core/icons/WeatherIcon';
 import { useAppTheme } from '@/core/theme/useAppTheme';
@@ -12,6 +12,7 @@ import {
   formatDistanceKm,
   haversineKm,
 } from '@/features/storms/model/legends';
+import { legendImage } from '@/features/storms/model/legendImages';
 import {
   chaseLevelForTier,
   describeStormType,
@@ -71,12 +72,44 @@ export default function LegendDetailScreen() {
   const tierTextColor = theme.colors.tierText[tierLevel];
 
   const distanceKm = coordinates ? haversineKm(coordinates, legend.coordinates) : null;
+  const image = legendImage(legend.id);
 
   return (
     <ScrollView
       style={{ flex: 1, backgroundColor: theme.colors.background }}
       contentContainerStyle={{ padding: 16, paddingBottom: 48 }}
     >
+      {image ? (
+        <View style={{ marginBottom: 12 }}>
+          <Image
+            source={image.source}
+            style={{
+              width: '100%',
+              height: 220,
+              borderRadius: theme.radius.panel,
+              backgroundColor: theme.colors.surfaceSunken,
+            }}
+            resizeMode="cover"
+            accessibilityIgnoresInvertColors
+            accessibilityLabel={image.caption}
+          />
+          {/*
+            The caption says what the photograph actually shows, which is not
+            always this legend. Freely licensed photography of a tornado from
+            1925 does not exist, so some entries illustrate the phenomenon
+            rather than document the event, and the only honest way to use one
+            is to say so under it. The credit line is also what the licence
+            requires in exchange for using the image at all.
+          */}
+          <Text variant="caption" style={{ marginTop: 8 }}>
+            {image.caption}
+          </Text>
+          <Text variant="label" style={{ marginTop: 4 }}>
+            {`${image.credit} · ${image.license}`}
+          </Text>
+        </View>
+      ) : null}
+
       <Panel style={{ marginBottom: 12 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
           <View style={{ flex: 1 }}>
@@ -88,7 +121,9 @@ export default function LegendDetailScreen() {
               {legend.year ? `${legend.place} · ${legend.year}` : legend.place}
             </Text>
           </View>
-          <WeatherIcon name={iconForStormType(legend.stormType)} size={120} />
+          {/* With a photograph above it the icon is a classification badge, not
+              the illustration, so it drops to the size of one. */}
+          <WeatherIcon name={iconForStormType(legend.stormType)} size={image ? 64 : 120} />
         </View>
 
         <Text variant="message" style={{ marginTop: 12 }}>
@@ -98,6 +133,23 @@ export default function LegendDetailScreen() {
 
       <Panel label="Why it matters" style={{ marginBottom: 12 }}>
         <Text variant="body">{legend.fact}</Text>
+
+        {legend.story.map((paragraph, index) => (
+          <Text key={index} variant="body" style={{ marginTop: 12 }}>
+            {paragraph}
+          </Text>
+        ))}
+      </Panel>
+
+      <Panel label="By the numbers" style={{ marginBottom: 12 }}>
+        {legend.numbers.map((entry, index) => (
+          <Row
+            key={entry.label}
+            label={entry.label}
+            value={entry.value}
+            last={index === legend.numbers.length - 1}
+          />
+        ))}
       </Panel>
 
       <Panel label="Field notes" style={{ marginBottom: 12 }}>

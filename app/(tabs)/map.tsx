@@ -11,11 +11,18 @@ import { useDeviceLocation } from '@/features/location/useDeviceLocation';
 import { useCommunityReports } from '@/features/storms/hooks/useCommunityReports';
 import { useStormReports } from '@/features/storms/hooks/useStormLog';
 import { isDemoSet, type CommunityReport } from '@/features/storms/model/community';
-import { STORM_LEGENDS, describeLegendKind } from '@/features/storms/model/legends';
+import {
+  STORM_LEGENDS,
+  describeLegendKind,
+  type StormLegend,
+} from '@/features/storms/model/legends';
 import { boundingRegion } from '@/features/storms/model/mapRegion';
 import { chaseLevelForTier, describeStormType } from '@/features/storms/model/stormTypes';
 import type { StormReport } from '@/features/storms/model/types';
 import { toLevel } from '@/features/weather/model/severity';
+
+/** Frozen empty set, so "lore off" is one identity rather than a new array. */
+const NO_LEGENDS: StormLegend[] = [];
 
 export default function MapScreen() {
   const router = useRouter();
@@ -35,6 +42,10 @@ export default function MapScreen() {
    * are actually looking at your own.
    */
   const [showLore, setShowLore] = useState(true);
+
+  // Stable identities on both branches, so the memo below is not defeated by a
+  // fresh array on every unrelated render.
+  const loreMarkers = useMemo(() => (showLore ? STORM_LEGENDS : NO_LEGENDS), [showLore]);
 
   const located = useMemo(
     () => (data ?? []).filter((report) => report.coordinates !== null),
@@ -78,7 +89,15 @@ export default function MapScreen() {
       >
         <OwnReportMarkers reports={located} onOpen={openReport} />
         <CommunityMarkers reports={others} />
-        {showLore ? <LoreMarkers onOpen={openLegend} /> : null}
+        {/*
+          Always mounted, with an empty list when lore is off, rather than
+          unmounted behind a condition. Unmounting a fragment-returning child of
+          MapView leaves its annotations on the iOS map: the React tree loses
+          them, the MKMapView does not, and the toggle reads as doing nothing.
+          Varying the array instead goes through the marker diff that both
+          platforms handle.
+        */}
+        <LoreMarkers legends={loreMarkers} onOpen={openLegend} />
       </MapView>
 
       <View style={{ position: 'absolute', bottom: 24, left: 16, right: 16 }}>
@@ -248,12 +267,18 @@ const CommunityMarkers = memo(function CommunityMarkers({
  * a single label, including for anyone who cannot rely on the colour
  * difference.
  */
-const LoreMarkers = memo(function LoreMarkers({ onOpen }: { onOpen: (id: string) => void }) {
+const LoreMarkers = memo(function LoreMarkers({
+  legends,
+  onOpen,
+}: {
+  legends: StormLegend[];
+  onOpen: (id: string) => void;
+}) {
   const { theme } = useAppTheme();
 
   return (
     <>
-      {STORM_LEGENDS.map((legend) => (
+      {legends.map((legend) => (
         <Marker
           key={legend.id}
           coordinate={legend.coordinates}

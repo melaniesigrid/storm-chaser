@@ -11,6 +11,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { useAppTheme } from '@/core/theme/useAppTheme';
+import { seededRandom } from '@/core/utils/random';
 
 /**
  * The night sky behind a dark theme.
@@ -182,7 +183,7 @@ function Twinkle({
  * haze band at the horizon where they would not be visible anyway.
  */
 function buildStars(count: number, extent: number): Star[] {
-  const random = seeded(0x5f3a91);
+  const random = seededRandom(0x5f3a91);
   const stars: Star[] = [];
 
   for (let index = 0; index < count; index += 1) {
@@ -210,16 +211,4 @@ function buildStars(count: number, extent: number): Star[] {
   }
 
   return stars;
-}
-
-/** Mulberry32: one line of state, uniform enough for scattering dots. */
-function seeded(seed: number): () => number {
-  let state = seed >>> 0;
-
-  return () => {
-    state = (state + 0x6d2b79f5) >>> 0;
-    let drawn = Math.imul(state ^ (state >>> 15), 1 | state);
-    drawn = (drawn + Math.imul(drawn ^ (drawn >>> 7), 61 | drawn)) ^ drawn;
-    return ((drawn ^ (drawn >>> 14)) >>> 0) / 4294967296;
-  };
 }

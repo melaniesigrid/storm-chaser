@@ -35,10 +35,18 @@ export interface CapturedConditions {
 
 export type SyncState = 'local' | 'pending' | 'synced' | 'failed';
 
+/**
+ * Where the photograph came from. Recorded because an imported shot carries the
+ * conditions and position of the import, not of the storm, and a field log that
+ * cannot tell the two apart is not evidence of anything.
+ */
+export type PhotoSource = 'camera' | 'library';
+
 export interface StormReport {
   id: string;
   /** Absolute file URI inside the app document directory. */
   photoUri: string;
+  photoSource: PhotoSource;
   capturedAt: string;
   coordinates: Coordinates | null;
   locationAccuracyM: number | null;

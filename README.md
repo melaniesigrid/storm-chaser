@@ -14,7 +14,7 @@
   <img src="https://img.shields.io/badge/Expo_SDK-57-000020?style=flat-square&logo=expo&logoColor=white" alt="Expo SDK 57" />
   <img src="https://img.shields.io/badge/React_Native-0.86-61DAFB?style=flat-square&logo=react&logoColor=black" alt="React Native 0.86" />
   <img src="https://img.shields.io/badge/TypeScript-strict-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript strict" />
-  <img src="https://img.shields.io/badge/tests-304_passing-4FD1C5?style=flat-square" alt="304 tests passing" />
+  <img src="https://img.shields.io/badge/tests-509_passing-4FD1C5?style=flat-square" alt="509 tests passing" />
   <img src="https://img.shields.io/badge/API_keys-none_required-F5C242?style=flat-square" alt="No API keys required" />
   <img src="https://img.shields.io/badge/platforms-iOS_%7C_Android-14213A?style=flat-square" alt="iOS and Android" />
 </p>
@@ -173,7 +173,7 @@ the capture position was doing at the time.
 <details>
   <summary>Device</summary>
   <ul>
-    <li><a href="https://docs.expo.dev/versions/latest/sdk/camera/">expo-camera</a>, <a href="https://docs.expo.dev/versions/latest/sdk/location/">expo-location</a>, <a href="https://docs.expo.dev/versions/latest/sdk/haptics/">expo-haptics</a></li>
+    <li><a href="https://docs.expo.dev/versions/latest/sdk/camera/">expo-camera</a>, <a href="https://docs.expo.dev/versions/latest/sdk/imagepicker/">expo-image-picker</a>, <a href="https://docs.expo.dev/versions/latest/sdk/location/">expo-location</a>, <a href="https://docs.expo.dev/versions/latest/sdk/haptics/">expo-haptics</a></li>
     <li><a href="https://docs.expo.dev/versions/latest/sdk/network/">expo-network</a> for the connectivity probe</li>
     <li><a href="https://docs.expo.dev/versions/latest/sdk/font/">expo-font</a> + <a href="https://github.com/expo/google-fonts">@expo-google-fonts</a></li>
   </ul>
@@ -182,7 +182,7 @@ the capture position was doing at the time.
 <details>
   <summary>Tooling</summary>
   <ul>
-    <li><a href="https://jestjs.io/">Jest</a> via <a href="https://www.npmjs.com/package/jest-expo">jest-expo</a> — 304 tests, no renderer, no mocking framework</li>
+    <li><a href="https://jestjs.io/">Jest</a> via <a href="https://www.npmjs.com/package/jest-expo">jest-expo</a> — 509 tests, no renderer, no mocking framework</li>
     <li><a href="https://github.com/kristerkari/react-native-svg-transformer">react-native-svg-transformer</a> so Meteocons import as components</li>
     <li><a href="https://playwright.dev/">Playwright</a> + <a href="https://necolas.github.io/react-native-web/">react-native-web</a> — the screenshot pipeline renders the real app in a browser</li>
     <li><a href="https://vercel.com/">Vercel</a> for the static showcase site in <code>landing/</code></li>
@@ -201,7 +201,14 @@ rainfall rate and the convective indices, with a ranked list of the factors driv
 score. The maths is one pure, tested module:
 [`features/weather/model/severity.ts`](src/features/weather/model/severity.ts).
 
-**Field log** — Camera capture, then a metadata form. Classification and notes are typed
+**Field log** — Camera capture, then a metadata form. Selecting a classification shows a
+sentence on how to recognise it from the ground, because twelve labels are not
+self-explanatory to someone learning the sky and a wall cloud filed as a shelf cloud is a
+wrong record rather than an untidy one. A photo already in the library can
+be imported instead: storms do not wait for the person holding the phone, and a shot taken
+on a real camera and copied across documents the same event. Imported reports are recorded
+as such and say so on the form and on the record, because their position and conditions are
+the device's at import time, not the storm's. Classification and notes are typed
 by the user; time, coordinates, accuracy and the full weather snapshot are captured
 automatically and shown read only so they can be verified before saving. Photo first,
 record second: if the image cannot be copied into permanent storage, the report is never
@@ -212,15 +219,27 @@ the viewport fitted to the set. Tapping a callout opens the report.
 
 **Community** — Storms other chasers logged, drawn around you as hollow rings so someone
 else's report can never be mistaken for one of your own at a glance. With no sync backend
-configured they come from a bundled sample set, generated relative to your position and
-badged **community · demo data** in the legend. They are a separate type from your reports
+configured they come from a bundled sample set of 39, badged **community · demo data** in
+the legend. Six are generated relative to your position, so the map is populated wherever
+you are standing; the other 33 sit at fixed coordinates in storm-prone places on every
+inhabited continent, so the map is worth zooming out of. They are a separate type from your reports
 and never enter the repository.
 
 **Storm legends** — 22 famous storm places — Catatumbo lightning, Hector the Convector,
 the Tri-State Tornado — plotted as a third pin shape on the map wherever in the world you are, each with a
 detail route at `/legend/[id]` carrying its claim, its fact, its season and the great
-circle distance from you. A legend of the day surfaces on Conditions as a lore card, so
-the map has something worth opening before you have logged anything. They are a separate
+circle distance from you. Each one carries a photograph, two paragraphs on the mechanism
+and the consequence, and a block of checkable figures. A legend of the day surfaces on
+Conditions as a lore card, so the map has something worth opening before you have logged
+anything.
+
+The photographs come from Wikimedia Commons, with the licence read from the Commons API
+rather than assumed: only public domain, CC0, CC BY and CC BY-SA files were kept, and each
+is credited in the app and in [docs/IMAGE_CREDITS.md](docs/IMAGE_CREDITS.md). Where no
+freely licensed photograph of a specific historical storm exists — which is most of them,
+for a tornado in 1925 — the image illustrates the phenomenon instead, and the caption
+printed underneath says what it actually shows. A legend with no acceptable image keeps
+its icon. They are a separate
 type from reports and from community pins: no photo, no weather snapshot, no owner, and
 they never touch `StormRepository`. The table and its distance maths are one pure module,
 [`features/storms/model/legends.ts`](src/features/storms/model/legends.ts).
@@ -519,7 +538,7 @@ npx expo install --fix
 npm test
 ```
 
-304 tests across formatting, severity, mapping, the repository, the theme contract, the
+509 tests across formatting, severity, mapping, the repository, the theme contract, the
 icon mapping, the community layer and the storm legends. No renderer, no device, no
 mocking framework.
 
@@ -561,7 +580,8 @@ Chase Index with its ranked factors, a 12 hour strip and a 7 day outlook. Pull t
 If nothing can be retrieved you get an explicit **Not found** view that names the failure
 and offers two ways forward — retry, or fall back to the bundled sample dataset.
 
-**Documenting a storm.** Tap capture, take the photo, fill in classification and notes.
+**Documenting a storm.** Tap capture, take the photo — or import one from the library —
+then fill in classification and notes.
 Everything else is stamped automatically and shown read only so you can verify it before
 saving. Saving lands you in the field log, with confetti.
 
@@ -570,7 +590,7 @@ saving. Saving lands you in the field log, with confetti.
 | Route | Screen |
 | --- | --- |
 | `/(tabs)` | Conditions, Field log, Map |
-| `/capture` | Camera and metadata form (modal) |
+| `/capture` | Camera or library import, then the metadata form (modal) |
 | `/storm/[id]` | A single report |
 | `/legend/[id]` | A single storm legend, with its distance from you |
 | `/settings` | Appearance and theme (modal) |
@@ -630,7 +650,7 @@ src/services/              Cross cutting: query client, network probe, cloud syn
 landing/                   The static showcase site. One HTML file, no build step.
 scripts/                   Screenshot capture: the app itself, and the showcase site.
 docs/                      Architecture notes, AI disclosure, time log, screenshots.
-__tests__/                 304 tests. Domain, data and theme layers.
+__tests__/                 509 tests. Domain, data and theme layers.
 ```
 
 `model/` never imports from `hooks/` or `components/`. That is what makes the interesting
@@ -667,6 +687,9 @@ The snapshot is copied onto the record at capture time rather than referenced.
 | Meteorological detail for chasers | Temp, apparent temp, wind, gusts, bearing, pressure, humidity, cloud, precipitation, CAPE, lifted index |
 | "Not found" view | Dedicated component, with retry and sample data fallback |
 | Camera capture | `expo-camera`, photo copied to app document storage |
+| Photo import | `expo-image-picker`, EXIF timestamp preferred over the import clock, source recorded on the report |
+| Storm classification help | A recognition sentence per type, shown on selection and on the report |
+| Storm lore | 22 legends with licensed photography, expanded detail and checkable figures |
 | Photo metadata | Conditions, coordinates, accuracy, date and time, notes, classification |
 | Local persistence | AsyncStorage envelope plus file storage, versioned, migration hook |
 | Navigation | Expo Router, three tabs plus a modal capture flow and a detail route |
@@ -677,7 +700,7 @@ The snapshot is copied onto the record at capture time rather than referenced.
 | Skeleton screens | Layout matched skeletons on both data screens |
 | Pull to refresh | Conditions and field log |
 | Cloud integration | Upload client plus a community feed; no keys, sample-backed unless configured |
-| Unit tests | 304, across formatting, severity, mapping, the repository, the theme contract, the icon mapping, the community layer and the storm legends |
+| Unit tests | 509, across formatting, severity, mapping, the repository, the theme contract, the icon mapping, the community layer, the storm legends and EXIF date resolution |
 
 ### Known limits
 

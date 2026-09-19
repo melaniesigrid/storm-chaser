@@ -133,7 +133,17 @@ export default function StormDetailScreen() {
         </Panel>
       ) : null}
 
+      <Panel label="Classification" style={{ marginBottom: 12 }}>
+        <Text variant="body">{describeStormType(report.stormType).description}</Text>
+      </Panel>
+
       <Panel label="Record" style={{ marginBottom: 16 }}>
+        {/* Photo source sits in the record panel rather than beside the image:
+            it is provenance, not decoration. */}
+        <Row
+          label="Photo"
+          value={report.photoSource === 'library' ? 'Imported from library' : 'Shot in app'}
+        />
         <Row label="Sync" value={report.syncState} />
         <Row label="Id" value={report.id} />
       </Panel>

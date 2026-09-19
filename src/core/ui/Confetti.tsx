@@ -11,6 +11,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { useAppTheme } from '@/core/theme/useAppTheme';
+import { seededRandom } from '@/core/utils/random';
 
 const COUNT = 42;
 const DURATION = 1800;
@@ -59,20 +60,32 @@ export function Confetti({ active, onDone }: ConfettiProps) {
     [theme],
   );
 
-  const pieces = useMemo<Piece[]>(
-    () =>
-      Array.from({ length: COUNT }, (_, index) => ({
-        key: index,
-        startX: Math.random() * width,
-        drift: (Math.random() - 0.5) * 180,
-        delay: Math.random() * 320,
-        size: 7 + Math.random() * 9,
-        rotations: 1 + Math.random() * 2.5,
-        color: palette[index % palette.length] as string,
-        square: Math.random() > 0.4,
-      })),
-    [palette, width],
-  );
+  /**
+   * The burst is scattered from a seed rather than from `Math.random()`.
+   *
+   * A random draw during render is impure: React may render twice and keep one
+   * result, so the pieces could be laid out differently from the frame that
+   * actually animates. Seeding makes the burst a pure function of the palette
+   * and the screen width.
+   *
+   * The cost is that every celebration falls the same way. For a one second
+   * decoration that fires after a save, nobody sees two bursts close enough
+   * together to notice, and a correct render is worth more than novelty.
+   */
+  const pieces = useMemo<Piece[]>(() => {
+    const random = seededRandom(0x0fe77e);
+
+    return Array.from({ length: COUNT }, (_, index) => ({
+      key: index,
+      startX: random() * width,
+      drift: (random() - 0.5) * 180,
+      delay: random() * 320,
+      size: 7 + random() * 9,
+      rotations: 1 + random() * 2.5,
+      color: palette[index % palette.length] as string,
+      square: random() > 0.4,
+    }));
+  }, [palette, width]);
 
   useEffect(() => {
     if (active && reduceMotion) onDone?.();
@@ -83,7 +96,7 @@ export function Confetti({ active, onDone }: ConfettiProps) {
   return (
     <View pointerEvents="none" style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
       {pieces.map((piece, index) => (
-        <Piece
+        <ConfettiPiece
           key={piece.key}
           piece={piece}
           // Only the last piece reports completion, so onDone fires once.
@@ -94,7 +107,12 @@ export function Confetti({ active, onDone }: ConfettiProps) {
   );
 }
 
-function Piece({ piece, onDone }: { piece: Piece; onDone?: () => void }) {
+/**
+ * One falling piece. Named apart from the `Piece` shape it renders: a component
+ * and an interface sharing a name reads fine until a stack trace has to say
+ * which one it means.
+ */
+function ConfettiPiece({ piece, onDone }: { piece: Piece; onDone?: () => void }) {
   const progress = useSharedValue(0);
   const { height } = Dimensions.get('window');
 

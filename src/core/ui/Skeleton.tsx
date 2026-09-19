@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Animated, Easing, View, type DimensionValue } from 'react-native';
 
 import { useAppTheme } from '@/core/theme/useAppTheme';
@@ -15,7 +15,10 @@ export interface SkeletonProps {
  */
 export function Skeleton({ height = 16, width = '100%', rounded = false }: SkeletonProps) {
   const { theme } = useAppTheme();
-  const pulse = useRef(new Animated.Value(0.35)).current;
+  // `useRef(new Animated.Value(...)).current` reads a ref during render, which
+  // React may do twice and discard. `useMemo` gives the same create-once
+  // behaviour without the read.
+  const pulse = useMemo(() => new Animated.Value(0.35), []);
 
   useEffect(() => {
     const animation = Animated.loop(

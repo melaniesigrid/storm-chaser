@@ -12,8 +12,8 @@ import {
 } from '@/core/utils/format';
 import type { Coordinates } from '@/features/weather/model/types';
 
-import { chaseLevelForTier, STORM_TYPES } from '../model/stormTypes';
-import type { CapturedConditions, StormTypeId } from '../model/types';
+import { chaseLevelForTier, describeStormType, STORM_TYPES } from '../model/stormTypes';
+import type { CapturedConditions, PhotoSource, StormTypeId } from '../model/types';
 
 export interface StormMetadataFormValues {
   stormType: StormTypeId;
@@ -22,6 +22,7 @@ export interface StormMetadataFormValues {
 
 export interface StormMetadataFormProps {
   photoUri: string;
+  photoSource: PhotoSource;
   capturedAt: string;
   coordinates: Coordinates | null;
   conditions: CapturedConditions | null;
@@ -38,6 +39,7 @@ export interface StormMetadataFormProps {
  */
 export function StormMetadataForm({
   photoUri,
+  photoSource,
   capturedAt,
   coordinates,
   conditions,
@@ -71,7 +73,26 @@ export function StormMetadataForm({
             />
           ))}
         </View>
+
+        {/*
+          The description of whatever is selected, in place rather than behind a
+          second tap. Twelve labels are not self-explanatory to someone learning
+          the sky, and a wall cloud filed as a shelf cloud is a wrong record
+          rather than an untidy one. It sits below the chips so the block does
+          not reflow the grid as the selection moves between a one-line and a
+          two-line description.
+        */}
+        <Text variant="message" tone="muted" style={{ marginTop: 12 }}>
+          {describeStormType(stormType).description}
+        </Text>
       </Panel>
+
+      {photoSource === 'library' ? (
+        <Text variant="message" tone="muted">
+          Imported photo. The position and conditions below are this device&apos;s, now —
+          not necessarily the storm&apos;s.
+        </Text>
+      ) : null}
 
       <Panel label="Field notes">
         <TextInput
@@ -98,7 +119,11 @@ export function StormMetadataForm({
       </Panel>
 
       <Panel label="Captured automatically">
-        <Row label="Time" value={formatTimestamp(capturedAt)} />
+        <Row label="Source" value={photoSource === 'camera' ? 'Camera' : 'Imported'} />
+        <Row
+          label={photoSource === 'camera' ? 'Time' : 'Photo taken'}
+          value={formatTimestamp(capturedAt)}
+        />
         <Row
           label="Position"
           value={

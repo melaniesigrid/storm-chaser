@@ -8,6 +8,7 @@ import type { StormReportDraft } from '@/features/storms/model/types';
 function draft(overrides: Partial<StormReportDraft> = {}): StormReportDraft {
   return {
     photoUri: 'file:///documents/storm-photos/a.jpg',
+    photoSource: 'camera',
     capturedAt: '2026-05-01T18:00:00.000Z',
     coordinates: { latitude: 35.48, longitude: -97.53 },
     locationAccuracyM: 12,
@@ -120,6 +121,46 @@ describe('StormRepository', () => {
     const second = await repository.remove('storm_1');
     expect(second.ok).toBe(false);
     expect(!second.ok && second.error.kind).toBe('not_found');
+  });
+
+  it('migrates a version 1 envelope by marking its reports camera shot', async () => {
+    // Version 1 predates photo import, so every report in it was necessarily
+    // taken on the camera.
+    const legacy = {
+      version: 1,
+      reports: [
+        {
+          id: 'storm_legacy',
+          photoUri: 'file:///documents/storm-photos/legacy.jpg',
+          capturedAt: '2026-04-01T18:00:00.000Z',
+          coordinates: null,
+          locationAccuracyM: null,
+          stormType: 'hail',
+          notes: 'Golf ball, north of the highway',
+          conditions: null,
+          createdAt: '2026-04-01T18:00:00.000Z',
+          updatedAt: '2026-04-01T18:00:00.000Z',
+        },
+      ],
+    };
+
+    const { repository } = buildRepository({ [STORAGE_KEY]: JSON.stringify(legacy) });
+    const result = await repository.list();
+
+    expect(result.ok).toBe(true);
+    expect(result.ok && result.value[0]?.photoSource).toBe('camera');
+    // The other version 1 gap is still filled on the same pass.
+    expect(result.ok && result.value[0]?.syncState).toBe('local');
+  });
+
+  it('keeps an imported photo labelled as imported across a reload', async () => {
+    const { repository, store } = buildRepository();
+    await repository.create(draft({ photoSource: 'library' }));
+
+    const reopened = createStormRepository(store);
+    const result = await reopened.list();
+
+    expect(result.ok && result.value[0]?.photoSource).toBe('library');
   });
 
   it('degrades to an empty log when stored data is corrupt', async () => {

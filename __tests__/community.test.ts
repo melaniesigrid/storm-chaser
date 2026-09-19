@@ -12,13 +12,52 @@ describe('sampleCommunityReports', () => {
     const elsewhere = sampleCommunityReports({ latitude: -33.86, longitude: 151.2 });
 
     expect(here).toHaveLength(elsewhere.length);
+    // The nearby half is ordered first, so index 0 is a viewer-relative pin.
     expect(here[0]?.coordinates).not.toEqual(elsewhere[0]?.coordinates);
   });
 
-  it('stays within a sensible radius of the viewer', () => {
-    for (const report of sampleCommunityReports(TORONTO)) {
-      expect(Math.abs(report.coordinates.latitude - TORONTO.latitude)).toBeLessThan(1.5);
+  it('puts some reports within reach of the viewer, wherever they are', () => {
+    // The nearby half is what makes the map useful on first run. It is asserted
+    // as "at least some are close" rather than "all are", because the set now
+    // also carries fixed worldwide pins that are close to nobody in particular.
+    for (const origin of [TORONTO, { latitude: -33.86, longitude: 151.2 }]) {
+      const nearby = sampleCommunityReports(origin).filter(
+        (report) => Math.abs(report.coordinates.latitude - origin.latitude) < 1.5,
+      );
+
+      expect(nearby.length).toBeGreaterThanOrEqual(6);
     }
+  });
+
+  it('carries a worldwide set that does not move with the viewer', () => {
+    const here = sampleCommunityReports(TORONTO);
+    const elsewhere = sampleCommunityReports({ latitude: -33.86, longitude: 151.2 });
+
+    const fixed = here.filter((report) =>
+      elsewhere.some(
+        (other) =>
+          other.id === report.id &&
+          other.coordinates.latitude === report.coordinates.latitude &&
+          other.coordinates.longitude === report.coordinates.longitude,
+      ),
+    );
+
+    // Every continent should be represented no matter where the viewer stands.
+    expect(fixed.length).toBeGreaterThanOrEqual(30);
+  });
+
+  it('spreads the worldwide set across both hemispheres', () => {
+    const reports = sampleCommunityReports(TORONTO);
+
+    expect(reports.some((r) => r.coordinates.latitude > 40)).toBe(true);
+    expect(reports.some((r) => r.coordinates.latitude < -25)).toBe(true);
+    expect(reports.some((r) => r.coordinates.longitude > 100)).toBe(true);
+    expect(reports.some((r) => r.coordinates.longitude < -90)).toBe(true);
+  });
+
+  it('gives every sample report a unique id', () => {
+    const ids = sampleCommunityReports(TORONTO).map((report) => report.id);
+    expect(new Set(ids).size).toBe(ids.length);
   });
 
   it('keeps every generated point on the globe', () => {

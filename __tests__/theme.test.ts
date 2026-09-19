@@ -24,6 +24,8 @@ import {
   isThemePreference,
   THEME_STORAGE_KEY,
 } from '@/core/theme/themeStore';
+import { bleedFor, TEXT_VARIANTS, variantStyle } from '@/core/ui/Text';
+import { cardTint } from '@/features/storms/model/cardTint';
 import { createMemoryStore, type KeyValueStore } from '@/core/storage/KeyValueStore';
 import type { ChaseLevel } from '@/features/weather/model/types';
 
@@ -781,5 +783,101 @@ describe('the AA helper and the WCAG thresholds', () => {
     expect(WCAG_MAX_FLASHES_PER_SECOND).toBe(3);
     expect(WCAG_GENERAL_FLASH_LUMINANCE_DELTA).toBeCloseTo(0.1, 5);
     expect(WCAG_GENERAL_FLASH_AREA_FRACTION).toBeCloseTo(0.25, 5);
+  });
+});
+
+describe('the type scale', () => {
+  /**
+   * A line box shorter than its own font size crops the glyphs inside it. The
+   * `score` variant shipped at 56px inside a 54px line and lost every
+   * descender, so this walks the whole scale rather than pinning the one case.
+   */
+  it('never sets a line height below its font size', () => {
+    for (const themeName of THEME_NAMES) {
+      const theme = THEMES[themeName];
+
+      for (const variant of TEXT_VARIANTS) {
+        const style = variantStyle(variant, theme);
+        const fontSize = style.fontSize as number;
+        const lineHeight = style.lineHeight as number;
+
+        expect(typeof fontSize).toBe('number');
+        expect(typeof lineHeight).toBe('number');
+        // Named in the failure so a regression says which variant broke.
+        expect({ variant, ok: lineHeight >= fontSize }).toEqual({ variant, ok: true });
+      }
+    }
+  });
+
+  /**
+   * The display faces paint outside the box React Native measures for them, so
+   * the large variants carry a bleed. It has to cancel itself out, or every
+   * heading in the app shifts and the right-aligned readouts stop lining up.
+   */
+  it('cancels the display bleed so layout never moves', () => {
+    for (const variant of TEXT_VARIANTS) {
+      const style = variantStyle(variant, THEMES['skyward-day']);
+      const bleed = bleedFor(variant, style.fontSize as number);
+      if (!bleed) continue;
+
+      if (bleed.paddingHorizontal !== undefined) {
+        expect(bleed.marginHorizontal).toBe(-(bleed.paddingHorizontal as number));
+      }
+      if (bleed.paddingRight !== undefined) {
+        expect(bleed.marginRight).toBe(-(bleed.paddingRight as number));
+      }
+    }
+  });
+
+  it('gives the display variants room and leaves body copy alone', () => {
+    expect(bleedFor('display', 40)).toMatchObject({ paddingHorizontal: 4 });
+    expect(bleedFor('body', 17)).toBeNull();
+    expect(bleedFor('caption', 15)).toBeNull();
+  });
+});
+
+describe('card stocks', () => {
+  /**
+   * Field Card prints each report on a different stock. A tint that cannot
+   * carry the theme's ink is a readability bug dressed as a style, so the whole
+   * palette is held to AA for body text.
+   */
+  it('carries body text at AA on every tint a theme offers', () => {
+    for (const themeName of THEME_NAMES) {
+      const theme = THEMES[themeName];
+      for (const tint of theme.colors.cardTints ?? []) {
+        expect({ themeName, tint, ok: meetsAA(theme.colors.text, tint, AA_TEXT) })
+          .toEqual({ themeName, tint, ok: true });
+      }
+    }
+  });
+
+  /*
+   * There is deliberately no assertion that the severity rail clears 3:1
+   * against the stock behind it. The teal `unsettled` fill cannot do that on
+   * white, and the project already rejected the same assertion once against
+   * `surface`: the tier is carried by a text label on the card as well as by
+   * the rail, so the colour is a second encoding rather than the only one.
+   * Bending the palette to satisfy a check that is not required would lose the
+   * tier hues the whole theme is built on.
+   */
+
+  it('gives a report the same stock every time, and no stock without a palette', () => {
+    const tints = THEMES['field-card'].colors.cardTints;
+
+    expect(cardTint('storm_abc', tints)).toBe(cardTint('storm_abc', tints));
+    expect(cardTint('storm_abc', undefined)).toBeUndefined();
+    expect(cardTint('storm_abc', [])).toBeUndefined();
+  });
+
+  it('spreads ids across the whole palette rather than favouring one', () => {
+    const tints = THEMES['field-card'].colors.cardTints ?? [];
+    const seen = new Set<string | undefined>();
+
+    for (let index = 0; index < 400; index += 1) {
+      seen.add(cardTint(`storm_${index}_${index * 7}`, tints));
+    }
+
+    expect(seen.size).toBe(tints.length);
   });
 });

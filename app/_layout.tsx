@@ -139,9 +139,17 @@ function AppStack() {
           headerTintColor: colors.text,
           headerTitleStyle: { fontFamily: type.display, fontSize: 20 },
           contentStyle: { backgroundColor: colors.background },
+          // iOS labels the back button with the PREVIOUS screen's title. The
+          // tab group has its header hidden, so its title defaulted to the
+          // route name and the back button read a literal "(tabs)". Pinning a
+          // label here fixes every pushed screen at once, including any added
+          // later, rather than one route at a time.
+          headerBackTitle: 'Back',
         }}
       >
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        {/* Titled even though its header is hidden: the title is what iOS
+            reads back out on the next screen's back button. */}
+        <Stack.Screen name="(tabs)" options={{ headerShown: false, title: 'Storm Chaser' }} />
         <Stack.Screen
           name="capture"
           options={{ presentation: 'modal', title: 'Document a storm' }}

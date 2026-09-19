@@ -13,7 +13,8 @@
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Storm Chaser uses your location to pull live conditions and to stamp coordinates onto storm reports.",
         "NSCameraUsageDescription": "Storm Chaser uses the camera to photograph storm structure for your field log.",
-        "NSPhotoLibraryAddUsageDescription": "Storm Chaser can save storm photos to your library."
+        "NSPhotoLibraryAddUsageDescription": "Storm Chaser can save storm photos to your library.",
+        "NSPhotoLibraryUsageDescription": "Storm Chaser can file a storm photo you already have in your library, when the shot was taken on another camera or the moment had already passed."
       }
     },
     "android": {
@@ -22,7 +23,9 @@
       "permissions": [
         "ACCESS_COARSE_LOCATION",
         "ACCESS_FINE_LOCATION",
-        "CAMERA"
+        "CAMERA",
+        "READ_MEDIA_IMAGES",
+        "READ_EXTERNAL_STORAGE"
       ]
     },
     "plugins": [
@@ -37,6 +40,12 @@
         "expo-camera",
         {
           "cameraPermission": "Storm Chaser uses the camera to photograph storm structure for your field log."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Storm Chaser can file a storm photo you already have in your library, when the shot was taken on another camera or the moment had already passed."
         }
       ],
       "expo-font",

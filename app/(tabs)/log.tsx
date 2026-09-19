@@ -1,6 +1,6 @@
 import * as Haptics from 'expo-haptics';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
 import { FlatList, Pressable, View } from 'react-native';
 
 import { WeatherIcon } from '@/core/icons/WeatherIcon';
@@ -22,16 +22,29 @@ export default function FieldLogScreen() {
   // Celebrating on the destination rather than inside the modal means the burst
   // lands over the list the new report just joined.
   const { celebrate } = useLocalSearchParams<{ celebrate?: string }>();
-  const [celebrating, setCelebrating] = useState(false);
+
+  /**
+   * Derived from the route rather than mirrored into state.
+   *
+   * This used to set a `celebrating` flag inside an effect and clear the param
+   * in the same pass, which is a synchronous setState in an effect: one render
+   * to read the param, a second to record it, and the burst starting a frame
+   * later than the screen it belongs to. The param already IS the state, so the
+   * confetti reads it directly and clears it when it finishes.
+   */
+  const celebrating = celebrate === '1';
 
   useEffect(() => {
-    if (celebrate !== '1') return;
-
-    setCelebrating(true);
+    if (!celebrating) return;
     void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    // Clear the flag so a re-render or a back navigation cannot re-fire it.
-    router.setParams({ celebrate: undefined });
-  }, [celebrate, router]);
+  }, [celebrating]);
+
+  // Clearing the flag is what ends the burst, so a re-render or a back
+  // navigation cannot re-fire it.
+  const endCelebration = useCallback(
+    () => router.setParams({ celebrate: undefined }),
+    [router],
+  );
 
   if (isLoading) {
     return (
@@ -107,7 +120,7 @@ export default function FieldLogScreen() {
         </Pressable>
       ) : null}
 
-      <Confetti active={celebrating} onDone={() => setCelebrating(false)} />
+      <Confetti active={celebrating} onDone={endCelebration} />
     </View>
   );
 }

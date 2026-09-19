@@ -44,10 +44,15 @@ export function useDeviceLocation({ auto = true }: DeviceLocationOptions = {}): 
   const [accuracyMeters, setAccuracyMeters] = useState<number | null>(null);
   const [error, setError] = useState<AppError | null>(null);
 
-  const refresh = useCallback(async () => {
-    setStatus('requesting');
-    setError(null);
-
+  /**
+   * The acquisition itself, with no synchronous state change of its own.
+   *
+   * Split out because the auto path already opens in `requesting` with no
+   * error, so the reset below was setting two pieces of state to the values
+   * they already held, inside an effect, on every mount. That is a cascading
+   * render for nothing, and it is what the compiler was objecting to.
+   */
+  const acquire = useCallback(async () => {
     try {
       const permission = await Location.requestForegroundPermissionsAsync();
 
@@ -81,10 +86,33 @@ export function useDeviceLocation({ auto = true }: DeviceLocationOptions = {}): 
     }
   }, []);
 
+  /**
+   * The manual entry point: a retry from the UI has to clear whatever the last
+   * attempt left on screen before it starts, which the auto path never does
+   * because there is nothing there yet.
+   */
+  const refresh = useCallback(async () => {
+    setStatus('requesting');
+    setError(null);
+    await acquire();
+  }, [acquire]);
+
   useEffect(() => {
     if (!shouldAutoAcquire({ auto, gate })) return;
-    void refresh();
-  }, [auto, gate, refresh]);
+    /*
+     * `acquire`, not `refresh`: see the note on the split above.
+     *
+     * The rule cannot see through the async boundary. `acquire` sets no state
+     * synchronously -- its first statement is an `await` on the permission
+     * prompt, and every setState after it runs in a promise callback once the
+     * device has answered. That is precisely the shape the rule's own guidance
+     * calls correct: subscribe to an external system, set state when it
+     * reports back. Suppressed narrowly rather than restructured, because the
+     * restructuring would only be there to satisfy the analyzer.
+     */
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    void acquire();
+  }, [auto, gate, acquire]);
 
   return { status, coordinates, accuracyMeters, error, refresh };
 }
