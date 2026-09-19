@@ -857,6 +857,164 @@
   .b-shoulders .wb-lockups b { font-family: 'Big Shoulders Display', sans-serif; font-weight: 900; font-size: 3.7778vw; line-height: 3.5556vw; letter-spacing: 0.1111vw; color: #F4F2E8; text-transform: uppercase; }
   .b-shoulders .wb-lockups s { font-family: 'Big Shoulders Display', sans-serif; font-weight: 400; font-size: 2.2222vw; line-height: 2.2222vw; letter-spacing: 0.2222vw; color: #B4B2A4; text-transform: uppercase; text-decoration: none; }
 
+  /*
+   * The peculiarities.
+   *
+   * Each direction was drawn with its own motion, and that motion is half the
+   * argument: 01 keys a graphic on, 02 drops a bolt into a word, 03 wipes a
+   * slash across one and scans the top of the board. Shipping the three boards
+   * without them was shipping three still frames of three different films.
+   *
+   * Cycle lengths are the boards' own: 2.6s, 3s, 2.9s. They are deliberately
+   * not harmonised -- three directions running in lockstep would read as one
+   * system, which is the opposite of what this section is for.
+   */
+
+  /* Shared: the bolt strikes down into every app-icon plate. */
+  @keyframes sc-strike {
+    0%, 10%  { transform: translateY(-118%); opacity: 0; }
+    24%      { transform: translateY(0); opacity: 1; }
+    30%      { opacity: 0.2; }
+    36%,100% { transform: translateY(0); opacity: 1; }
+  }
+  @keyframes sc-iglow {
+    0%, 16%  { opacity: 0; }
+    26%      { opacity: 0.9; }
+    52%,100% { opacity: 0.18; }
+  }
+
+  .wb-plate .wb-bolt { animation: sc-strike 2.9s cubic-bezier(0.16, 1, 0.3, 1) infinite; }
+  .wb-plate::before {
+    content: '';
+    position: absolute;
+    width: 13.1111vw;
+    height: 13.1111vw;
+    border-radius: 50%;
+    animation: sc-iglow 2.9s ease-out infinite;
+    pointer-events: none;
+  }
+
+  /* ---- 01 Anton: the ray draws, then a shine crosses the lockup ---- */
+  @keyframes sc-ray-draw {
+    0%   { clip-path: inset(0 100% 0 0); }
+    55%  { clip-path: inset(0 0 0 0); }
+    100% { clip-path: inset(0 0 0 0); }
+  }
+  @keyframes sc-shine {
+    0%   { transform: translateX(-140%) skewX(-18deg); opacity: 0; }
+    18%  { opacity: 1; }
+    60%  { opacity: 1; }
+    100% { transform: translateX(240%) skewX(-18deg); opacity: 0; }
+  }
+  .b-anton .wb-plate .wb-bolt,
+  .b-anton .wb-plate::before { animation-duration: 2.6s; }
+  .b-anton .rule { animation: sc-ray-draw 2.6s cubic-bezier(0.16, 1, 0.3, 1) infinite; }
+  .b-anton .wb-mark::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 10vw;
+    /*
+     * Bounded to the two line boxes rather than the padded block, and at a
+     * third of the board's alpha. The board clips its shine inside a 640x220
+     * box; there is no clean way to clip here without also cutting the ray,
+     * which starts 20px outside the lockup -- so the sweep is sized and
+     * softened instead of masked. Unbounded it skewed into a grey wedge over
+     * the board edge, which is a smudge rather than a key light.
+     */
+    height: 23.5556vw;
+    background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%);
+    animation: sc-shine 2.6s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+    pointer-events: none;
+  }
+  .b-anton .wb-plate:first-child::before { background: radial-gradient(circle, rgba(255,255,255,0.95) 0%, rgba(255,212,0,0) 68%); }
+  .b-anton .wb-plate + .wb-plate::before { background: radial-gradient(circle, rgba(255,212,0,0.85) 0%, rgba(255,212,0,0) 68%); }
+
+  /* ---- 02 Bricolage: the underline draws, the bolt drops into the word ---- */
+  @keyframes sc-underline {
+    0%   { transform: scaleX(0); }
+    45%  { transform: scaleX(1); }
+    100% { transform: scaleX(1); }
+  }
+  @keyframes sc-bolt-drop {
+    0%, 30% { transform: translateY(-4.5vw) scale(0.7); opacity: 0; }
+    46%     { transform: translateY(0) scale(1.14); opacity: 1; }
+    56%     { transform: translateY(0) scale(1); opacity: 1; }
+    100%    { transform: translateY(0) scale(1); opacity: 1; }
+  }
+  @keyframes sc-halo {
+    0%, 40% { opacity: 0; transform: scale(0.5); }
+    50%     { opacity: 0.45; transform: scale(1.5); }
+    72%,100%{ opacity: 0; transform: scale(2.1); }
+  }
+  .b-bric .wb-plate .wb-bolt,
+  .b-bric .wb-plate::before { animation-duration: 3s; }
+  .b-bric .rule { animation: sc-underline 3s cubic-bezier(0.22, 1, 0.36, 1) infinite; transform-origin: left center; }
+  .b-bric .wb-drop { animation: sc-bolt-drop 3s cubic-bezier(0.34, 1.56, 0.64, 1) infinite; }
+  /*
+   * The halo is a SIBLING of the bolt, not a child of it: clip-path clips an
+   * element's pseudo-elements too, so a ::after on the bolt would be cut to
+   * the same lightning silhouette and never read as a glow behind it.
+   */
+  .b-bric .wb-droplet { position: relative; display: inline-block; }
+  .b-bric .wb-halo {
+    position: absolute;
+    left: 50%;
+    top: 0.8889vw;
+    width: 6.6667vw;
+    height: 6.6667vw;
+    margin-left: -3.3333vw;
+    border-radius: 50%;
+    background: #FFB400;
+    animation: sc-halo 3s ease-out infinite;
+  }
+  .b-bric .wb-plate:first-child::before { background: radial-gradient(circle, rgba(255,180,0,0.9) 0%, rgba(255,180,0,0) 68%); }
+  .b-bric .wb-plate + .wb-plate::before { background: radial-gradient(circle, rgba(255,90,71,0.4) 0%, rgba(255,90,71,0) 68%); }
+
+  /* ---- 03 Big Shoulders: the slash wipes, a scan line runs the top ---- */
+  @keyframes sc-slash {
+    0%   { clip-path: polygon(0 0, 0 0, 0 100%, 0 100%); }
+    38%  { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+    100% { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); }
+  }
+  @keyframes sc-scan {
+    0%   { transform: translateY(0); opacity: 0; }
+    20%  { opacity: 0.85; }
+    70%  { opacity: 0.85; }
+    100% { transform: translateY(13.3333vw); opacity: 0; }
+  }
+  @keyframes sc-blink {
+    0%, 44%  { opacity: 0.25; }
+    48%, 60% { opacity: 1; }
+    64%,100% { opacity: 0.25; }
+  }
+  .b-shoulders .rule { animation: sc-slash 2.9s cubic-bezier(0.83, 0, 0.17, 1) infinite; }
+  .b-shoulders .wb-head b { animation: sc-blink 2.9s steps(1, end) infinite; }
+  .b-shoulders::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 0.2222vw;
+    background: #4FD1C5;
+    box-shadow: 0 0 2vw 0.3333vw rgba(79, 209, 197, 0.7);
+    animation: sc-scan 2.9s linear infinite;
+    pointer-events: none;
+  }
+  .b-shoulders .wb-plate .wb-bolt { animation-timing-function: steps(1, end); }
+  .b-shoulders .wb-plate:first-child::before { background: radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(245,194,66,0) 68%); }
+  .b-shoulders .wb-plate + .wb-plate::before { background: radial-gradient(circle, rgba(79,209,197,0.75) 0%, rgba(79,209,197,0) 68%); }
+
+  /* ---------- the directions opener, now the top of the page ---------- */
+  .directions { padding: 96px 0 0; }
+  .directions .wrap { margin-bottom: 40px; }
+  .directions-title { margin: 10px 0 14px; }
+  /* The boards are the page's opening image, so the first one starts flush. */
+  .directions .props--wordmark { margin-bottom: 0; }
+  .directions .prop:last-child { margin-bottom: 72px; }
+
   /* Screen treatments */
   .mini { display: flex; flex-direction: column; gap: 8px; }
   .mini-temp { font-size: 42px; line-height: 1; }
@@ -1076,6 +1234,22 @@
   @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
     .skyflash, .bolt-stage, .channel, .fork, .ray { animation: none; }
+    /*
+     * The board peculiarities, stilled. Each one resolves to its finished
+     * state rather than its first frame: a ray that never draws is a missing
+     * ray, not a calm one.
+     */
+    .wb-plate .wb-bolt, .wb-plate::before, .b-anton .wb-mark::after,
+    .b-anton .rule, .b-bric .rule, .b-bric .wb-drop, .b-bric .wb-halo,
+    .b-shoulders .rule, .b-shoulders .wb-head b, .b-shoulders::before {
+      animation: none;
+    }
+    .b-bric .wb-drop { transform: none; opacity: 1; }
+    .b-bric .rule { transform: scaleX(1); }
+    .b-anton .rule, .b-shoulders .rule { clip-path: none; }
+    .b-anton .wb-mark::after, .b-bric .wb-halo, .b-shoulders::before { opacity: 0; }
+    .wb-plate .wb-bolt { transform: none; opacity: 1; }
+    .wb-plate::before { opacity: 0.18; }
     .channel, .fork { stroke-dashoffset: 0; opacity: 1; }
     .ray { transform: var(--ray-tilt) scaleX(1); }
   }
@@ -1415,6 +1589,108 @@
 
 
 
+<section id="directions" class="directions">
+  <div class="wrap">
+    <p class="eyebrow">Phase 01 &middot; Wordmark, three display faces</p>
+    <h2 class="directions-title">Three directions, shipped as drawn</h2>
+    <p class="section-lede">
+      The wordmark went through three display faces before one stuck. All three are here
+      in full, in the palettes, faces and motion they were drawn in &mdash; the ray, the
+      bolt drop, the hazard stripe, the slash, the scan. They do not follow the theme
+      switcher; a direction should look like itself.
+    </p>
+  </div>
+
+    <div class="props props--wordmark">
+
+      <article class="prop">
+        <div class="board wb b-anton">
+          <div class="wb-head"><span>Direction 01</span><b>Anton / Broadcast</b></div>
+          <div class="wb-mark">
+            <i>Storm</i><i>Chaser</i>
+            <div class="rule" aria-hidden="true"></div>
+          </div>
+          <p class="wb-desc">Ultra-condensed, one weight, no apologies. Reads at 16px on a tab bar and at 124px on a splash screen.</p>
+          <div class="wb-foot">
+            <div class="wb-plate" aria-hidden="true"><div class="wb-bolt"></div><span class="wb-sc">SC</span></div>
+            <div class="wb-plate" aria-hidden="true"><div class="wb-bolt"></div><span class="wb-sc">SC</span></div>
+            <div class="wb-lockups" aria-hidden="true"><b>Storm Chaser</b><s>Storm Chaser</s></div>
+            <div class="wb-swatches" aria-hidden="true">
+              <span style="background:#FFD400"></span><span style="background:#FF5A47"></span>
+              <span style="background:#8E7CFF"></span><span style="background:#F2F6FA"></span>
+            </div>
+          </div>
+        </div>
+        <span class="verdict">Not chosen</span>
+        <p class="prop-note">
+          Ultra-condensed, one weight, no apologies. It reads at 16px on a tab bar and at
+          124px on a splash. <b>Rejected for having exactly one voice</b> &mdash; with a single
+          weight there is no hierarchy to build a whole interface out of.
+        </p>
+      </article>
+
+      <article class="prop">
+        <div class="board wb b-bric">
+          <div class="wb-head"><span>Direction 02</span><b>Bricolage / Atmospheric</b></div>
+          <div class="wb-mark">
+            <i>storm<span class="wb-droplet" aria-hidden="true"><span class="wb-halo"></span><span class="wb-drop"></span></span></i><i>chaser</i>
+            <div class="rule" aria-hidden="true"></div>
+          </div>
+          <p class="wb-desc">Weight as the whole idea: hairline against heavy in one word. The optical-size axis keeps it readable when it shrinks to a tab label.</p>
+          <div class="wb-foot">
+            <div class="wb-plate" aria-hidden="true"><div class="wb-bolt"></div><span class="wb-sc">sc</span></div>
+            <div class="wb-plate" aria-hidden="true"><div class="wb-bolt"></div><span class="wb-sc">sc</span></div>
+            <div class="wb-lockups" aria-hidden="true"><b>stormchaser</b><s>stormchaser</s></div>
+            <div class="wb-swatches" aria-hidden="true">
+              <span style="background:#FFB400"></span><span style="background:#FF5A47"></span>
+              <span style="background:#14213A"></span><span style="background:#F4F1E8"></span>
+            </div>
+          </div>
+        </div>
+        <span class="verdict verdict--shipped">Shipped</span>
+        <p class="prop-note">
+          Weight as the whole idea: hairline against heavy inside one word. The optical-size
+          axis holds it together from a tab label to a splash screen, and the 200/800 pair
+          became <b>the display token for both Skyward themes</b>. It is the lockup at the
+          top of this page.
+        </p>
+      </article>
+
+      <article class="prop">
+        <div class="board wb b-shoulders">
+          <div class="wb-head"><span>Direction 03</span><b>Big Shoulders / Signage</b></div>
+          <div class="wb-sign">
+            <div class="hazard" aria-hidden="true"></div>
+            <div>
+              <div class="wb-mark">
+                <i>Storm</i><i>Chaser<span class="rule" aria-hidden="true"></span></i>
+              </div>
+              <span class="strap">Field Instrument</span>
+            </div>
+          </div>
+          <p class="wb-desc">Condensed enough to set two words at 132px inside a phone splash. Variable weight from 100 to 900 gives the whole hierarchy one voice.</p>
+          <div class="wb-foot">
+            <div class="wb-plate" aria-hidden="true"><div class="wb-bolt"></div><span class="wb-sc">SC</span></div>
+            <div class="wb-plate" aria-hidden="true"><div class="wb-bolt"></div><span class="wb-sc">SC</span></div>
+            <div class="wb-lockups" aria-hidden="true"><b>Storm Chaser</b><s>Storm Chaser</s></div>
+            <div class="wb-swatches" aria-hidden="true">
+              <span style="background:#F5C242"></span><span style="background:#FF5A47"></span>
+              <span style="background:#4FD1C5"></span><span style="background:#F4F2E8"></span>
+            </div>
+          </div>
+        </div>
+        <span class="verdict">Partly kept</span>
+        <p class="prop-note">
+          Highway signage: hazard stripe, condensed caps, a 100&ndash;900 variable axis. Too
+          severe for the everyday screen, but <b>its language survives</b> &mdash; the &ldquo;field
+          instrument&rdquo; strapline is the hero eyebrow, and its amber and teal are the
+          Active and Unsettled rungs of the chase ladder.
+        </p>
+      </article>
+
+    </div>
+</section>
+
 <header class="hero">
   <!--
     The weather. Decorative in full: it carries no information, so it is hidden
@@ -1511,97 +1787,6 @@
       drawn in. They do not follow the theme switcher; a rejected direction should look
       like itself.
     </p>
-
-    <h3 class="phase">Phase 01 &middot; Wordmark, three display faces</h3>
-    <div class="props props--wordmark">
-
-      <article class="prop">
-        <div class="board wb b-anton">
-          <div class="wb-head"><span>Direction 01</span><b>Anton / Broadcast</b></div>
-          <div class="wb-mark">
-            <i>Storm</i><i>Chaser</i>
-            <div class="rule" aria-hidden="true"></div>
-          </div>
-          <p class="wb-desc">Ultra-condensed, one weight, no apologies. Reads at 16px on a tab bar and at 124px on a splash screen.</p>
-          <div class="wb-foot">
-            <div class="wb-plate" aria-hidden="true"><div class="wb-bolt"></div><span class="wb-sc">SC</span></div>
-            <div class="wb-plate" aria-hidden="true"><div class="wb-bolt"></div><span class="wb-sc">SC</span></div>
-            <div class="wb-lockups" aria-hidden="true"><b>Storm Chaser</b><s>Storm Chaser</s></div>
-            <div class="wb-swatches" aria-hidden="true">
-              <span style="background:#FFD400"></span><span style="background:#FF5A47"></span>
-              <span style="background:#8E7CFF"></span><span style="background:#F2F6FA"></span>
-            </div>
-          </div>
-        </div>
-        <span class="verdict">Not chosen</span>
-        <p class="prop-note">
-          Ultra-condensed, one weight, no apologies. It reads at 16px on a tab bar and at
-          124px on a splash. <b>Rejected for having exactly one voice</b> &mdash; with a single
-          weight there is no hierarchy to build a whole interface out of.
-        </p>
-      </article>
-
-      <article class="prop">
-        <div class="board wb b-bric">
-          <div class="wb-head"><span>Direction 02</span><b>Bricolage / Atmospheric</b></div>
-          <div class="wb-mark">
-            <i>storm<span class="wb-drop" aria-hidden="true"></span></i><i>chaser</i>
-            <div class="rule" aria-hidden="true"></div>
-          </div>
-          <p class="wb-desc">Weight as the whole idea: hairline against heavy in one word. The optical-size axis keeps it readable when it shrinks to a tab label.</p>
-          <div class="wb-foot">
-            <div class="wb-plate" aria-hidden="true"><div class="wb-bolt"></div><span class="wb-sc">sc</span></div>
-            <div class="wb-plate" aria-hidden="true"><div class="wb-bolt"></div><span class="wb-sc">sc</span></div>
-            <div class="wb-lockups" aria-hidden="true"><b>stormchaser</b><s>stormchaser</s></div>
-            <div class="wb-swatches" aria-hidden="true">
-              <span style="background:#FFB400"></span><span style="background:#FF5A47"></span>
-              <span style="background:#14213A"></span><span style="background:#F4F1E8"></span>
-            </div>
-          </div>
-        </div>
-        <span class="verdict verdict--shipped">Shipped</span>
-        <p class="prop-note">
-          Weight as the whole idea: hairline against heavy inside one word. The optical-size
-          axis holds it together from a tab label to a splash screen, and the 200/800 pair
-          became <b>the display token for both Skyward themes</b>. It is the lockup at the
-          top of this page.
-        </p>
-      </article>
-
-      <article class="prop">
-        <div class="board wb b-shoulders">
-          <div class="wb-head"><span>Direction 03</span><b>Big Shoulders / Signage</b></div>
-          <div class="wb-sign">
-            <div class="hazard" aria-hidden="true"></div>
-            <div>
-              <div class="wb-mark">
-                <i>Storm</i><i>Chaser<span class="rule" aria-hidden="true"></span></i>
-              </div>
-              <span class="strap">Field Instrument</span>
-            </div>
-          </div>
-          <p class="wb-desc">Condensed enough to set two words at 132px inside a phone splash. Variable weight from 100 to 900 gives the whole hierarchy one voice.</p>
-          <div class="wb-foot">
-            <div class="wb-plate" aria-hidden="true"><div class="wb-bolt"></div><span class="wb-sc">SC</span></div>
-            <div class="wb-plate" aria-hidden="true"><div class="wb-bolt"></div><span class="wb-sc">SC</span></div>
-            <div class="wb-lockups" aria-hidden="true"><b>Storm Chaser</b><s>Storm Chaser</s></div>
-            <div class="wb-swatches" aria-hidden="true">
-              <span style="background:#F5C242"></span><span style="background:#FF5A47"></span>
-              <span style="background:#4FD1C5"></span><span style="background:#F4F2E8"></span>
-            </div>
-          </div>
-        </div>
-        <span class="verdict">Partly kept</span>
-        <p class="prop-note">
-          Highway signage: hazard stripe, condensed caps, a 100&ndash;900 variable axis. Too
-          severe for the everyday screen, but <b>its language survives</b> &mdash; the &ldquo;field
-          instrument&rdquo; strapline is the hero eyebrow, and its amber and teal are the
-          Active and Unsettled rungs of the chase ladder.
-        </p>
-      </article>
-
-    </div>
-
 
     <h3 class="phase">Phase 02 &middot; The conditions screen, four treatments</h3>
     <div class="props props--ui">
