@@ -1,6 +1,7 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Alert, Image, ScrollView, View } from 'react-native';
 
+import { Bolt } from '@/core/icons/Bolt';
 import { useAppTheme } from '@/core/theme/useAppTheme';
 import { Button, Panel, Skeleton, Text } from '@/core/ui';
 import {
@@ -147,6 +148,17 @@ export default function StormDetailScreen() {
         <Row label="Sync" value={report.syncState} />
         <Row label="Id" value={report.id} />
       </Panel>
+
+      {/*
+        The way out of the log and onto someone's feed. Primary, and above
+        Delete: this is the thing a chaser came back to the report to do.
+      */}
+      <Button
+        title="Stamp this storm"
+        icon={<Bolt size={30} color={theme.colors.onAccent} />}
+        onPress={() => router.push({ pathname: '/seal/[id]', params: { id: report.id } })}
+        style={{ marginBottom: 12 }}
+      />
 
       <Button
         title="Delete report"

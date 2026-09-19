@@ -157,6 +157,7 @@ function AppStack() {
         />
         <Stack.Screen name="storm/[id]" options={{ title: 'Storm report' }} />
         <Stack.Screen name="legend/[id]" options={{ title: 'Storm lore' }} />
+        <Stack.Screen name="seal/[id]" options={{ title: 'Stamp this storm' }} />
         <Stack.Screen
           name="profile"
           options={{ presentation: 'modal', title: 'Profile' }}
