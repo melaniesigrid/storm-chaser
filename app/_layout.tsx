@@ -30,6 +30,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { onboardingStore } from '@/core/onboarding/onboardingStore';
+import { ProfileProvider } from '@/core/profile';
 import { ThemeProvider } from '@/core/theme/ThemeProvider';
 import { useAppTheme } from '@/core/theme/useAppTheme';
 import {
@@ -73,15 +74,17 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <ThemeProvider>
-          <PersistQueryClientProvider
-            client={queryClient}
-            persistOptions={{
-              persister: queryPersister,
-              maxAge: PERSIST_MAX_AGE_MS,
-            }}
-          >
-            <AppStack />
-          </PersistQueryClientProvider>
+          <ProfileProvider>
+            <PersistQueryClientProvider
+              client={queryClient}
+              persistOptions={{
+                persister: queryPersister,
+                maxAge: PERSIST_MAX_AGE_MS,
+              }}
+            >
+              <AppStack />
+            </PersistQueryClientProvider>
+          </ProfileProvider>
         </ThemeProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
@@ -137,8 +140,8 @@ function AppStack() {
         <Stack.Screen name="storm/[id]" options={{ title: 'Storm report' }} />
         <Stack.Screen name="legend/[id]" options={{ title: 'Storm lore' }} />
         <Stack.Screen
-          name="settings"
-          options={{ presentation: 'modal', title: 'Appearance' }}
+          name="profile"
+          options={{ presentation: 'modal', title: 'Profile' }}
         />
         <Stack.Screen name="onboarding" options={{ headerShown: false }} />
       </Stack>
