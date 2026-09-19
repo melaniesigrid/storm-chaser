@@ -336,7 +336,7 @@ a rendering failure rather than as honesty.
 
 ### Wireframe
 
-![Storm seal layout wireframe](storm-seal-wireframe.png)
+![Storm seal layout wireframe](storm-seal-wireframe.webp)
 
 Source: [`storm-seal-wireframe.html`](storm-seal-wireframe.html). Rough on
 purpose — system fonts, not Big Shoulders. It resolves layout and hierarchy for

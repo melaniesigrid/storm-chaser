@@ -237,6 +237,12 @@ const GROUPS = {
       { maxEdge: SCREENSHOT_MAX_EDGE, quality: SCREENSHOT_QUALITY },
       'docs screenshots (-> WebP, rendered by GitHub)',
     ),
+  designs: () =>
+    runWebpGroup(
+      'docs/designs',
+      { maxEdge: SCREENSHOT_MAX_EDGE, quality: SCREENSHOT_QUALITY },
+      'design wireframes (-> WebP, rendered by GitHub)',
+    ),
   landing: () =>
     runWebpGroup(
       'landing',
