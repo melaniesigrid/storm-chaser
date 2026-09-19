@@ -835,6 +835,19 @@
 
   .theme-name { font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; margin-top: auto; }
 
+  /* The twelve card stocks Field Card prints the field log on. Hard ink and a
+     hard offset, because that is what the theme does everywhere else. */
+  .stocks { margin-top: 34px; }
+  .stock-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 14px; }
+  .stock {
+    width: 46px;
+    height: 62px;
+    border: 3px solid #14140F;
+    border-radius: 6px;
+    box-shadow: 4px 4px 0 #14140F;
+  }
+  .stock-note { font-size: 15px; opacity: 0.8; margin-top: 18px; max-width: 62ch; }
+
   /* ---------- features ---------- */
 
   .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
@@ -1756,6 +1769,30 @@
         <div class="theme-name">Field Card</div>
       </article>
 
+    </div>
+
+    <div class="stocks">
+      <h3>Twelve stocks, one ink</h3>
+      <div class="stock-row">
+        <span class="stock" style="background:#FFFFFF"></span>
+        <span class="stock" style="background:#FFEFC2"></span>
+        <span class="stock" style="background:#CFEDE8"></span>
+        <span class="stock" style="background:#FFD9D2"></span>
+        <span class="stock" style="background:#E4DCFF"></span>
+        <span class="stock" style="background:#F4EAD7"></span>
+        <span class="stock" style="background:#CFE4FF"></span>
+        <span class="stock" style="background:#DDEFC8"></span>
+        <span class="stock" style="background:#FFE0C2"></span>
+        <span class="stock" style="background:#FFD8EA"></span>
+        <span class="stock" style="background:#D6F2FB"></span>
+        <span class="stock" style="background:#E8E6DF"></span>
+      </div>
+      <p class="stock-note">
+        In Field Card every logged storm is printed on its own stock, picked from the
+        report&rsquo;s id so a card keeps its colour when the log is filtered or added to.
+        Six of these was one screenful before the palette repeated. Each one carries the
+        theme&rsquo;s single ink at WCAG AA, which the theme test holds the whole list to.
+      </p>
     </div>
   </div>
 </section>
