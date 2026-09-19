@@ -34,6 +34,7 @@ export const WEATHER_ICON_NAMES = [
   'windsock',
   'raindrops',
   'code-yellow',
+  'lightning-bolt',
   'starry-night',
 ] as const;
 
