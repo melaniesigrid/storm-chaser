@@ -1602,6 +1602,10 @@
     .picker { top: auto; bottom: 12px; right: 12px; left: 12px; justify-content: center; }
     .picker-label { display: none; }
   }
+/* The real-phase moon, stacked on the moonless starry-night artwork. */
+.moon-icon { position: relative; display: inline-block; width: 40px; height: 40px; }
+.moon-icon img { display: block; }
+.moon-icon-disc { position: absolute; inset: 0; }
 </style>
 <script>
   /*
@@ -1998,7 +2002,26 @@
       <article class="phone phone--night">
         <div class="phone-top">
           <span class="phone-loc">43.6532&deg;N 79.3832&deg;W</span>
-          <img src="icons/starry-night.svg" alt="" width="40" height="40">
+          <!--
+            The moon here is the real one. The stars come from the artwork;
+            the disc is drawn by the script at the end of this file from the
+            actual lunar phase, the same way the app draws it. A marketing
+            page showing a crescent on the night of a full moon is a small
+            lie told at scale.
+          -->
+          <span class="moon-icon">
+            <img src="icons/starry-night-moonless.svg" alt="" width="40" height="40">
+            <!--
+              The viewBox is the artwork's own 128 box recentred on the moon,
+              so the disc lands exactly where the removed crescent was and at
+              the size it was drawn. A 64 box here would render it at twice
+              the scale and hang it off the icon.
+            -->
+            <svg class="moon-icon-disc" viewBox="-64 -64 128 128" width="40" height="40" aria-hidden="true">
+              <circle r="21" fill="#fff" opacity="0.07"></circle>
+              <path id="landing-moon" fill="#FFFBEF"></path>
+            </svg>
+          </span>
         </div>
         <div>
           <div class="temp">18&deg;</div>
@@ -2877,6 +2900,95 @@
     buttons.forEach(function (button) {
       button.addEventListener('click', function () { apply(button.dataset.set); });
     });
+  })();
+</script>
+
+<script>
+  /*
+   * The moon on the night phone, at the phase it is actually at.
+   *
+   * A port of src/core/sky/moonPhase.ts. It is duplicated rather than shared
+   * because landing/ is static HTML with no build step and no module
+   * resolution into src/ -- and a thirty-line port is a smaller cost than a
+   * bundler existing solely to deliver it. The app's copy stays the source of
+   * truth; this one is checked against it by __tests__/landingMoon.test.ts,
+   * which runs both over the same instants and fails if they disagree.
+   *
+   * Method: the moon's phase is the elongation between the moon's ecliptic
+   * longitude and the sun's. 0 degrees is new, 180 is full. That one angle
+   * gives both how lit the disc is and which way the terminator bows.
+   */
+  (function () {
+    var path = document.getElementById('landing-moon');
+    if (!path) return;
+
+    var RAD = Math.PI / 180;
+    var RADIUS = 21.4;
+
+    function norm360(value) {
+      return ((value % 360) + 360) % 360;
+    }
+
+    function daysSinceJ2000(date) {
+      return date.getTime() / 86400000 - 10957.5;
+    }
+
+    function sunLongitude(d) {
+      var meanAnomaly = RAD * norm360(357.5291 + 0.98560028 * d);
+      var meanLongitude = norm360(280.459 + 0.98564736 * d);
+      return norm360(
+        meanLongitude +
+          1.9148 * Math.sin(meanAnomaly) +
+          0.02 * Math.sin(2 * meanAnomaly) +
+          0.0003 * Math.sin(3 * meanAnomaly)
+      );
+    }
+
+    function moonLongitude(d) {
+      var meanLongitude = 218.316 + 13.176396 * d;
+      var meanAnomaly = RAD * norm360(134.963 + 13.064993 * d);
+      var meanElongation = RAD * norm360(297.8502 + 12.19074912 * d);
+      return norm360(
+        meanLongitude +
+          6.289 * Math.sin(meanAnomaly) +
+          1.274 * Math.sin(2 * meanElongation - meanAnomaly) +
+          0.658 * Math.sin(2 * meanElongation) +
+          0.214 * Math.sin(2 * meanAnomaly) -
+          0.186 * Math.sin(RAD * norm360(357.5291 + 0.98560028 * d))
+      );
+    }
+
+    function draw(now) {
+      var d = daysSinceJ2000(now);
+      var elongation = norm360(moonLongitude(d) - sunLongitude(d));
+      var cycle = elongation / 360;
+
+      // Northern hemisphere: a waxing moon is lit on its right limb.
+      var litOnRight = elongation < 180;
+
+      // cos of the elongation is +1 at new, 0 at the quarters and -1 at full,
+      // which is exactly the signed horizontal radius the terminator needs.
+      var terminator = Math.cos(2 * Math.PI * cycle);
+      var rx = Math.abs(terminator) * RADIUS;
+
+      var limbSweep = litOnRight ? 1 : 0;
+      var bowsTowardLitSide = terminator > 0;
+      var terminatorSweep = litOnRight
+        ? bowsTowardLitSide ? 0 : 1
+        : bowsTowardLitSide ? 1 : 0;
+
+      path.setAttribute(
+        'd',
+        'M 0 ' + -RADIUS +
+          ' A ' + RADIUS + ' ' + RADIUS + ' 0 0 ' + limbSweep + ' 0 ' + RADIUS +
+          ' A ' + rx + ' ' + RADIUS + ' 0 0 ' + terminatorSweep + ' 0 ' + -RADIUS +
+          ' Z'
+      );
+    }
+
+    draw(new Date());
+    // The page is the sort of thing that gets left open on a second monitor.
+    setInterval(function () { draw(new Date()); }, 30 * 60 * 1000);
   })();
 </script>
 

@@ -90,7 +90,7 @@ defining the token for it.
 
 ## Testing
 
-586 unit tests across 29 suites, run under TypeScript strict mode. They target logic
+754 unit tests across 35 suites, run under TypeScript strict mode. They target logic
 rather than pixels: formatting, the severity model, API mapping, the repository and its
 migrations, the theme and typography contracts, WCAG contrast, icon mapping, the community
 layer, storm legends and EXIF date resolution.
@@ -99,7 +99,7 @@ The suite runs in two timezones, the default UTC and, via `npm run test:tz`,
 `America/Toronto`, because a whole class of date bug in this app is invisible under UTC.
 
 ```
-npm test          # 586 tests
+npm test          # 754 tests
 npm run test:tz   # the same suite at a negative UTC offset
 npm run typecheck # tsc --noEmit, clean
 npm run lint      # eslint, clean

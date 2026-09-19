@@ -14,7 +14,7 @@
   <img src="https://img.shields.io/badge/Expo_SDK-57-000020?style=flat-square&logo=expo&logoColor=white" alt="Expo SDK 57" />
   <img src="https://img.shields.io/badge/React_Native-0.86-61DAFB?style=flat-square&logo=react&logoColor=black" alt="React Native 0.86" />
   <img src="https://img.shields.io/badge/TypeScript-strict-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript strict" />
-  <img src="https://img.shields.io/badge/tests-734_passing-4FD1C5?style=flat-square" alt="734 tests passing" />
+  <img src="https://img.shields.io/badge/tests-754_passing-4FD1C5?style=flat-square" alt="754 tests passing" />
   <img src="https://img.shields.io/badge/API_keys-none_required-F5C242?style=flat-square" alt="No API keys required" />
   <img src="https://img.shields.io/badge/platforms-iOS_%7C_Android-14213A?style=flat-square" alt="iOS and Android" />
 </p>
@@ -66,7 +66,7 @@ npx expo start
 Press `i` for iOS, `a` for Android, or scan the QR code with Expo Go. Node 20+.
 
 ```bash
-npm test          # 734 tests, no renderer, no device, no mocking framework
+npm test          # 754 tests, no renderer, no device, no mocking framework
 npm run typecheck
 npm run lint
 ```
@@ -189,7 +189,7 @@ Reduce Motion.
 | Skeleton screens | Layout matched skeletons on both data screens |
 | Pull to refresh | Conditions and field log |
 | Cloud integration | Upload client plus a community feed; no keys, sample-backed unless configured |
-| Unit tests | 734, across formatting, severity, mapping, the repository, the theme contract, the seal, air quality, moon phase and EXIF date resolution |
+| Unit tests | 754, across formatting, severity, mapping, the repository, the theme contract, the seal, air quality, moon phase and EXIF date resolution |
 
 Three places on the showcase site go further: the
 [coverage matrix](https://stormchaser-field.vercel.app/#coverage) maps each requirement to
@@ -238,7 +238,7 @@ app/                  Expo Router routes: tabs, capture, storm, seal, legend, on
 src/core/             Theme, UI primitives, charts, icons, sky, storage, utils
 src/features/         weather · storms (incl. seal) · location · air
 src/services/         Query client, network probe, cloud client
-__tests__/            734 tests. Domain, data and theme layers.
+__tests__/            754 tests. Domain, data and theme layers.
 docs/                 Architecture, branding, AI disclosure, submission, time log
 landing/              The static showcase site, deployed to Vercel
 ```

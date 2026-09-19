@@ -3,31 +3,26 @@ import type { SvgProps } from 'react-native-svg';
 
 import Barometer from '@meteocons/svg-static/flat/barometer.svg';
 import ClearDay from '@meteocons/svg-static/flat/clear-day.svg';
-import ClearNight from '@meteocons/svg-static/flat/clear-night.svg';
 import CodeYellow from '@meteocons/svg-static/flat/code-yellow.svg';
 import Compass from '@meteocons/svg-static/flat/compass.svg';
 import Drizzle from '@meteocons/svg-static/flat/drizzle.svg';
 import FogDay from '@meteocons/svg-static/flat/fog-day.svg';
-import FogNight from '@meteocons/svg-static/flat/fog-night.svg';
 import Hail from '@meteocons/svg-static/flat/hail.svg';
 import LightningBolt from '@meteocons/svg-static/flat/lightning-bolt.svg';
 import NotAvailable from '@meteocons/svg-static/flat/not-available.svg';
 import OvercastDay from '@meteocons/svg-static/flat/overcast-day.svg';
-import OvercastNight from '@meteocons/svg-static/flat/overcast-night.svg';
 import PartlyCloudyDay from '@meteocons/svg-static/flat/partly-cloudy-day.svg';
-import PartlyCloudyNight from '@meteocons/svg-static/flat/partly-cloudy-night.svg';
 import Rain from '@meteocons/svg-static/flat/rain.svg';
 import Raindrops from '@meteocons/svg-static/flat/raindrops.svg';
 import Sleet from '@meteocons/svg-static/flat/sleet.svg';
 import Snow from '@meteocons/svg-static/flat/snow.svg';
-import StarryNight from '@meteocons/svg-static/flat/starry-night.svg';
 import ThermometerCelsius from '@meteocons/svg-static/flat/thermometer-celsius.svg';
 import ThunderstormsDayRain from '@meteocons/svg-static/flat/thunderstorms-day-rain.svg';
 import ThunderstormsExtremeRain from '@meteocons/svg-static/flat/thunderstorms-extreme-rain.svg';
-import ThunderstormsNightRain from '@meteocons/svg-static/flat/thunderstorms-night-rain.svg';
 import Tornado from '@meteocons/svg-static/flat/tornado.svg';
 import Windsock from '@meteocons/svg-static/flat/windsock.svg';
 
+import { NightIcon, type NightIconName } from './NightIcon';
 import type { WeatherIconName } from './names';
 
 /**
@@ -50,22 +45,17 @@ import type { WeatherIconName } from './names';
  * by taking the pale card out from behind them instead, which is a surface
  * decision rather than an icon one -- see `conditionsSurface`.
  */
-const REGISTRY: Record<WeatherIconName, ComponentType<SvgProps>> = {
+const REGISTRY: Record<DayIconName, ComponentType<SvgProps>> = {
   'clear-day': ClearDay,
-  'clear-night': ClearNight,
   'partly-cloudy-day': PartlyCloudyDay,
-  'partly-cloudy-night': PartlyCloudyNight,
   'overcast-day': OvercastDay,
-  'overcast-night': OvercastNight,
   'fog-day': FogDay,
-  'fog-night': FogNight,
   drizzle: Drizzle,
   rain: Rain,
   snow: Snow,
   sleet: Sleet,
   hail: Hail,
   'thunderstorms-day-rain': ThunderstormsDayRain,
-  'thunderstorms-night-rain': ThunderstormsNightRain,
   'thunderstorms-extreme-rain': ThunderstormsExtremeRain,
   'not-available': NotAvailable,
   tornado: Tornado,
@@ -76,18 +66,51 @@ const REGISTRY: Record<WeatherIconName, ComponentType<SvgProps>> = {
   raindrops: Raindrops,
   'code-yellow': CodeYellow,
   'lightning-bolt': LightningBolt,
-  'starry-night': StarryNight,
 };
+
+/** Everything that is not one of the six glyphs that contained a moon. */
+type DayIconName = Exclude<WeatherIconName, NightIconName>;
+
+const NIGHT_NAMES = new Set<string>([
+  'clear-night',
+  'starry-night',
+  'partly-cloudy-night',
+  'overcast-night',
+  'fog-night',
+  'thunderstorms-night-rain',
+]);
+
+function isNightName(name: WeatherIconName): name is NightIconName {
+  return NIGHT_NAMES.has(name);
+}
 
 export interface WeatherIconProps extends Omit<SvgProps, 'width' | 'height'> {
   name: WeatherIconName;
   size?: number;
+  /** Injectable clock, so a screenshot or a test can pin a moon phase. */
+  now?: Date;
 }
 
-export function WeatherIcon({ name, size = 48, ...rest }: WeatherIconProps) {
+/**
+ * The single door every weather icon goes through.
+ *
+ * Night names are routed to `NightIcon`, which draws the real lunar phase
+ * instead of the crescent Meteocons hardcodes. Doing it HERE rather than at
+ * each call site is the point: the hero, the forecast strip and the theme
+ * picker all ask for an icon by name and none of them has to know that some
+ * names carry a moon, so none of them can be the one that forgets.
+ */
+export function WeatherIcon({ name, size = 48, now, ...rest }: WeatherIconProps) {
+  if (isNightName(name)) {
+    return <NightIcon name={name} size={size} now={now} {...rest} />;
+  }
+
   const Icon = REGISTRY[name];
   return <Icon width={size} height={size} {...rest} />;
 }
 
-/** Exposed so a test can assert the registry covers every declared name. */
-export const WEATHER_ICON_REGISTRY_KEYS = Object.keys(REGISTRY) as WeatherIconName[];
+/** Exposed so a test can assert every declared name still resolves. */
+export const WEATHER_ICON_REGISTRY_KEYS = [
+  ...Object.keys(REGISTRY),
+  ...NIGHT_NAMES,
+] as WeatherIconName[];
