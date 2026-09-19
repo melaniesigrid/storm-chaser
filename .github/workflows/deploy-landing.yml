@@ -43,8 +43,12 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: production
-      url: https://storm-chaser-three.vercel.app
+      url: https://stormchaser-field.vercel.app
     env:
+      # The one domain the README, the landing footer and the submission all
+      # name. Every step below reads it from here so they cannot drift apart
+      # again -- which is how production ended up frozen while CI went green.
+      SITE_DOMAIN: stormchaser-field.vercel.app
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
     steps:
@@ -162,16 +166,48 @@ jobs:
           }
           echo "built page is $(wc -c < "$out") bytes"
 
+      # Capture the deployment URL. Every production deploy gets an immutable
+      # one; the stable domain is an alias pointed at it, and aliasing is a
+      # separate act that the previous version of this workflow assumed had
+      # already happened somewhere it could not see.
       - name: Deploy to production
-        run: vercel deploy --prebuilt --prod --token="${{ secrets.VERCEL_TOKEN }}"
+        id: deploy
+        run: |
+          set -euo pipefail
+          deployed=$(vercel deploy --prebuilt --prod --token="${{ secrets.VERCEL_TOKEN }}" | tail -n1)
+          echo "deployed=$deployed" >> "$GITHUB_OUTPUT"
+          echo "deployment is $deployed"
 
-      # The deploy prints the alias it actually aliased. If that is not the
-      # domain this workflow claims to publish, say so rather than leave the
-      # environment link pointing somewhere nothing was deployed.
+      # Point the domain the README sends people to at the build we just made.
+      #
+      # This is the bug that outlived three fixes to the steps above. The
+      # deploys were working the whole time -- they published to the project's
+      # own immutable URL, which changes on every run and which nobody has ever
+      # opened. Meanwhile README.md, the landing page footer and the submission
+      # all link to SITE_DOMAIN, and that domain was still serving the manual
+      # laptop deploy from months ago: a three-theme switcher called
+      # day/night/card. A deploy nobody can reach at a URL anybody can is not
+      # a deploy, and it is worth saying plainly that every green run in this
+      # workflow's history was green about the wrong thing.
+      #
+      # `vercel alias set` is idempotent: once the domain is on this project it
+      # simply re-points, and re-pointing to the current build is exactly what
+      # each run should do. If the domain belongs to a DIFFERENT project this
+      # fails, which is the answer we want out loud rather than another green
+      # run over a stale page.
+      - name: Point the site domain at this build
+        run: |
+          set -euo pipefail
+          vercel alias set "${{ steps.deploy.outputs.deployed }}" "$SITE_DOMAIN"             --token="${{ secrets.VERCEL_TOKEN }}"
+
+      # Read the domain back over the public internet, not from the CLI's own
+      # report of success. The alias step can return zero and the DNS-facing
+      # edge still serve the previous build, and it is the public page that the
+      # README promises -- so this asks the same question an assessor would.
       - name: Check production serves the new page
         run: |
           set -euo pipefail
-          url=https://storm-chaser-three.vercel.app
+          url="https://$SITE_DOMAIN"
           if ! body=$(curl -fsS --retry 5 --retry-delay 3 --retry-all-errors --max-time 30 "$url"); then
             echo "::error::$url did not serve a page after the deploy"
             exit 1
