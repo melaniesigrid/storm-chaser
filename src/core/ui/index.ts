@@ -8,3 +8,4 @@ export { Skeleton } from './Skeleton';
 export { StatusBanner } from './StatusBanner';
 export { Text } from './Text';
 export { Volt } from './Volt';
+export { Starfield } from './Starfield';

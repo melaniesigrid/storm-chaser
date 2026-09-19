@@ -280,6 +280,40 @@ export interface ThemeMotion {
   safety: MotionSafety;
 }
 
+/**
+ * How a panel sits in front of the sky.
+ *
+ * Only Skyward turns this on, and only Skyward can: glass is an argument that
+ * there is something behind the card worth seeing, and the two Skyward
+ * variants are the only themes with a moving sky behind one. Broadcast paints
+ * on near-black and Field Card is printed stock -- neither has a background to
+ * let through, so both declare `enabled: false`.
+ *
+ * `fill` is not the surface colour with an alpha bolted on. It is tuned so the
+ * composite over the WORST stop of that theme's own gradient still clears AA
+ * for body and muted text, which is why the alpha is high enough to read as
+ * frost rather than as a tint -- a 30%-alpha card looks better in a screenshot
+ * and is unreadable over weather.
+ *
+ * Every field carries a real value in every theme, switched off or not, so
+ * nothing downstream has to handle a missing one.
+ */
+export interface ThemeGlass {
+  enabled: boolean;
+  /** Translucent stand-in for `colors.surface` when the frost is on. */
+  fill: string;
+  /**
+   * The sheen raking down from the top edge, as two stops. Light hits a pane
+   * of glass at its top edge; without this the fill is just a transparent
+   * rectangle, which is the difference between frosted glass and low opacity.
+   */
+  sheen: readonly [string, string];
+  /** The lit hairline along the top edge. */
+  rim: string;
+  /** The shaded hairline along the bottom, which is what gives it thickness. */
+  shade: string;
+}
+
 export interface Theme {
   name: ThemeName;
   label: string;
@@ -289,6 +323,7 @@ export interface Theme {
   type: ThemeTypography;
   brand: ThemeBrand;
   atmosphere: ThemeAtmosphere;
+  glass: ThemeGlass;
   motion: ThemeMotion;
   radius: { panel: number; control: number };
   /** Field Card draws hard 3px outlines; Skyward draws hairlines or none. */
@@ -471,6 +506,22 @@ const skywardDay: Theme = {
     clouds: { count: 2, speed: 0.04, blur: 28, tint: '#FFFFFF' },
     shimmer: { enabled: true, amplitude: 3, periodMs: 5200 },
   },
+  /**
+   * Daylight frost. The fill is white at 0.74, which over the darkest stop of
+   * this theme's own gradient (#8DB0DF, the top of the sky) composites to
+   * roughly #DCE7F5 -- ink at 13:1 and muted copy comfortably past AA, while
+   * the cumulus bank still moves visibly behind the card.
+   *
+   * The sheen is white falling to nothing, and the rim is near-opaque white:
+   * on a bright day the lit edge of a pane is the brightest thing on it.
+   */
+  glass: {
+    enabled: true,
+    fill: 'rgba(255, 255, 255, 0.74)',
+    sheen: ['rgba(255, 255, 255, 0.85)', 'rgba(255, 255, 255, 0)'],
+    rim: 'rgba(255, 255, 255, 0.92)',
+    shade: 'rgba(20, 33, 58, 0.10)',
+  },
   motion: SKYWARD_MOTION,
   radius: { panel: 24, control: 29 },
   borderWidth: 0,
@@ -552,6 +603,23 @@ const skywardNight: Theme = {
     lightning: { enabled: true, minGapMs: 3400, maxGapMs: 14000, bloom: '#9FD4FF' },
     clouds: { count: 2, speed: 0.05, blur: 36, tint: '#2A2140' },
     shimmer: { enabled: false, amplitude: 0, periodMs: 0 },
+  },
+  /**
+   * Night frost, and the harder of the two to get right: a dark pane over a
+   * dark sky disappears. The fill is the surface navy at 0.68 -- over the
+   * lightest stop (#2A2140) it composites to about #1B1D37, close enough to
+   * the opaque surface that every contrast guarantee still holds, and open
+   * enough that rain and a lightning bloom read through it.
+   *
+   * The sheen and rim are a cold blue-white rather than plain white, because
+   * on this sky the light source is the bloom, not the sun.
+   */
+  glass: {
+    enabled: true,
+    fill: 'rgba(20, 27, 51, 0.68)',
+    sheen: ['rgba(159, 212, 255, 0.14)', 'rgba(159, 212, 255, 0)'],
+    rim: 'rgba(186, 209, 255, 0.34)',
+    shade: 'rgba(5, 7, 14, 0.42)',
   },
   motion: SKYWARD_MOTION,
   radius: { panel: 24, control: 29 },
@@ -638,6 +706,15 @@ const broadcast: Theme = {
     lightning: { enabled: false, minGapMs: 0, maxGapMs: 0, bloom: '#07090E' },
     clouds: { count: 0, speed: 0, blur: 0, tint: '#07090E' },
     shimmer: { enabled: false, amplitude: 0, periodMs: 0 },
+  },
+  // Off. A bulletin graphic is opaque -- you cannot see the studio through the
+  // lower third -- and there is no sky behind this one to let through anyway.
+  glass: {
+    enabled: false,
+    fill: '#0E1013',
+    sheen: ['rgba(255, 212, 0, 0)', 'rgba(255, 212, 0, 0)'],
+    rim: '#FFFFFF',
+    shade: '#000000',
   },
   motion: BROADCAST_MOTION,
   radius: { panel: 0, control: 0 },
@@ -741,6 +818,14 @@ const fieldCard: Theme = {
     lightning: { enabled: false, minGapMs: 0, maxGapMs: 0, bloom: '#FFF8EC' },
     clouds: { count: 0, speed: 0, blur: 0, tint: '#FFF8EC' },
     shimmer: { enabled: false, amplitude: 0, periodMs: 0 },
+  },
+  // Off, and not a near miss: card stock is not translucent.
+  glass: {
+    enabled: false,
+    fill: '#FFFFFF',
+    sheen: ['rgba(20, 20, 15, 0)', 'rgba(20, 20, 15, 0)'],
+    rim: '#14140F',
+    shade: '#14140F',
   },
   motion: FIELD_CARD_MOTION,
   radius: { panel: 20, control: 28 },

@@ -1,7 +1,9 @@
-import { View, type StyleProp, type ViewProps, type ViewStyle } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { StyleSheet, View, type StyleProp, type ViewProps, type ViewStyle } from 'react-native';
 
 import { WeatherIcon } from '@/core/icons/WeatherIcon';
 import type { WeatherIconName } from '@/core/icons/names';
+import type { ThemeGlass } from '@/core/theme/themes';
 import { useAppTheme } from '@/core/theme/useAppTheme';
 
 import { Text } from './Text';
@@ -36,10 +38,24 @@ export interface PanelProps extends ViewProps {
  * Elevation is a theme decision, not a per-card one: Skyward Day lifts with a
  * soft shadow, Skyward Night with a faint glow, Field Card with a hard offset
  * block shadow and a 3px outline.
+ *
+ * So is frost. On Skyward the panel is a pane of glass in front of the sky --
+ * `theme.glass` says so and this is the one place it is drawn, which is what
+ * keeps a hundred cards from each inventing their own translucency. The other
+ * two themes declare the frost off and fall through to the opaque surface.
+ *
+ * There is no real backdrop blur here, and that is deliberate rather than a
+ * shortcut: a Gaussian blur of everything behind the card costs a full-screen
+ * readback per frame, and this app already has weather animating under every
+ * panel on the screen. What actually sells glass at this scale is not the blur
+ * -- it is the edges. So the budget goes into three cheap layers instead: a
+ * raking sheen from the top, a lit rim along the top edge and a shaded one
+ * along the bottom. Those give the pane thickness and a light source, which is
+ * what the eye is reading when it calls something glass.
  */
 export function Panel({ label, icon, accessory, style, children, ...rest }: PanelProps) {
   const { theme } = useAppTheme();
-  const { colors } = theme;
+  const { colors, glass } = theme;
 
   const elevation: ViewStyle =
     theme.elevation === 'hard'
@@ -66,14 +82,23 @@ export function Panel({ label, icon, accessory, style, children, ...rest }: Pane
             elevation: 3,
           };
 
+  const radius = theme.radius.panel;
+
   return (
     <View
       style={[
         {
-          borderRadius: theme.radius.panel,
-          backgroundColor: colors.surface,
-          borderWidth: theme.borderWidth,
-          borderColor: colors.border,
+          borderRadius: radius,
+          backgroundColor: glass.enabled ? glass.fill : colors.surface,
+          // Skyward Day carries `borderWidth: 0`, which leaves a frosted pane
+          // with no edge at all. Frost needs one, so the glass themes are
+          // floored at a hairline and take the lit rim as their border colour
+          // -- the token itself is left alone, because every other component
+          // reading it still wants the answer it has always had.
+          borderWidth: glass.enabled
+            ? Math.max(theme.borderWidth, StyleSheet.hairlineWidth)
+            : theme.borderWidth,
+          borderColor: glass.enabled ? glass.rim : colors.border,
           padding: 16,
         },
         elevation,
@@ -81,6 +106,7 @@ export function Panel({ label, icon, accessory, style, children, ...rest }: Pane
       ]}
       {...rest}
     >
+      {glass.enabled ? <GlassSurface radius={radius} glass={glass} /> : null}
       {(label || icon || accessory) && (
         <View
           style={{
@@ -101,6 +127,58 @@ export function Panel({ label, icon, accessory, style, children, ...rest }: Pane
         </View>
       )}
       {children}
+    </View>
+  );
+}
+
+/**
+ * The three layers that make the fill read as a pane rather than as opacity.
+ *
+ * Absolutely positioned and pointer-transparent, and rendered before the
+ * panel's children so every one of them paints on top without needing a
+ * z-index. The clip lives on this view rather than on the Panel because
+ * `overflow: 'hidden'` cancels the Android elevation shadow, and the shadow is
+ * how three of the four themes separate a card from the sky.
+ *
+ * The sheen stops at 62% of the height on purpose: run to the bottom and it
+ * reads as a gradient fill, which is a different material.
+ */
+function GlassSurface({ radius, glass }: { radius: number; glass: ThemeGlass }) {
+  return (
+    <View
+      pointerEvents="none"
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
+      style={[StyleSheet.absoluteFill, { borderRadius: radius, overflow: 'hidden' }]}
+    >
+      <LinearGradient
+        colors={[glass.sheen[0], glass.sheen[1]]}
+        start={{ x: 0.1, y: 0 }}
+        end={{ x: 0.85, y: 1 }}
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '62%' }}
+      />
+      {/* Inset by the corner radius so the hairlines stop where the corner
+          starts turning, instead of cutting a chord across it. */}
+      <View
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: radius * 0.5,
+          right: radius * 0.5,
+          height: StyleSheet.hairlineWidth,
+          backgroundColor: glass.rim,
+        }}
+      />
+      <View
+        style={{
+          position: 'absolute',
+          bottom: 0,
+          left: radius * 0.5,
+          right: radius * 0.5,
+          height: StyleSheet.hairlineWidth,
+          backgroundColor: glass.shade,
+        }}
+      />
     </View>
   );
 }

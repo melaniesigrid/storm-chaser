@@ -4,6 +4,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAppTheme } from '@/core/theme/useAppTheme';
 
+import { Starfield } from './Starfield';
+
 export interface ScreenProps extends ViewProps {
   /** Applies top inset. Disable on screens inside a native header. */
   edgeToEdge?: boolean;
@@ -30,6 +32,9 @@ export function Screen({ edgeToEdge = false, style, children, ...rest }: ScreenP
         locations={theme.colors.backgroundGradientLocations}
         style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
       />
+      {/* Above the gradient, below everything else. Renders nothing at all in
+          the daylight themes. */}
+      <Starfield />
       <View
         style={[{ flex: 1 }, edgeToEdge ? null : { paddingTop: insets.top }, style]}
         {...rest}

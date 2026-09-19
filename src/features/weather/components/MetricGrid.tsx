@@ -24,7 +24,12 @@ export interface Metric {
  */
 export function MetricGrid({ metrics }: { metrics: Metric[] }) {
   const { theme } = useAppTheme();
-  const bare = theme.name === 'field-card';
+  // The disc is a Skyward device: it belongs to the themes that draw soft
+  // shapes over a sky. Field Card's control radius rounded it into a circle
+  // and Broadcast's squared it into a box, and in both cases it came out as a
+  // second shape competing with the glyph that carries the reading. Signage
+  // and print set their icons straight onto the ground.
+  const bare = !theme.name.startsWith('skyward');
 
   return (
     <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
@@ -40,11 +45,8 @@ export function MetricGrid({ metrics }: { metrics: Metric[] }) {
                   height: 48,
                   alignItems: 'center',
                   justifyContent: 'center',
-                  // Field Card prints its icons straight onto the stock. Its
-                  // control radius would round the disc into a circle, and a
-                  // circle drawn behind a weather glyph is a second shape
-                  // competing with the one that carries the reading. The box
-                  // stays for alignment; only its surface goes.
+                  // The box stays either way, so the labels beside it keep
+                  // their baseline down the grid. Only its surface goes.
                   ...(bare
                     ? null
                     : {
