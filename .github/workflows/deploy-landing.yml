@@ -1,0 +1,82 @@
+# Deploy the landing page to Vercel on every push to main.
+#
+# This exists because the site did not have one. The Vercel project was linked
+# once from a laptop with `vercel --prod`, and production then stayed frozen at
+# whatever that machine happened to have: for months the live page served a
+# three-theme switcher called day/night/card and claimed 181 unit tests, while
+# main moved on to atmospheric/broadcast/fieldcard and 413. Nothing was broken
+# and nothing complained, because a manual deploy that never happens again
+# looks exactly like a working one.
+#
+# The landing page is a static directory with no build step, so this uploads
+# `landing/` prebuilt rather than asking Vercel to run an install. That also
+# keeps the Expo app at the repo root out of the deploy entirely -- it is not
+# what this project serves.
+#
+# Required repository secrets (Settings -> Secrets and variables -> Actions):
+#   VERCEL_TOKEN        a token from https://vercel.com/account/tokens
+#   VERCEL_ORG_ID       team_DbOeTFejpOueea6uxDHpoQGz
+#   VERCEL_PROJECT_ID   prj_ve3t6gSIoj82Hqx3z40fHIZZ0vjP
+#
+# The two IDs are not credentials -- they are the same values `vercel link`
+# writes into landing/.vercel/project.json, which is gitignored. They live in
+# secrets so the workflow reads one way whether or not that file is present.
+
+name: Deploy landing
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'landing/**'
+      - '.github/workflows/deploy-landing.yml'
+  # So a stale production can be corrected without an empty commit.
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-landing
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://stormchaser-field.vercel.app
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install the Vercel CLI
+        run: npm install --global vercel@latest
+
+      # Fails loudly rather than deploying a page that lost its themes: these
+      # are the markers that were missing from production the whole time.
+      - name: Check the build is the one we think it is
+        run: |
+          set -euo pipefail
+          page=landing/index.html
+          for marker in 'data-theme="atmospheric"' 'data-theme="broadcast"' 'data-theme="fieldcard"'; do
+            grep -q "$marker" "$page" || { echo "::error::missing $marker in $page"; exit 1; }
+          done
+          grep -q 'Anton' "$page" || { echo "::error::Anton is not in $page"; exit 1; }
+          grep -q 'Big Shoulders' "$page" || { echo "::error::Big Shoulders is not in $page"; exit 1; }
+          echo "three themes and three display faces present"
+
+      - name: Pull the project settings
+        run: vercel pull --yes --environment=production --token="${{ secrets.VERCEL_TOKEN }}"
+        working-directory: landing
+
+      - name: Build
+        run: vercel build --prod --token="${{ secrets.VERCEL_TOKEN }}"
+        working-directory: landing
+
+      - name: Deploy to production
+        run: vercel deploy --prebuilt --prod --token="${{ secrets.VERCEL_TOKEN }}"
+        working-directory: landing
