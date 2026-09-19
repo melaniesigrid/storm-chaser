@@ -56,18 +56,34 @@ jobs:
       - name: Install the Vercel CLI
         run: npm install --global vercel@latest
 
-      # Fails loudly rather than deploying a page that lost its themes: these
-      # are the markers that were missing from production the whole time.
+      # Fails loudly rather than deploying a page that lost its themes.
+      #
+      # Counts rather than names. The first version of this listed the theme
+      # ids -- atmospheric, broadcast, fieldcard -- and then fieldcard was
+      # renamed to signage, so the guard blocked a perfectly good deploy over
+      # its own stale copy of a name. What matters is that three themes and
+      # three display faces are present, not what any of them is called; a
+      # rename should pass, a loss should not.
       - name: Check the build is the one we think it is
         run: |
           set -euo pipefail
           page=landing/index.html
-          for marker in 'data-theme="atmospheric"' 'data-theme="broadcast"' 'data-theme="fieldcard"'; do
-            grep -q "$marker" "$page" || { echo "::error::missing $marker in $page"; exit 1; }
+
+          themes=$(grep -o 'html\[data-theme="[a-z-]*"\]' "$page" | sort -u | wc -l)
+          if [ "$themes" -lt 3 ]; then
+            echo "::error::expected 3 theme blocks in $page, found $themes"; exit 1
+          fi
+
+          buttons=$(grep -c 'data-set="' "$page")
+          if [ "$buttons" -lt 3 ]; then
+            echo "::error::expected 3 picker buttons in $page, found $buttons"; exit 1
+          fi
+
+          for face in 'Anton' 'Bricolage Grotesque' 'Big Shoulders'; do
+            grep -q "$face" "$page" || { echo "::error::display face $face is not in $page"; exit 1; }
           done
-          grep -q 'Anton' "$page" || { echo "::error::Anton is not in $page"; exit 1; }
-          grep -q 'Big Shoulders' "$page" || { echo "::error::Big Shoulders is not in $page"; exit 1; }
-          echo "three themes and three display faces present"
+
+          echo "$themes theme blocks, $buttons picker buttons, three display faces"
 
       - name: Pull the project settings
         run: vercel pull --yes --environment=production --token="${{ secrets.VERCEL_TOKEN }}"
