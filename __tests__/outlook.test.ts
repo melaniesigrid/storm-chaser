@@ -1,4 +1,11 @@
 import { dayLabel } from '@/features/weather/model/dayLabel';
+import {
+  BAR_MAX,
+  BAR_MIN,
+  DAY_MIN,
+  ROW_FIXED,
+  barWidthFor,
+} from '@/features/weather/model/outlookLayout';
 
 describe('dayLabel', () => {
   /**
@@ -16,8 +23,8 @@ describe('dayLabel', () => {
 
   /**
    * REGRESSION. This assertion used to build its expectation with
-   * `new Date('2026-09-19')` — the same expression the code under test used,
-   * including its bug — so it agreed with whatever the function did. The
+   * `new Date('2026-09-19')`, the same expression the code under test used,
+   * including its bug, so it agreed with whatever the function did. The
    * expectation is now built from the date's components as local midnight,
    * which is independently what the row means: a calendar day in the reader's
    * own zone. Under the old UTC-midnight parse this fails in every zone west of
@@ -37,7 +44,7 @@ describe('dayLabel', () => {
   /**
    * The whole seven-row series, each row asserted against its own local
    * calendar day. A one-day shift moves every row together, so checking the
-   * set is distinct (below) never catches it — only comparing each row to the
+   * set is distinct (below) never catches it. Only comparing each row to the
    * day it claims to be does.
    */
   it('names every row the weekday its own date falls on', () => {
@@ -92,12 +99,12 @@ describe('dayLabel', () => {
  * the same helper is reached from anything holding an Open-Meteo timestamp,
  * and `new Date` treats the two forms differently: date-only is UTC midnight,
  * date-and-time is local. Both denote the same calendar day, so the label has
- * to come out the same either way — that is the invariant worth pinning.
+ * to come out the same either way, and that is the invariant worth pinning.
  */
 describe('dayLabel input shapes', () => {
   /**
    * REGRESSION. This compared the two forms by LENGTH, which is equal even when
-   * the two disagree about which day it is — "Fri" and "Sat" are both three
+   * the two disagree about which day it is, since "Fri" and "Sat" are both three
    * characters. Comparing the values is what catches the UTC-midnight parse:
    * west of UTC the bare form used to resolve a day earlier than the stamped
    * one.
@@ -178,5 +185,54 @@ describe('dayLabel on input it was not promised', () => {
 
     expect(label).not.toBe('2026-09-19T12:00:00Z');
     expect(label.length).toBeLessThanOrEqual(5);
+  });
+});
+
+/*
+ * REGRESSION. The outlook row was six fixed-width columns totalling 408dp
+ * inside a panel that is 326dp wide on a 390pt phone. React Native overlaps
+ * an overflowing row rather than clipping it, so the gust printed through the
+ * low temperature -- "37 km/h9°" -- on every row, on every phone. No test
+ * could have caught it, because the widths were literals inside JSX. They are
+ * arithmetic now, and this is the arithmetic.
+ */
+describe('the outlook row fits the phone it is drawn on', () => {
+  /**
+   * Panel content width = screen width, less the scroll view's 16dp either
+   * side, less the panel's own 16dp either side.
+   */
+  const panel = (screen: number) => screen - 32 - 32;
+
+  /** The narrowest phone still worth supporting, and the common ones. */
+  const PHONES = [320, 360, 375, 390, 414, 430];
+
+  it('never asks for more room than the row has', () => {
+    for (const screen of PHONES) {
+      const row = panel(screen);
+      const used = ROW_FIXED + DAY_MIN + barWidthFor(row);
+
+      expect({ screen, fits: used <= row || barWidthFor(row) === BAR_MIN })
+        .toEqual({ screen, fits: true });
+    }
+  });
+
+  it('leaves the day label at least its floor on every phone but the smallest', () => {
+    for (const screen of PHONES.filter((width) => width >= 360)) {
+      const row = panel(screen);
+      expect({ screen, dayColumn: row - ROW_FIXED - barWidthFor(row) >= DAY_MIN })
+        .toEqual({ screen, dayColumn: true });
+    }
+  });
+
+  it('keeps the bar between a dash and a chart', () => {
+    for (const row of [0, 100, 200, 300, 400, 900, 4000]) {
+      const width = barWidthFor(row);
+      expect({ row, inRange: width >= BAR_MIN && width <= BAR_MAX })
+        .toEqual({ row, inRange: true });
+    }
+  });
+
+  it('grows the bar with the screen rather than pinning it', () => {
+    expect(barWidthFor(panel(390))).toBeGreaterThan(barWidthFor(panel(320)));
   });
 });

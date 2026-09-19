@@ -1,5 +1,5 @@
-import { useMemo } from 'react';
-import { View } from 'react-native';
+import { useMemo, useState } from 'react';
+import { View, type LayoutChangeEvent } from 'react-native';
 
 import { RangeBar } from '@/core/charts/RangeBar';
 import { WeatherIcon } from '@/core/icons/WeatherIcon';
@@ -8,13 +8,27 @@ import { Panel, Text } from '@/core/ui';
 import { formatSpeed, formatTemperature } from '@/core/utils/format';
 
 import { dayLabel } from '../model/dayLabel';
+import {
+  ICON,
+  ROW_GAP,
+  TEMP_COLUMN,
+  TEMP_GAP,
+  barWidthFor,
+} from '../model/outlookLayout';
 import { iconForCondition } from '../model/weatherIcons';
 import type { DailyPoint } from '../model/types';
 
-const BAR_WIDTH = 108;
-
 export function OutlookList({ days }: { days: DailyPoint[] }) {
   const { theme } = useAppTheme();
+
+  /*
+   * One measurement for the whole panel rather than one per row: every bar
+   * shares a domain, so two bars of different widths would make the same
+   * spread look like two different spreads.
+   */
+  const [rowWidth, setRowWidth] = useState(0);
+  const onRowLayout = (event: LayoutChangeEvent) =>
+    setRowWidth(event.nativeEvent.layout.width);
 
   /**
    * One domain across all seven rows. Scaling each bar to its own day would
@@ -44,59 +58,74 @@ export function OutlookList({ days }: { days: DailyPoint[] }) {
       {days.map((day, index) => (
         <View
           key={day.date}
+          onLayout={index === 0 ? onRowLayout : undefined}
           style={{
             flexDirection: 'row',
             alignItems: 'center',
-            gap: 10,
+            gap: ROW_GAP,
             paddingVertical: 10,
             borderBottomWidth: index < days.length - 1 ? 1 : 0,
             borderBottomColor: theme.colors.border,
           }}
         >
-          <Text variant="heading" style={{ width: 48 }}>
-            {dayLabel(day.date, index)}
-          </Text>
-
           {/* Daily rows are always the day variant: a 7 day outlook has no hour. */}
-          <WeatherIcon name={iconForCondition(day.condition, false)} size={38} />
+          <WeatherIcon name={iconForCondition(day.condition, false)} size={ICON} />
 
-          {/* `figure`, not `label`: label uppercases, and a formatted reading
-              is "45 km/h", not an instrument name. Widened from 62 to hold a
-              three figure gust at the larger mono size without truncating. */}
-          <Text
-            variant="figure"
-            tone={day.maxWindGustKmh >= 60 ? undefined : 'muted'}
-            color={day.maxWindGustKmh >= 60 ? theme.colors.tierText.severe : undefined}
-            style={{ width: 70 }}
-            numberOfLines={1}
-          >
-            {formatSpeed(day.maxWindGustKmh)}
-          </Text>
+          {/* The only column that flexes, and the only one that can afford to:
+              a truncated weekday is still a weekday, a truncated reading is a
+              wrong number. `minWidth: 0` is what lets it shrink at all -- a
+              flex child in React Native will not go below its content width
+              without it, which is the other half of why the row overflowed. */}
+          <View style={{ flex: 1, minWidth: 0 }}>
+            <Text variant="heading" numberOfLines={1}>
+              {dayLabel(day.date, index)}
+            </Text>
+            {/* `caption`, not `figure`: under the weekday this is the second
+                line of one column rather than a reading in its own right, and
+                at the figure size it was the thing that would not fit. A
+                notable gust still lifts onto the severe colour. */}
+            <Text
+              variant="caption"
+              tone={day.maxWindGustKmh >= 60 ? undefined : 'muted'}
+              color={day.maxWindGustKmh >= 60 ? theme.colors.tierText.severe : undefined}
+              numberOfLines={1}
+            >
+              {formatSpeed(day.maxWindGustKmh)}
+            </Text>
+          </View>
 
-          <View style={{ flex: 1, alignItems: 'flex-end', gap: 6 }}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-              {/* Both ends of the bar are one size now; the low keeps its muted
-                  tone, which is what carried the hierarchy here anyway. Width
-                  is up from 38 to fit the larger mono glyphs. */}
-              <Text variant="figure" tone="muted" style={{ width: 44, textAlign: 'right' }}>
-                {formatTemperature(day.minTempC)}
-              </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: TEMP_GAP }}>
+            {/* Both ends of the bar are one size; the low keeps its muted tone,
+                which is what carried the hierarchy here anyway. */}
+            <Text
+              variant="figure"
+              tone="muted"
+              style={{ width: TEMP_COLUMN, textAlign: 'right' }}
+              numberOfLines={1}
+            >
+              {formatTemperature(day.minTempC)}
+            </Text>
 
+            {rowWidth > 0 ? (
               <RangeBar
                 low={day.minTempC}
                 high={day.maxTempC}
                 domainMin={domainMin}
                 domainMax={domainMax}
-                width={BAR_WIDTH}
+                width={barWidthFor(rowWidth)}
                 coldColor={theme.colors.tier.unsettled}
                 warmColor={theme.colors.tier.severe}
                 trackColor={theme.colors.surfaceSunken}
               />
+            ) : null}
 
-              <Text variant="figure" style={{ width: 44, textAlign: 'right' }}>
-                {formatTemperature(day.maxTempC)}
-              </Text>
-            </View>
+            <Text
+              variant="figure"
+              style={{ width: TEMP_COLUMN, textAlign: 'right' }}
+              numberOfLines={1}
+            >
+              {formatTemperature(day.maxTempC)}
+            </Text>
           </View>
         </View>
       ))}

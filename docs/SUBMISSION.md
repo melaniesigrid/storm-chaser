@@ -1,11 +1,11 @@
-# Storm Chaser — Speer Technologies Mobile Assessment
+# Storm Chaser: Speer Technologies Mobile Assessment
 
 ## Submission details
 
 | | |
 |---|---|
 | **Candidate** | Melanie Baratto |
-| **Assessment** | Mobile — React Native (Senior React Native Developer) |
+| **Assessment** | Mobile: React Native (Senior React Native Developer) |
 | **GitHub repository** | https://github.com/melaniesigrid/storm-chaser |
 | **Screen recording** | https://drive.google.com/file/d/1hHfLGWvkn_EwCxRvGiozFD_H-ZrF_eAD/view?usp=sharing |
 | **Portfolio** | https://melaniesigrid.com |
@@ -64,8 +64,8 @@ and no I/O, which is why the interesting logic is testable without a renderer or
 
 **`Result<T, AppError>` at every boundary.** Data access and network code return a result
 rather than throwing, so callers are forced to handle the failure branch and the UI always
-has something concrete to render. Error *kinds* — `network`, `permission`, `not_found`,
-`storage` — map onto specific UI responses rather than a single generic error state.
+has something concrete to render. Error *kinds* (`network`, `permission`, `not_found`,
+`storage`) map onto specific UI responses rather than a single generic error state.
 
 **A repository behind an injected store port.** `StormRepository` takes a `KeyValueStore`
 interface rather than calling AsyncStorage directly, so the whole data layer is testable
@@ -95,8 +95,8 @@ rather than pixels: formatting, the severity model, API mapping, the repository 
 migrations, the theme and typography contracts, WCAG contrast, icon mapping, the community
 layer, storm legends and EXIF date resolution.
 
-The suite runs in two timezones — the default UTC and, via `npm run test:tz`,
-`America/Toronto` — because a whole class of date bug in this app is invisible under UTC.
+The suite runs in two timezones, the default UTC and, via `npm run test:tz`,
+`America/Toronto`, because a whole class of date bug in this app is invisible under UTC.
 
 ```
 npm test          # 560 tests
@@ -149,9 +149,9 @@ in [`docs/TIME_LOG.md`](TIME_LOG.md).
 
 | Session | Duration | Work |
 |---|---|---|
-| One — build | 7 h 45 m | Stack, design system, weather domain and feature, storm capture, persistence, field log, map, offline, dark mode, cloud client, tests, documentation. |
-| Two — themes and accessibility | 1 h 20 m | The theme system, brand identity, onboarding, landing page, and three accessibility defects closed. |
-| Three — community, legends and charts | 1 h 10 m | Community layer, 22 storm legends, the chart primitives, brand marks, and a pre-landing review pass. |
+| One: build | 7 h 45 m | Stack, design system, weather domain and feature, storm capture, persistence, field log, map, offline, dark mode, cloud client, tests, documentation. |
+| Two: themes and accessibility | 1 h 20 m | The theme system, brand identity, onboarding, landing page, and three accessibility defects closed. |
+| Three: community, legends and charts | 1 h 10 m | Community layer, 22 storm legends, the chart primitives, brand marks, and a pre-landing review pass. |
 
 Where git history can bound a session, it does, and the log says so. Session one landed as
 a single commit and its figures are estimates.

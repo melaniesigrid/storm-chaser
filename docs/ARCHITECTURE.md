@@ -38,14 +38,14 @@ Two facts are genuinely cross screen, and both are single values rather than
 state trees, so each is a module store with a `useSyncExternalStore` hook rather
 than a context:
 
-- `features/location/lastKnownPosition.ts` — the last fix any screen resolved.
+- `features/location/lastKnownPosition.ts` holds the last fix any screen resolved.
   `useDeviceLocation` acquires a fresh fix on mount, which is right for capture
   and wrong for a read only screen that just wants to print "420 km away".
   Opening five legend pins in a row should not mean five permission checks and
   five trips to the satellites. Readers always handle `null`; a null publish is
   ignored, because a hook still requesting is not evidence a good fix went
   stale.
-- `core/onboarding/onboardingGate.ts` — a render time cache of the one
+- `core/onboarding/onboardingGate.ts` is a render time cache of the one
   onboarding flag `onboardingStore` owns. The Conditions tab mounts before the
   root layout's redirect to `/onboarding` lands, so without a synchronous read
   the OS location dialog fires over the welcome copy that explains why the app
@@ -87,8 +87,8 @@ The field log itself is local first and needs no network at all.
 
 A report's photo has two possible origins, and they converge immediately.
 
-**Camera** — `expo-camera` writes to the OS cache directory.
-**Library import** — `expo-image-picker` also hands back a temporary URI.
+**Camera.** `expo-camera` writes to the OS cache directory.
+**Library import.** `expo-image-picker` also hands back a temporary URI.
 
 Either way the URI is temporary and the system is free to purge it, so
 `persistPhoto` copies it to `documentDirectory/storm-photos/<id>.<ext>` before the
@@ -98,7 +98,7 @@ orphaned file is recoverable, a record pointing at nothing is not.
 The two paths meet at the metadata phase rather than running in parallel, so
 classification, notes, storage and failure handling have one implementation. The
 metadata phase is also checked *before* the camera permission gate, so a device
-that has refused the camera — or has none, like a simulator — can still file a
+that has refused the camera, or has none, like a simulator, can still file a
 report.
 
 ### Provenance
@@ -109,7 +109,7 @@ storm, and a field log that cannot tell the two apart is not evidence of
 anything. The capture form says so plainly when a photo is imported, and the
 detail view carries it in the record panel.
 
-Capture time for an imported photo is resolved in preference order — EXIF
+Capture time for an imported photo is resolved in preference order: EXIF
 `DateTimeOriginal`, then `DateTimeDigitized`, then `DateTime`, then the asset's
 creation time, then the clock. EXIF carries no timezone, so it is read as local
 time: the wall clock the photographer was standing in. Anything that does not
@@ -122,7 +122,7 @@ worse than an honest fallback. That resolution is a pure function,
 Adding `photoSource` moved `SCHEMA_VERSION` to 2 and gave the migration hook its
 first real job. Version 1 predates import, so every report in a version 1
 envelope was necessarily shot on the camera; the migration says so. It runs at
-read time and is non-destructive — the upgraded envelope is written back on the
+read time and is non-destructive, and the upgraded envelope is written back on the
 next save.
 
 ## Testing approach
@@ -172,7 +172,7 @@ ThemeCard        an option that paints itself in the theme it offers
 
 Five decisions worth calling out:
 
-**Contrast is an assertion, not an opinion.** The previous palette shipped an
+**Contrast is asserted in the test suite.** The previous palette shipped an
 offline banner at 1.22:1 and a muted token at 2.0:1. Both looked fine in a list
 of hex values. `theme.test.ts` now computes the real ratios and fails the build
 if any theme regresses, and keeps those two exact pairs as named guards.
@@ -203,7 +203,7 @@ any mood fill, or changing mood would show nothing; and the monogram mark must
 clear 3:1 against its plate, which is the non-text floor a large graphic is
 actually held to, not the 4.5:1 body floor.
 
-**The sky gradient has four stops, not three.** The third is the haze band at
+**The sky gradient has four stops.** The third is the haze band at
 the horizon. Two stops and a midpoint read as a CSS demo; the band is most of
 why Skyward reads as sky. Each theme ships its own `backgroundGradientLocations`
 alongside the colours so the stop positions travel with the palette rather than
@@ -247,7 +247,7 @@ branches, so no component has to test a theme by name.
 defines it, because only Field Card argues that a report is a collectible card,
 and a run of identical white rectangles is where that argument visibly failed.
 `cardTint` picks one from a hash of the report id, so a card keeps its colour
-when the list is filtered, reordered or added to — an index-based choice would
+when the list is filtered, reordered or added to. An index-based choice would
 repaint every card above a newly saved report. Every tint is asserted to carry
 the theme's text at AA.
 

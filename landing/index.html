@@ -681,7 +681,7 @@
   /* ---------- design proposals ----------
      These boards are history, not product. They keep the exact palettes and
      faces they were drawn in, so they deliberately do NOT resolve theme
-     tokens — flipping the switcher must not rewrite a rejected proposal.
+     tokens. Flipping the switcher must not rewrite a rejected proposal.
      ---------------------------------------------------------------- */
 
   h3.phase, .phase {
@@ -746,7 +746,7 @@
     cursor: default;
   }
 
-  /* A — Storm Radar */
+  /* A. Storm Radar */
   .b-radar { background: #05070B; color: #F2F6FA; }
   .b-radar .board-tag { color: #FF5A47; }
   .b-radar .mini-temp, .b-radar .mini-score { font-family: 'IBM Plex Mono', monospace; font-weight: 600; }
@@ -757,7 +757,7 @@
   .b-radar .mini-bar i { background: #FF5A47; }
   .b-radar .mini-cta { background: #FF5A47; color: #05070B; border-radius: 22px; }
 
-  /* B — Skyward */
+  /* B. Skyward */
   .b-sky { background: linear-gradient(175deg, #6BA5DC 0%, #93BFE0 42%, #CADCDE 78%, #F7EFD2 100%); color: #14213A; }
   .b-sky .board-tag { color: #14213A; }
   .b-sky .mini-temp, .b-sky .mini-score { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; letter-spacing: -0.04em; }
@@ -768,7 +768,7 @@
   .b-sky .mini-bar i { background: linear-gradient(90deg, #F5C242 0%, #FF5A47 100%); }
   .b-sky .mini-cta { background: #14213A; color: #FFFFFF; border-radius: 22px; }
 
-  /* C — Field Card */
+  /* C. Field Card */
   .b-field { background: #FFF8EC; border: 3px solid #14140F; color: #14140F; }
   .b-field .board-tag { color: #3F3E34; }
   .b-field .mini-temp, .b-field .mini-score { font-family: 'Big Shoulders Display', sans-serif; font-weight: 900; letter-spacing: -0.04em; }
@@ -778,7 +778,7 @@
   .b-field .mini-bar i { background: #FF5A47; }
   .b-field .mini-cta { background: #F5C242; color: #14140F; border: 3px solid #14140F; border-radius: 24px; box-shadow: 4px 4px 0 #14140F; font-family: 'Big Shoulders Display', sans-serif; font-weight: 900; }
 
-  /* D — High-Vis */
+  /* D. High-Vis */
   .b-hivis { background: #000000; color: #FFFFFF; }
   .b-hivis .board-tag { background: #FFD400; color: #000000; padding: 4px 8px; align-self: flex-start; }
   .b-hivis .mini-temp, .b-hivis .mini-score { font-family: 'IBM Plex Mono', monospace; font-weight: 700; letter-spacing: -0.04em; }
@@ -988,6 +988,29 @@
     line-height: var(--display-leading);
   }
 
+/* ---------- walkthrough ---------- */
+
+  .demo { margin: 34px 0 0; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .demo img {
+    display: block;
+    width: 100%;
+    max-width: 330px;
+    height: auto;
+    /* The recording is a phone screen, so it gets a phone's corners and the
+       theme's own elevation rather than a flat rectangle on the page. */
+    border-radius: calc(var(--radius) + 10px);
+    border: max(1px, var(--card-border)) solid var(--line);
+    box-shadow: var(--lift);
+    background: var(--surface);
+  }
+  .demo figcaption {
+    font-size: 14px;
+    color: var(--ink-soft);
+    text-align: center;
+    max-width: 44ch;
+  }
+  .demo figcaption a { color: var(--accent); }
+
 /* ---------- architecture ---------- */
 
   .layers { display: grid; gap: 12px; margin-top: 28px; }
@@ -1041,7 +1064,104 @@
   }
   .qa .pt a:hover { text-decoration: underline; }
 
-  /* ---------- coverage matrix ---------- */
+  /* ---------- stack ---------- */
+
+  .chips {
+    list-style: none;
+    margin: 16px 0 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 14px;
+  }
+  .chip {
+    display: grid;
+    grid-template-columns: 30px 1fr;
+    grid-template-rows: auto auto;
+    column-gap: 14px;
+    align-items: center;
+    padding: 16px 18px;
+    background: var(--surface);
+    border-width: var(--card-border);
+    border-style: solid;
+    border-color: var(--line);
+    border-radius: var(--radius);
+  }
+  /* Marks carry no colour of their own: they take the theme's ink, so a row of
+     fifteen brands reads as one set instead of fifteen brand guidelines. */
+  .chip .mark { grid-row: 1 / 3; width: 30px; height: 30px; color: var(--ink); }
+  .chip .mark.letters {
+    display: grid;
+    place-items: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+  }
+  .chip .cname { font-weight: 700; font-size: 16px; line-height: 1.2; }
+  .chip .cwhat { font-size: 13px; color: var(--ink-soft); line-height: 1.4; margin-top: 3px; }
+
+/* ---------- diagrams ---------- */
+
+  .diagram { margin: 34px 0 0; }
+  .diagram figcaption {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 12px;
+  }
+  /* A diagram shrunk to phone width is a diagram nobody can read. It keeps its
+     drawn size and the container scrolls, which is the honest trade. */
+  .dg-scroll {
+    overflow-x: auto;
+    padding: 18px;
+    background: var(--surface);
+    border-width: var(--card-border);
+    border-style: solid;
+    border-color: var(--line);
+    border-radius: var(--radius);
+  }
+  svg.dg { display: block; width: 100%; min-width: 680px; height: auto; color: var(--ink); }
+  svg.dg .node rect { fill: var(--band); stroke: var(--line); stroke-width: 1.5; }
+  svg.dg .node.key rect { stroke: var(--accent); stroke-width: 2; }
+  svg.dg .node.alt rect { fill: none; stroke-dasharray: 5 4; }
+  svg.dg .node.fail rect { fill: none; stroke: var(--t-severe); stroke-dasharray: 5 4; }
+  svg.dg .band rect { fill: var(--band); stroke: var(--line); stroke-width: 1.5; }
+  svg.dg text { font-family: 'Instrument Sans', system-ui, sans-serif; fill: var(--ink); }
+  svg.dg .t { font-size: 14px; font-weight: 700; text-anchor: middle; }
+  svg.dg .s { font-size: 11.5px; fill: var(--ink-soft); text-anchor: middle; }
+  /* A presentation attribute loses to a CSS rule in SVG, so `text-anchor="start"`
+     on the element was silently overridden by `.s` and every band description
+     drew from its own centre, off the left edge of the band. Left-anchored small
+     text gets a class of its own instead. */
+  svg.dg .sl { font-size: 11.5px; fill: var(--ink-soft); text-anchor: start; }
+  svg.dg .lname {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 14px;
+    font-weight: 600;
+    fill: var(--accent);
+  }
+  svg.dg .eg {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    fill: var(--ink-soft);
+    text-anchor: end;
+  }
+  svg.dg .cap { font-size: 11.5px; fill: var(--ink-soft); }
+  svg.dg .cap.strong { font-size: 12px; font-weight: 700; fill: var(--ink); }
+  svg.dg .cap.fail { fill: var(--t-severe-text, var(--t-severe)); text-anchor: middle; }
+  svg.dg .cap.start { text-anchor: start; }
+  svg.dg .rot { font-size: 11.5px; fill: var(--ink-soft); text-anchor: middle; }
+  svg.dg .flow { stroke: var(--ink); stroke-width: 1.8; fill: none; }
+  svg.dg .flow.dashed { stroke-dasharray: 5 4; stroke: var(--ink-soft); }
+  svg.dg .flow.fail { stroke: var(--t-severe); stroke-dasharray: 5 4; }
+  .dg-note { margin: 16px 0 0; color: var(--ink-soft); line-height: 1.6; max-width: 72ch; }
+
+/* ---------- coverage matrix ---------- */
 
   .matrix-head {
     font-family: var(--display);
@@ -1690,7 +1810,9 @@
 
     <div class="cta-row">
       <a class="btn btn-primary" href="https://github.com/melaniesigrid/storm-chaser">View the code</a>
+      <a class="btn btn-ghost" href="#walkthrough">Watch the run-through</a>
       <a class="btn btn-ghost" href="#architecture">How it is built</a>
+      <a class="btn btn-ghost" href="#stack">The stack</a>
       <a class="btn btn-ghost" href="#submission">Submission details</a>
     </div>
 
@@ -1703,12 +1825,40 @@
   </div>
 </header>
 
+<section id="walkthrough" class="walkthrough">
+  <div class="wrap">
+    <h2>The whole app, in thirty-six seconds</h2>
+    <p class="section-lede">
+      Recorded on a device, which is the only place the map is real:
+      <code>react-native-maps</code> is native only, so the stills further down &mdash;
+      exported from this same source through react-native-web &mdash; draw a stand-in
+      where the map should be. Onboarding and the theme picker, live conditions and the
+      Chase Index, the forecast, the camera flow through to a saved report, the field log
+      and the map.
+    </p>
+
+    <figure class="demo">
+      <img
+        src="demo.gif"
+        width="360"
+        height="780"
+        loading="lazy"
+        decoding="async"
+        alt="A full run through Storm Chaser on a phone: the onboarding theme picker, the conditions screen with the Chase Index, the forecast strip and seven day outlook, capturing and saving a storm report, the field log, and the map">
+      <figcaption>
+        The same run is the submission recording.
+        <a href="https://drive.google.com/file/d/1hHfLGWvkn_EwCxRvGiozFD_H-ZrF_eAD/view?usp=sharing" rel="noopener">Full size on Google Drive</a>.
+      </figcaption>
+    </figure>
+  </div>
+</section>
+
 <section id="design" class="design">
   <div class="wrap">
     <h2>The three themes started as seven proposals</h2>
     <p class="section-lede">
       Nothing here was the first idea. The wordmark went through three display faces
-      before one stuck, and the conditions screen was drawn four ways at full fidelity —
+      before one stuck, and the conditions screen was drawn four ways at full fidelity:
       same data, same layout, four different arguments about what a field app should feel
       like. The boards below are the originals, kept in the palettes and faces they were
       drawn in. They do not follow the theme switcher; a rejected direction should look
@@ -1755,7 +1905,7 @@
         </div>
         <span class="verdict verdict--shipped">Shipped &times;2</span>
         <p class="prop-note">
-          The sky itself as the background, soft elevation, no borders. It shipped twice —
+          The sky itself as the background, soft elevation, no borders. It shipped twice, as
           <b>Skyward Day and a night-tuned Skyward Night</b> off the same token names.
         </p>
       </article>
@@ -1777,7 +1927,7 @@
         <span class="verdict verdict--shipped">Shipped</span>
         <p class="prop-note">
           Trading-card weight: 3px outlines, hard offset shadows, Big Shoulders Display. It gave
-          the token contract its <b>hardest test</b> — a theme with no gradient and a
+          the token contract its <b>hardest test</b>, a theme with no gradient and a
           non-zero border.
         </p>
       </article>
@@ -2022,6 +2172,208 @@
       the file that settles it.
     </p>
 
+    <figure class="diagram">
+      <figcaption>1 &middot; The dependency rule</figcaption>
+      <div class="dg-scroll">
+    <svg class="dg" viewBox="0 0 880 330" role="img" aria-label="Four layers stacked: app slash routes on top, then source features, then source core, then source services. One arrow runs down the left showing that imports may only point downward, never back up.">
+      <defs>
+        <marker id="tip" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7"
+                markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"/>
+        </marker>
+      </defs>
+      <g class="band">
+      <rect x="76" y="34" width="794" height="62" rx="10"/>
+      <text class="lname" x="96" y="60">app/</text>
+      <text class="sl" x="96" y="80">Routes. Compose hooks and components, decide what is seen.</text>
+      <text class="eg" x="854" y="71">index.tsx · capture.tsx · map.tsx</text>
+      </g>
+      <g class="band">
+      <rect x="76" y="110" width="794" height="62" rx="10"/>
+      <text class="lname" x="96" y="136">src/features/</text>
+      <text class="sl" x="96" y="156">One slice per domain. api / model / data / hooks.</text>
+      <text class="eg" x="854" y="147">weather · storms · location</text>
+      </g>
+      <g class="band">
+      <rect x="76" y="186" width="794" height="62" rx="10"/>
+      <text class="lname" x="96" y="212">src/core/</text>
+      <text class="sl" x="96" y="232">Shared and owned by nobody. Primitives and contracts.</text>
+      <text class="eg" x="854" y="223">ui · theme · charts · storage</text>
+      </g>
+      <g class="band">
+      <rect x="76" y="262" width="794" height="62" rx="10"/>
+      <text class="lname" x="96" y="288">src/services/</text>
+      <text class="sl" x="96" y="308">The outside world that is not a feature.</text>
+      <text class="eg" x="854" y="299">query · net · cloud</text>
+      </g>
+      <line class="flow" x1="42" y1="38" x2="42" y2="320" marker-end="url(#tip)"/>
+      <text class="rot" x="24" y="179.0" transform="rotate(-90 24 179.0)">imports may only point this way</text>
+      <text class="cap strong" x="76" y="20">Nothing below may import anything above it</text>
+    </svg>
+      </div>
+      <p class="dg-note">
+        Four layers, one direction. This is the whole architectural pattern in a picture:
+        a screen may reach down for a hook, a hook may reach down for a repository, and
+        nothing may reach back up. It is why a four-theme redesign touched no domain logic,
+        and why the domain suite runs with no renderer at all.
+      </p>
+    </figure>
+
+    <figure class="diagram">
+      <figcaption>2 &middot; One reading, end to end</figcaption>
+      <div class="dg-scroll">
+    <svg class="dg" viewBox="0 0 900 430" role="img" aria-label="A reading travelling from the device GPS through useDeviceLocation and useWeather to the Open-Meteo client, then back through contracts.ts and mappers.ts into the app's own WeatherSnapshot type, through the pure severity scorer, and into the Conditions screen. A dashed branch above shows the persisted cache and the status banner taking over when there is no signal.">
+      <defs>
+        <marker id="tip" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7"
+                markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"/>
+        </marker>
+      </defs>
+      <g class="node alt">
+      <rect x="340" y="20" width="180" height="56" rx="10"/>
+      <text class="t" x="430.0" y="42.0">Persisted cache</text>
+      <text class="s" x="430.0" y="61.0">24 h, AsyncStorage</text>
+      </g>
+      <line class="flow dashed" x1="520" y1="48" x2="556" y2="48" marker-end="url(#tip)"/>
+      <g class="node alt">
+      <rect x="560" y="20" width="170" height="56" rx="10"/>
+      <text class="t" x="645.0" y="42.0">StatusBanner</text>
+      <text class="s" x="645.0" y="61.0">offline · stale · sample</text>
+      </g>
+      <line class="flow dashed" x1="420" y1="146" x2="420" y2="80" marker-end="url(#tip)"/>
+      <text class="cap" x="340" y="12">no signal, or a cache still warm</text>
+      <g class="node">
+      <rect x="0" y="146" width="120" height="56" rx="10"/>
+      <text class="t" x="60.0" y="168.0">Device GPS</text>
+      <text class="s" x="60.0" y="187.0">expo-location</text>
+      </g>
+      <line class="flow" x1="120" y1="174" x2="146" y2="174" marker-end="url(#tip)"/>
+      <g class="node">
+      <rect x="150" y="146" width="160" height="56" rx="10"/>
+      <text class="t" x="230.0" y="168.0">useDeviceLocation</text>
+      <text class="s" x="230.0" y="187.0">permission, then fix</text>
+      </g>
+      <line class="flow" x1="310" y1="174" x2="336" y2="174" marker-end="url(#tip)"/>
+      <g class="node">
+      <rect x="340" y="146" width="160" height="56" rx="10"/>
+      <text class="t" x="420.0" y="168.0">useWeather</text>
+      <text class="s" x="420.0" y="187.0">TanStack Query</text>
+      </g>
+      <line class="flow" x1="500" y1="174" x2="526" y2="174" marker-end="url(#tip)"/>
+      <g class="node">
+      <rect x="530" y="146" width="140" height="56" rx="10"/>
+      <text class="t" x="600.0" y="168.0">weatherClient</text>
+      <text class="s" x="600.0" y="187.0">one fetch</text>
+      </g>
+      <line class="flow" x1="670" y1="174" x2="696" y2="174" marker-end="url(#tip)"/>
+      <g class="node">
+      <rect x="700" y="146" width="160" height="56" rx="10"/>
+      <text class="t" x="780.0" y="168.0">Open-Meteo</text>
+      <text class="s" x="780.0" y="187.0">free, no key</text>
+      </g>
+      <line class="flow" x1="780" y1="202" x2="780" y2="246" marker-end="url(#tip)"/>
+      <g class="node key">
+      <rect x="700" y="246" width="160" height="56" rx="10"/>
+      <text class="t" x="780.0" y="268.0">contracts.ts</text>
+      <text class="s" x="780.0" y="287.0">the wire shape stops here</text>
+      </g>
+      <line class="flow" x1="700" y1="274" x2="664" y2="274" marker-end="url(#tip)"/>
+      <g class="node">
+      <rect x="480" y="246" width="160" height="56" rx="10"/>
+      <text class="t" x="560.0" y="268.0">mappers.ts</text>
+      <text class="s" x="560.0" y="287.0">into domain types</text>
+      </g>
+      <line class="flow" x1="480" y1="274" x2="444" y2="274" marker-end="url(#tip)"/>
+      <g class="node">
+      <rect x="260" y="246" width="160" height="56" rx="10"/>
+      <text class="t" x="340.0" y="268.0">WeatherSnapshot</text>
+      <text class="s" x="340.0" y="287.0">the app's own type</text>
+      </g>
+      <line class="flow" x1="260" y1="274" x2="224" y2="274" marker-end="url(#tip)"/>
+      <g class="node key">
+      <rect x="20" y="246" width="200" height="56" rx="10"/>
+      <text class="t" x="120.0" y="268.0">severity.ts</text>
+      <text class="s" x="120.0" y="287.0">pure · Chase Index 0-100</text>
+      </g>
+      <line class="flow" x1="120" y1="302" x2="120" y2="346" marker-end="url(#tip)"/>
+      <g class="node">
+      <rect x="20" y="346" width="200" height="56" rx="10"/>
+      <text class="t" x="120.0" y="368.0">Conditions screen</text>
+      <text class="s" x="120.0" y="387.0">renders what it is given</text>
+      </g>
+      <text class="cap" x="240" y="330">Two files carry the whole domain: one scores the atmosphere,</text>
+      <text class="cap" x="240" y="348">the other translates it. Neither imports React.</text>
+      <text class="cap" x="240" y="228">returning</text>
+    </svg>
+      </div>
+      <p class="dg-note">
+        The solid path is a live fetch; the dashed branch is what happens with no signal,
+        which is most of what &ldquo;offline functionality&rdquo; actually means here. Note
+        where the wire shape stops: <code>contracts.ts</code> is the last file that knows
+        what Open-Meteo calls anything. Swapping to weather.gov is a new client and a new
+        mapper, and no screen changes.
+      </p>
+    </figure>
+
+    <figure class="diagram">
+      <figcaption>3 &middot; The capture write order</figcaption>
+      <div class="dg-scroll">
+    <svg class="dg" viewBox="0 0 900 250" role="img" aria-label="The capture write order: shutter, copy the photo into document storage, freeze the weather snapshot onto the record, write the report through the repository, and it appears in the field log. A branch shows that if the photo copy fails, nothing is written at all.">
+      <defs>
+        <marker id="tip" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7"
+                markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"/>
+        </marker>
+      </defs>
+      <g class="node">
+      <rect x="10" y="40" width="160" height="58" rx="10"/>
+      <text class="t" x="90.0" y="63.0">Shutter</text>
+      <text class="s" x="90.0" y="82.0">expo-camera</text>
+      </g>
+      <line class="flow" x1="170" y1="69" x2="185" y2="69" marker-end="url(#tip)"/>
+      <g class="node key">
+      <rect x="185" y="40" width="160" height="58" rx="10"/>
+      <text class="t" x="265.0" y="63.0">Copy the photo</text>
+      <text class="s" x="265.0" y="82.0">into documents</text>
+      </g>
+      <line class="flow" x1="345" y1="69" x2="360" y2="69" marker-end="url(#tip)"/>
+      <g class="node">
+      <rect x="360" y="40" width="160" height="58" rx="10"/>
+      <text class="t" x="440.0" y="63.0">Freeze the weather</text>
+      <text class="s" x="440.0" y="82.0">onto the record</text>
+      </g>
+      <line class="flow" x1="520" y1="69" x2="535" y2="69" marker-end="url(#tip)"/>
+      <g class="node key">
+      <rect x="535" y="40" width="160" height="58" rx="10"/>
+      <text class="t" x="615.0" y="63.0">Write the report</text>
+      <text class="s" x="615.0" y="82.0">StormRepository</text>
+      </g>
+      <line class="flow" x1="695" y1="69" x2="710" y2="69" marker-end="url(#tip)"/>
+      <g class="node">
+      <rect x="710" y="40" width="160" height="58" rx="10"/>
+      <text class="t" x="790.0" y="63.0">Field log</text>
+      <text class="s" x="790.0" y="82.0">versioned envelope</text>
+      </g>
+      <line class="flow fail" x1="265" y1="98" x2="265" y2="150" marker-end="url(#tip)"/>
+      <g class="node fail">
+      <rect x="175" y="150" width="180" height="52" rx="10"/>
+      <text class="t" x="265.0" y="170.0">Nothing is written</text>
+      <text class="s" x="265.0" y="189.0">the copy failed</text>
+      </g>
+      <text class="cap fail start" x="278" y="128">if the copy fails</text>
+      <text class="cap strong" x="10" y="24">The order is the guarantee</text>
+      <text class="cap" x="10" y="228">The log can never hold an entry pointing at a file that is not there, and no report can cite a reading it did not carry.</text>
+    </svg>
+      </div>
+      <p class="dg-note">
+        Ordering as a correctness property rather than a preference. The photo is copied
+        into permanent storage <em>before</em> the record exists, so a failed copy leaves
+        no orphan; the weather is copied <em>onto</em> the record rather than referenced,
+        because no forecast API serves historical conditions for an arbitrary past
+        timestamp.
+      </p>
+    </figure>
+
     <div class="layers">
       <div class="layer">
         <div class="lname">app/</div>
@@ -2127,7 +2479,7 @@
       <article>
         <h3>How do you know it holds?</h3>
         <p>
-          561 tests, and the ones worth naming guard a decision rather than a line: WCAG AA
+          565 tests, and the ones worth naming guard a decision rather than a line: WCAG AA
           is asserted for every text colour on every surface in every theme, the flash
           cadence is held under WCAG 2.3.1, and the repository is tested against a
           substituted store, so persistence is verified without a device.
@@ -2257,7 +2609,7 @@
       <tbody>
       <tr>
         <td class="req">Unit tests</td>
-        <td>561 tests over 28 suites: severity scoring, mappers, the repository, the theme contract, EXIF dates, chart geometry, the community layer and the storm legends.</td>
+        <td>565 tests over 28 suites: severity scoring, mappers, the repository, the theme contract, EXIF dates, chart geometry, the community layer and the storm legends.</td>
         <td class="files"><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/__tests__/severity.test.ts"><code>__tests__/<wbr>severity.test.ts</code></a><br><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/__tests__/stormRepository.test.ts"><code>__tests__/<wbr>stormRepository.test.ts</code></a><br><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/__tests__/theme.test.ts"><code>__tests__/<wbr>theme.test.ts</code></a></td>
       </tr>
       <tr>
@@ -2289,6 +2641,130 @@
       <b>The map cannot be captured on the web</b> &mdash; <code>react-native-maps</code>
       calls <code>codegenNativeComponent</code>, which has no web implementation &mdash; so
       it is in the screen recording rather than in the stills.
+    </p>
+  </div>
+</section>
+
+<section id="stack" class="stack">
+  <div class="wrap">
+    <h2>The stack, all of it</h2>
+    <p class="section-lede">
+      Everything the app is actually built on, and what each piece is doing here. Nothing
+      in this list needs an API key, an account or a paid tier, which is the other reason
+      it was chosen: the whole thing clones and runs.
+    </p>
+
+  <h3 class="matrix-head">Runtime</h3>
+  <ul class="chips">
+    <li class="chip">
+      <svg class="mark" aria-hidden="true" focusable="false" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M14.23 12.004a2.236 2.236 0 0 1-2.235 2.236 2.236 2.236 0 0 1-2.236-2.236 2.236 2.236 0 0 1 2.235-2.236 2.236 2.236 0 0 1 2.236 2.236zm2.648-10.69c-1.346 0-3.107.96-4.888 2.622-1.78-1.653-3.542-2.602-4.887-2.602-.41 0-.783.093-1.106.278-1.375.793-1.683 3.264-.973 6.365C1.98 8.917 0 10.42 0 12.004c0 1.59 1.99 3.097 5.043 4.03-.704 3.113-.39 5.588.988 6.38.32.187.69.275 1.102.275 1.345 0 3.107-.96 4.888-2.624 1.78 1.654 3.542 2.603 4.887 2.603.41 0 .783-.09 1.106-.275 1.374-.792 1.683-3.263.973-6.365C22.02 15.096 24 13.59 24 12.004c0-1.59-1.99-3.097-5.043-4.032.704-3.11.39-5.587-.988-6.38-.318-.184-.688-.277-1.092-.278zm-.005 1.09v.006c.225 0 .406.044.558.127.666.382.955 1.835.73 3.704-.054.46-.142.945-.25 1.44-.96-.236-2.006-.417-3.107-.534-.66-.905-1.345-1.727-2.035-2.447 1.592-1.48 3.087-2.292 4.105-2.295zm-9.77.02c1.012 0 2.514.808 4.11 2.28-.686.72-1.37 1.537-2.02 2.442-1.107.117-2.154.298-3.113.538-.112-.49-.195-.964-.254-1.42-.23-1.868.054-3.32.714-3.707.19-.09.4-.127.563-.132zm4.882 3.05c.455.468.91.992 1.36 1.564-.44-.02-.89-.034-1.345-.034-.46 0-.915.01-1.36.034.44-.572.895-1.096 1.345-1.565zM12 8.1c.74 0 1.477.034 2.202.093.406.582.802 1.203 1.183 1.86.372.64.71 1.29 1.018 1.946-.308.655-.646 1.31-1.013 1.95-.38.66-.773 1.288-1.18 1.87-.728.063-1.466.098-2.21.098-.74 0-1.477-.035-2.202-.093-.406-.582-.802-1.204-1.183-1.86-.372-.64-.71-1.29-1.018-1.946.303-.657.646-1.313 1.013-1.954.38-.66.773-1.286 1.18-1.868.728-.064 1.466-.098 2.21-.098zm-3.635.254c-.24.377-.48.763-.704 1.16-.225.39-.435.782-.635 1.174-.265-.656-.49-1.31-.676-1.947.64-.15 1.315-.283 2.015-.386zm7.26 0c.695.103 1.365.23 2.006.387-.18.632-.405 1.282-.66 1.933-.2-.39-.41-.783-.64-1.174-.225-.392-.465-.774-.705-1.146zm3.063.675c.484.15.944.317 1.375.498 1.732.74 2.852 1.708 2.852 2.476-.005.768-1.125 1.74-2.857 2.475-.42.18-.88.342-1.355.493-.28-.958-.646-1.956-1.1-2.98.45-1.017.81-2.01 1.085-2.964zm-13.395.004c.278.96.645 1.957 1.1 2.98-.45 1.017-.812 2.01-1.086 2.964-.484-.15-.944-.318-1.37-.5-1.732-.737-2.852-1.706-2.852-2.474 0-.768 1.12-1.742 2.852-2.476.42-.18.88-.342 1.356-.494zm11.678 4.28c.265.657.49 1.312.676 1.948-.64.157-1.316.29-2.016.39.24-.375.48-.762.705-1.158.225-.39.435-.788.636-1.18zm-9.945.02c.2.392.41.783.64 1.175.23.39.465.772.705 1.143-.695-.102-1.365-.23-2.006-.386.18-.63.406-1.282.66-1.933zM17.92 16.32c.112.493.2.968.254 1.423.23 1.868-.054 3.32-.714 3.708-.147.09-.338.128-.563.128-1.012 0-2.514-.807-4.11-2.28.686-.72 1.37-1.536 2.02-2.44 1.107-.118 2.154-.3 3.113-.54zm-11.83.01c.96.234 2.006.415 3.107.532.66.905 1.345 1.727 2.035 2.446-1.595 1.483-3.092 2.295-4.11 2.295-.22-.005-.406-.05-.553-.132-.666-.38-.955-1.834-.73-3.703.054-.46.142-.944.25-1.438zm4.56.64c.44.02.89.034 1.345.034.46 0 .915-.01 1.36-.034-.44.572-.895 1.095-1.345 1.565-.455-.47-.91-.993-1.36-1.565z"/></svg>
+      <span class="cname">React Native</span>
+      <span class="cwhat">React Native 0.86 on React 19</span>
+    </li>
+    <li class="chip">
+      <svg class="mark" aria-hidden="true" focusable="false" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M0 20.084c.043.53.23 1.063.718 1.778.58.849 1.576 1.315 2.303.567.49-.505 5.794-9.776 8.35-13.29a.761.761 0 011.248 0c2.556 3.514 7.86 12.785 8.35 13.29.727.748 1.723.282 2.303-.567.57-.835.728-1.42.728-2.046 0-.426-8.26-15.798-9.092-17.078-.8-1.23-1.044-1.498-2.397-1.542h-1.032c-1.353.044-1.597.311-2.398 1.542C8.267 3.991.33 18.758 0 19.77Z"/></svg>
+      <span class="cname">Expo</span>
+      <span class="cwhat">Expo SDK 57, Expo Router, camera, location, file system</span>
+    </li>
+    <li class="chip">
+      <svg class="mark" aria-hidden="true" focusable="false" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M1.125 0C.502 0 0 .502 0 1.125v21.75C0 23.498.502 24 1.125 24h21.75c.623 0 1.125-.502 1.125-1.125V1.125C24 .502 23.498 0 22.875 0zm17.363 9.75c.612 0 1.154.037 1.627.111a6.38 6.38 0 0 1 1.306.34v2.458a3.95 3.95 0 0 0-.643-.361 5.093 5.093 0 0 0-.717-.26 5.453 5.453 0 0 0-1.426-.2c-.3 0-.573.028-.819.086a2.1 2.1 0 0 0-.623.242c-.17.104-.3.229-.393.374a.888.888 0 0 0-.14.49c0 .196.053.373.156.529.104.156.252.304.443.444s.423.276.696.41c.273.135.582.274.926.416.47.197.892.407 1.266.628.374.222.695.473.963.753.268.279.472.598.614.957.142.359.214.776.214 1.253 0 .657-.125 1.21-.373 1.656a3.033 3.033 0 0 1-1.012 1.085 4.38 4.38 0 0 1-1.487.596c-.566.12-1.163.18-1.79.18a9.916 9.916 0 0 1-1.84-.164 5.544 5.544 0 0 1-1.512-.493v-2.63a5.033 5.033 0 0 0 3.237 1.2c.333 0 .624-.03.872-.09.249-.06.456-.144.623-.25.166-.108.29-.234.373-.38a1.023 1.023 0 0 0-.074-1.089 2.12 2.12 0 0 0-.537-.5 5.597 5.597 0 0 0-.807-.444 27.72 27.72 0 0 0-1.007-.436c-.918-.383-1.602-.852-2.053-1.405-.45-.553-.676-1.222-.676-2.005 0-.614.123-1.141.369-1.582.246-.441.58-.804 1.004-1.089a4.494 4.494 0 0 1 1.47-.629 7.536 7.536 0 0 1 1.77-.201zm-15.113.188h9.563v2.166H9.506v9.646H6.789v-9.646H3.375z"/></svg>
+      <span class="cname">TypeScript</span>
+      <span class="cwhat">Strict, with noUncheckedIndexedAccess</span>
+    </li>
+    <li class="chip">
+      <svg class="mark" aria-hidden="true" focusable="false" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M11.998,24c-0.321,0-0.641-0.084-0.922-0.247l-2.936-1.737c-0.438-0.245-0.224-0.332-0.08-0.383 c0.585-0.203,0.703-0.25,1.328-0.604c0.065-0.037,0.151-0.023,0.218,0.017l2.256,1.339c0.082,0.045,0.197,0.045,0.272,0l8.795-5.076 c0.082-0.047,0.134-0.141,0.134-0.238V6.921c0-0.099-0.053-0.192-0.137-0.242l-8.791-5.072c-0.081-0.047-0.189-0.047-0.271,0 L3.075,6.68C2.99,6.729,2.936,6.825,2.936,6.921v10.15c0,0.097,0.054,0.189,0.139,0.235l2.409,1.392 c1.307,0.654,2.108-0.116,2.108-0.89V7.787c0-0.142,0.114-0.253,0.256-0.253h1.115c0.139,0,0.255,0.112,0.255,0.253v10.021 c0,1.745-0.95,2.745-2.604,2.745c-0.508,0-0.909,0-2.026-0.551L2.28,18.675c-0.57-0.329-0.922-0.945-0.922-1.604V6.921 c0-0.659,0.353-1.275,0.922-1.603l8.795-5.082c0.557-0.315,1.296-0.315,1.848,0l8.794,5.082c0.57,0.329,0.924,0.944,0.924,1.603 v10.15c0,0.659-0.354,1.273-0.924,1.604l-8.794,5.078C12.643,23.916,12.324,24,11.998,24z M19.099,13.993 c0-1.9-1.284-2.406-3.987-2.763c-2.731-0.361-3.009-0.548-3.009-1.187c0-0.528,0.235-1.233,2.258-1.233 c1.807,0,2.473,0.389,2.747,1.607c0.024,0.115,0.129,0.199,0.247,0.199h1.141c0.071,0,0.138-0.031,0.186-0.081 c0.048-0.054,0.074-0.123,0.067-0.196c-0.177-2.098-1.571-3.076-4.388-3.076c-2.508,0-4.004,1.058-4.004,2.833 c0,1.925,1.488,2.457,3.895,2.695c2.88,0.282,3.103,0.703,3.103,1.269c0,0.983-0.789,1.402-2.642,1.402 c-2.327,0-2.839-0.584-3.011-1.742c-0.02-0.124-0.126-0.215-0.253-0.215h-1.137c-0.141,0-0.254,0.112-0.254,0.253 c0,1.482,0.806,3.248,4.655,3.248C17.501,17.007,19.099,15.91,19.099,13.993z"/></svg>
+      <span class="cname">Node</span>
+      <span class="cwhat">Metro, the capture scripts, the test runner</span>
+    </li>
+  </ul>
+
+  <h3 class="matrix-head">Data and device</h3>
+  <ul class="chips">
+    <li class="chip">
+      <svg class="mark" aria-hidden="true" focusable="false" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 0c6.627 0 9.166 4.102 9.166 12S18.626 24 12 24s-9.166-4.096-9.166-12c0-7.898 2.54-12 9.166-12m3.031 17.485c-.861 0-1.33.234-1.708.423-.327.164-.582.292-1.148.292-.567 0-.822-.128-1.148-.292-.378-.189-.848-.423-1.71-.423-.86 0-1.33.234-1.708.423-.327.164-.581.292-1.148.292v1.251c.862 0 1.331-.234 1.709-.423.326-.163.581-.292 1.148-.292s.821.129 1.148.292c.378.189.847.423 1.709.423.861 0 1.33-.234 1.709-.423.326-.163.58-.292 1.147-.292s.822.129 1.148.292c.378.189.848.423 1.71.423v-1.25c-.565 0-.822-.13-1.149-.293-.377-.189-.847-.423-1.709-.423m.41-12.536c.65-.586 0-1.648-.813-1.328-.45.18-.873.438-1.251.779a4.2 4.2 0 0 0-1.202 1.94 4.2 4.2 0 0 0-1.203-1.94 4.3 4.3 0 0 0-1.25-.779c-.814-.32-1.463.742-.814 1.328l2.385 2.153a4.86 4.86 0 0 0-2.731-.839c-.552 0-1.082.09-1.58.26-.836.284-.604 1.532.275 1.532h3.326a4.2 4.2 0 0 0-2.012.988 4 4 0 0 0-.9 1.165c-.403.776.588 1.529 1.237.948l2.686-2.42-.2 6.656c0 .08-.047.158-.107.223a5 5 0 0 1-.257-.123c-.378-.189-.848-.423-1.71-.423-.861 0-1.33.234-1.708.423-.327.164-.581.292-1.148.292v1.251c.861 0 1.33-.234 1.709-.423.326-.164.58-.292 1.148-.292.566 0 .821.128 1.148.292.377.189.847.423 1.708.423.862 0 1.332-.234 1.71-.423.326-.164.58-.292 1.147-.292s.822.128 1.148.292c.378.189.848.423 1.71.423v-1.25c-.565 0-.822-.13-1.149-.293v-.005c-.378-.19-.847-.424-1.709-.424-.861 0-1.33.235-1.709.424-.097.045-.189.094-.283.131a.34.34 0 0 1-.12-.232l-.2-6.69 2.722 2.457c.65.587 1.64-.166 1.236-.948a4.11 4.11 0 0 0-2.911-2.153h3.326c.882 0 1.108-1.245.275-1.531a4.88 4.88 0 0 0-4.311.578l2.385-2.152z"/></svg>
+      <span class="cname">TanStack Query</span>
+      <span class="cwhat">Server state, persisted to survive a cold start</span>
+    </li>
+    <li class="chip">
+      <span class="mark letters" aria-hidden="true">AS</span>
+      <span class="cname">AsyncStorage</span>
+      <span class="cwhat">Behind a KeyValueStore interface the tests substitute</span>
+    </li>
+    <li class="chip">
+      <span class="mark letters" aria-hidden="true">OM</span>
+      <span class="cname">Open-Meteo</span>
+      <span class="cwhat">Free, keyless, no account. The only network call</span>
+    </li>
+    <li class="chip">
+      <svg class="mark" aria-hidden="true" focusable="false" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19.527 4.799c1.212 2.608.937 5.678-.405 8.173-1.101 2.047-2.744 3.74-4.098 5.614-.619.858-1.244 1.75-1.669 2.727-.141.325-.263.658-.383.992-.121.333-.224.673-.34 1.008-.109.314-.236.684-.627.687h-.007c-.466-.001-.579-.53-.695-.887-.284-.874-.581-1.713-1.019-2.525-.51-.944-1.145-1.817-1.79-2.671L19.527 4.799zM8.545 7.705l-3.959 4.707c.724 1.54 1.821 2.863 2.871 4.18.247.31.494.622.737.936l4.984-5.925-.029.01c-1.741.601-3.691-.291-4.392-1.987a3.377 3.377 0 0 1-.209-.716c-.063-.437-.077-.761-.004-1.198l.001-.007zM5.492 3.149l-.003.004c-1.947 2.466-2.281 5.88-1.117 8.77l4.785-5.689-.058-.05-3.607-3.035zM14.661.436l-3.838 4.563a.295.295 0 0 1 .027-.01c1.6-.551 3.403.15 4.22 1.626.176.319.323.683.377 1.045.068.446.085.773.012 1.22l-.003.016 3.836-4.561A8.382 8.382 0 0 0 14.67.439l-.009-.003zM9.466 5.868L14.162.285l-.047-.012A8.31 8.31 0 0 0 11.986 0a8.439 8.439 0 0 0-6.169 2.766l-.016.018 3.665 3.084z"/></svg>
+      <span class="cname">react-native-maps</span>
+      <span class="cwhat">Google Maps on Android, Apple Maps on iOS</span>
+    </li>
+  </ul>
+
+  <h3 class="matrix-head">Interface</h3>
+  <ul class="chips">
+    <li class="chip">
+      <span class="mark letters" aria-hidden="true">RA</span>
+      <span class="cname">Reanimated</span>
+      <span class="cwhat">Version 4, on the UI thread</span>
+    </li>
+    <li class="chip">
+      <span class="mark letters" aria-hidden="true">SV</span>
+      <span class="cname">react-native-svg</span>
+      <span class="cwhat">Every chart, mark and weather glyph</span>
+    </li>
+    <li class="chip">
+      <svg class="mark" aria-hidden="true" focusable="false" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12.001,4.8c-3.2,0-5.2,1.6-6,4.8c1.2-1.6,2.6-2.2,4.2-1.8c0.913,0.228,1.565,0.89,2.288,1.624 C13.666,10.618,15.027,12,18.001,12c3.2,0,5.2-1.6,6-4.8c-1.2,1.6-2.6,2.2-4.2,1.8c-0.913-0.228-1.565-0.89-2.288-1.624 C16.337,6.182,14.976,4.8,12.001,4.8z M6.001,12c-3.2,0-5.2,1.6-6,4.8c1.2-1.6,2.6-2.2,4.2-1.8c0.913,0.228,1.565,0.89,2.288,1.624 c1.177,1.194,2.538,2.576,5.512,2.576c3.2,0,5.2-1.6,6-4.8c-1.2,1.6-2.6,2.2-4.2,1.8c-0.913-0.228-1.565-0.89-2.288-1.624 C10.337,13.382,8.976,12,6.001,12z"/></svg>
+      <span class="cname">NativeWind</span>
+      <span class="cwhat">Version 4, over Tailwind 3</span>
+    </li>
+    <li class="chip">
+      <span class="mark letters" aria-hidden="true">MC</span>
+      <span class="cname">Meteocons</span>
+      <span class="cwhat">Static and Lottie, 60 weather glyphs</span>
+    </li>
+    <li class="chip">
+      <svg class="mark" aria-hidden="true" focusable="false" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M4 2.8A3.6 3.6 0 1 0 4 10a3.6 3.6 0 0 0 0-7.2zm7.6 0v18.4h7.2a5.2 5.2 0 1 1 0-10.4 4 4 0 1 1 0-8zm7.2 0v8a4 4 0 1 0 0-8zm0 8v10.4A5.2 5.2 0 0 0 24 16a5.2 5.2 0 0 0-5.2-5.2zm-7.7-7.206L0 21.199h8.8l2.3-3.64Z"/></svg>
+      <span class="cname">Google Fonts</span>
+      <span class="cwhat">Bricolage, Anton, Big Shoulders, IBM Plex Mono</span>
+    </li>
+  </ul>
+
+  <h3 class="matrix-head">Testing and delivery</h3>
+  <ul class="chips">
+    <li class="chip">
+      <svg class="mark" aria-hidden="true" focusable="false" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M22.251 11.82a3.117 3.117 0 0 0-2.328-3.01L22.911 0H8.104L11.1 8.838a3.116 3.116 0 0 0-2.244 2.988c0 1.043.52 1.967 1.313 2.536a8.279 8.279 0 0 1-1.084 1.244 8.14 8.14 0 0 1-2.55 1.647c-.834-.563-1.195-1.556-.869-2.446a3.11 3.11 0 0 0-.91-6.08 3.117 3.117 0 0 0-3.113 3.113c0 .848.347 1.626.903 2.182-.048.097-.097.195-.146.299-.465.959-.993 2.043-1.195 3.259-.403 2.432.257 4.384 1.849 5.489A5.093 5.093 0 0 0 5.999 24c1.827 0 3.682-.917 5.475-1.807 1.279-.632 2.599-1.292 3.898-1.612.48-.118.98-.187 1.508-.264 1.07-.153 2.175-.312 3.168-.89a4.482 4.482 0 0 0 2.182-3.091c.174-.994 0-1.994-.444-2.87.298-.48.465-1.042.465-1.647zm-1.355 0c0 .965-.785 1.75-1.75 1.75a1.753 1.753 0 0 1-1.085-3.126l.007-.007c.056-.042.118-.084.18-.125 0 0 .008 0 .008-.007.028-.014.055-.035.083-.05.007 0 .014-.006.021-.006.028-.014.063-.028.097-.042.035-.014.07-.027.098-.041.007 0 .013-.007.02-.007.028-.007.056-.021.084-.028.007 0 .02-.007.028-.007.034-.007.062-.014.097-.02h.007l.104-.022c.007 0 .02 0 .028-.007.028 0 .055-.007.083-.007h.035c.035 0 .07-.007.111-.007h.09c.028 0 .05 0 .077.007h.014c.055.007.111.014.167.028a1.766 1.766 0 0 1 1.396 1.723zM10.043 1.39h10.93l-2.509 7.4c-.104.02-.208.055-.312.09l-2.64-5.385-2.648 5.35c-.104-.034-.216-.055-.327-.076l-2.494-7.38zm4.968 9.825a3.083 3.083 0 0 0-.938-1.668l1.438-2.904 1.452 2.967c-.43.43-.743.98-.868 1.605H15.01zm-3.481-1.098c.034-.007.062-.014.097-.02h.02c.029-.008.056-.008.084-.015h.028c.028 0 .049-.007.076-.007h.271c.028 0 .049.007.07.007.014 0 .02 0 .035.007.027.007.048.007.076.014.007 0 .014 0 .028.007l.097.02h.007c.028.008.056.015.083.029.007 0 .014.007.028.007.021.007.049.014.07.027.007 0 .014.007.02.007.028.014.056.021.084.035h.007a.374.374 0 0 1 .09.049h.007c.028.014.056.034.084.048.007 0 .007.007.013.007.028.014.05.035.077.049l.007.007c.083.062.16.132.236.201l.007.007a1.747 1.747 0 0 1 .48 1.209 1.752 1.752 0 0 1-3.502 0 1.742 1.742 0 0 1 1.32-1.695zm-6.838-.049c.966 0 1.751.786 1.751 1.751s-.785 1.751-1.75 1.751-1.752-.785-1.752-1.75.786-1.752 1.751-1.752zm16.163 6.025a3.07 3.07 0 0 1-1.508 2.133c-.758.438-1.689.577-2.669.716a17.29 17.29 0 0 0-1.64.291c-1.445.355-2.834 1.05-4.182 1.717-1.724.854-3.35 1.66-4.857 1.66a3.645 3.645 0 0 1-2.154-.688c-1.529-1.056-1.453-3.036-1.272-4.12.167-1.015.632-1.966 1.077-2.877.028-.055.049-.104.077-.16.152.056.312.098.479.126-.264 1.473.486 2.994 1.946 3.745l.264.139.284-.104c1.216-.431 2.342-1.133 3.336-2.071a9.334 9.334 0 0 0 1.445-1.716c.16.027.32.034.48.034a3.117 3.117 0 0 0 3.008-2.327h1.167a3.109 3.109 0 0 0 3.01 2.327c.576 0 1.11-.16 1.57-.43.18.52.236 1.063.139 1.605z"/></svg>
+      <span class="cname">Jest</span>
+      <span class="cwhat">jest-expo. 565 tests over 28 suites</span>
+    </li>
+    <li class="chip">
+      <svg class="mark" aria-hidden="true" focusable="false" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M7.257 9.132L11.816 6.5a.369.369 0 0 1 .368 0l4.559 2.632a.369.369 0 0 1 .184.32v5.263a.37.37 0 0 1-.184.319l-4.559 2.632a.369.369 0 0 1-.368 0l-4.559-2.632a.369.369 0 0 1-.184-.32V9.452a.37.37 0 0 1 .184-.32M23.852 11.53l-5.446-9.475c-.198-.343-.564-.596-.96-.596H6.555c-.396 0-.762.253-.96.596L.149 11.509a1.127 1.127 0 0 0 0 1.117l5.447 9.398c.197.342.563.517.959.517h10.893c.395 0 .76-.17.959-.512l5.446-9.413a1.069 1.069 0 0 0 0-1.086m-4.51 4.556a.4.4 0 0 1-.204.338L12.2 20.426a.395.395 0 0 1-.392 0l-6.943-4.002a.4.4 0 0 1-.205-.338V8.08c0-.14.083-.269.204-.338L11.8 3.74c.12-.07.272-.07.392 0l6.943 4.003a.4.4 0 0 1 .206.338z"/></svg>
+      <span class="cname">ESLint</span>
+      <span class="cwhat">eslint-config-expo, flat config, zero warnings</span>
+    </li>
+    <li class="chip">
+      <svg class="mark" aria-hidden="true" focusable="false" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M23.996 7.462c-.056.837-.257 2.135-.716 3.85-.995 3.715-4.27 10.874-10.42 9.227-6.15-1.65-5.407-9.487-4.412-13.201.46-1.716.934-2.94 1.305-3.694.42-.853.846-.289 1.815.523.684.573 2.41 1.791 5.011 2.488 2.601.697 4.706.506 5.583.352 1.245-.219 1.897-.494 1.834.455Zm-9.807 3.863s-.127-1.819-1.773-2.286c-1.644-.467-2.613 1.04-2.613 1.04Zm4.058 4.539-7.769-2.172s.446 2.306 3.338 3.153c2.862.836 4.43-.98 4.43-.981Zm2.701-2.51s-.13-1.818-1.773-2.286c-1.644-.469-2.612 1.038-2.612 1.038ZM8.57 18.23c-4.749 1.279-7.261-4.224-8.021-7.08C.197 9.831.044 8.832.003 8.188c-.047-.73.455-.52 1.415-.354.677.118 2.3.261 4.308-.28a11.28 11.28 0 0 0 2.41-.956c-.058.197-.114.4-.17.61-.433 1.618-.827 4.055-.632 6.426-1.976.732-2.267 2.423-2.267 2.423l2.524-.715c.227 1.002.6 1.987 1.15 2.838a5.914 5.914 0 0 1-.171.049Zm-4.188-6.298c1.265-.333 1.363-1.631 1.363-1.631l-3.374.888s.745 1.076 2.01.743Z"/></svg>
+      <span class="cname">Playwright</span>
+      <span class="cwhat">Every screenshot on this page, from source</span>
+    </li>
+    <li class="chip">
+      <svg class="mark" aria-hidden="true" focusable="false" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M10.984 13.836a.5.5 0 0 1-.353-.146l-.745-.743a.5.5 0 1 1 .706-.708l.392.391 1.181-1.18a.5.5 0 0 1 .708.707l-1.535 1.533a.504.504 0 0 1-.354.146zm9.353-.147l1.534-1.532a.5.5 0 0 0-.707-.707l-1.181 1.18-.392-.391a.5.5 0 1 0-.706.708l.746.743a.497.497 0 0 0 .706-.001zM4.527 7.452l2.557-1.585A1 1 0 0 0 7.09 4.17L4.533 2.56A1 1 0 0 0 3 3.406v3.196a1.001 1.001 0 0 0 1.527.85zm2.03-2.436L4 6.602V3.406l2.557 1.61zM24 12.5c0 1.93-1.57 3.5-3.5 3.5a3.503 3.503 0 0 1-3.46-3h-2.08a3.503 3.503 0 0 1-3.46 3 3.502 3.502 0 0 1-3.46-3h-.558c-.972 0-1.85-.399-2.482-1.042V17c0 1.654 1.346 3 3 3h.04c.244-1.693 1.7-3 3.46-3 1.93 0 3.5 1.57 3.5 3.5S13.43 24 11.5 24a3.502 3.502 0 0 1-3.46-3H8c-2.206 0-4-1.794-4-4V9.899A5.008 5.008 0 0 1 0 5c0-2.757 2.243-5 5-5s5 2.243 5 5a5.005 5.005 0 0 1-4.952 4.998A2.482 2.482 0 0 0 7.482 12h.558c.244-1.693 1.7-3 3.46-3a3.502 3.502 0 0 1 3.46 3h2.08a3.503 3.503 0 0 1 3.46-3c1.93 0 3.5 1.57 3.5 3.5zm-15 8c0 1.378 1.122 2.5 2.5 2.5s2.5-1.122 2.5-2.5-1.122-2.5-2.5-2.5S9 19.122 9 20.5zM5 9c2.206 0 4-1.794 4-4S7.206 1 5 1 1 2.794 1 5s1.794 4 4 4zm9 3.5c0-1.378-1.122-2.5-2.5-2.5S9 11.122 9 12.5s1.122 2.5 2.5 2.5 2.5-1.122 2.5-2.5zm9 0c0-1.378-1.122-2.5-2.5-2.5S18 11.122 18 12.5s1.122 2.5 2.5 2.5 2.5-1.122 2.5-2.5zm-13 8a.5.5 0 1 0 1 0 .5.5 0 0 0-1 0zm2 0a.5.5 0 1 0 1 0 .5.5 0 0 0-1 0zm12 0c0 1.93-1.57 3.5-3.5 3.5a3.503 3.503 0 0 1-3.46-3.002c-.007.001-.013.005-.021.005l-.506.017h-.017a.5.5 0 0 1-.016-.999l.506-.017c.018-.002.035.006.052.007A3.503 3.503 0 0 1 20.5 17c1.93 0 3.5 1.57 3.5 3.5zm-1 0c0-1.378-1.122-2.5-2.5-2.5S18 19.122 18 20.5s1.122 2.5 2.5 2.5 2.5-1.122 2.5-2.5z"/></svg>
+      <span class="cname">GitHub Actions</span>
+      <span class="cwhat">Guards the deploy, then publishes it</span>
+    </li>
+    <li class="chip">
+      <svg class="mark" aria-hidden="true" focusable="false" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M24 22.525H0l12-21.05 12 21.05z"/></svg>
+      <span class="cname">Vercel</span>
+      <span class="cwhat">This page, static, no build step</span>
+    </li>
+  </ul>
+
+    <p class="stock-note">
+      Marks are drawn from <a href="https://simpleicons.org" rel="noopener">Simple Icons</a>
+      (CC0) and inherit the active theme's ink rather than carrying their own colour, so
+      the row reads as one set. Five pieces have no monochrome mark of their own and get a
+      typographic tile instead of a drawing that only half looks like the real thing.
     </p>
   </div>
 </section>

@@ -2,14 +2,14 @@
 
 All notable changes to this project are documented here. Dates are YYYY-MM-DD.
 
-## [1.3.0] — 2026-09-19
+## [1.3.0] / 2026-09-19
 
 ### Added
 
 - **Volt lies on the conditions card and answers questions.** The mascot now
   perches on the empty top-right shoulder of the first weather card, tipped
-  back at an angle and swaying, and a tap gets a fact about the sky outside —
-  thunderstorm facts during a thunderstorm, snow facts in snow — in a speech
+  back at an angle and swaying, and a tap gets a fact about the sky outside:
+  thunderstorm facts during a thunderstorm, snow facts in snow, in a speech
   bubble that springs out of the corner he is sitting on. Facts rotate rather
   than draw at random, so two taps never repeat. Tap anywhere else, or wait
   nine seconds, and he goes back to lounging. Nothing in the card moves to make
@@ -18,8 +18,8 @@ All notable changes to this project are documented here. Dates are YYYY-MM-DD.
 - **Storm legends carry photographs and the long version.** Each of the 22
   entries now has an image, two paragraphs on the mechanism and the consequence,
   and a block of checkable figures. Images came from Wikimedia Commons with the
-  licence read from the API rather than assumed — public domain, CC0, CC BY and
-  CC BY-SA only — and each is credited in the app and in `docs/IMAGE_CREDITS.md`.
+  licence read from the API rather than assumed. Public domain, CC0, CC BY and
+  CC BY-SA only, and each is credited in the app and in `docs/IMAGE_CREDITS.md`.
   Where no freely licensed photograph of a specific storm exists, the image
   illustrates the phenomenon and the caption underneath says what it really
   shows. One legend found nothing acceptable and keeps its icon.
@@ -34,7 +34,7 @@ All notable changes to this project are documented here. Dates are YYYY-MM-DD.
   Draws nothing in the daylight themes.
 - **Field Card prints every card on its own stock.** Twelve tints of hues the
   theme already owns, chosen by a hash of a stable name so a card keeps its
-  colour for life — a report's id in the field log, a `tone` for the fixed
+  colour for life: a report's id in the field log, a `tone` for the fixed
   panels on Conditions, capture and the profile. Every tint carries the theme's
   ink at AA, which is asserted, and the recesses inside a card (a meter track,
   an instrument well) are now mixed against the stock they sit on rather than
@@ -43,28 +43,48 @@ All notable changes to this project are documented here. Dates are YYYY-MM-DD.
 
 - **A sky that is a sky.** Skyward Day ran an all-gold gradient, which was
   chosen for contrast headroom: a blue zenith is the darkest thing the theme
-  can put behind body copy. The headroom is bought differently now —
-  `textMuted` darkened by about 0.9 of a contrast point — which pays for four
+  can put behind body copy. The headroom is bought differently now,
+  with `textMuted` darkened by about 0.9 of a contrast point, which pays for four
   stops running blue, through a desaturated haze band, into low warm light at
   the horizon. Ink reads at 6.2:1 and captions at 4.7:1 on the darkest stop,
   both with more margin than the gold had. The header takes the first stop and
   the tab bar the last, so the chrome is part of the sky instead of two flat
   bars laid over it.
 - **Field Card prints on stock, not on tinted white.** The twelve tints sat
-  between 0.75 and 1.0 relative luminance — close enough to paper that on a
+  between 0.75 and 1.0 relative luminance, close enough to paper that on a
   phone in daylight the column still read as white with a cast on it. They now
   sit between 0.54 and 0.78, and plain white is gone from the palette, because
   a palette whose first entry is the surface colour will always have one card
   that looks like the tint failed to apply.
 
+- **A full run-through of the app, on the page and in the README.** Thirty-six
+  seconds recorded on a device, downscaled to 360px and re-encoded, which is
+  the only place the map tab is real.
+- **Three flow diagrams on the showcase page.** The dependency rule, one
+  reading end to end, and the capture write order, drawn as inline SVG that
+  takes the active theme's ink rather than shipping four PNGs.
+- **The full stack, with marks.** Every dependency and what it is doing here,
+  in four groups, using monochrome Simple Icons that inherit the theme's ink.
+  Five pieces with no mark of their own get a typographic tile.
+
 ### Fixed
+
+- **The seven day outlook overlapped itself on every phone.** The row was six
+  fixed-width columns totalling 408dp inside a panel 326dp wide, and React
+  Native overlaps an overflowing row rather than clipping it, so the gust
+  printed through the low temperature: "37 km/h9°". The gust moved under the
+  day label, where it is a caption rather than a column, and the bar is
+  measured from what is left instead of declared, so the row cannot overflow
+  at any width. The arithmetic moved to `model/outlookLayout.ts` and four
+  tests hold it against six phone widths. Found in the submission recording,
+  which is the argument for watching your own demo.
 
 - **Field Card's tier text was under AA on eleven of its twelve stocks.** The
   `tierText` set was tuned against `surface` and never re-checked against the
   stocks a card is actually printed on; `unsettled` was reading at 3.8:1. The
   whole set is darkened to clear 4.5:1 against the darkest stock in the
   palette, and the theme test now checks everything that can be drawn as text
-  on a stock — body, captions and all five tier colours — rather than body
+  on a stock (body, captions and all five tier colours) rather than body
   alone, which is why the gap survived the first palette.
 - **`npm run lint` and `npm run typecheck` both run again.** `tsc` was exiting
   on a deprecated `baseUrl` before it checked a line, and could no longer find
@@ -93,8 +113,8 @@ All notable changes to this project are documented here. Dates are YYYY-MM-DD.
   shutter as its primary action and adds an import path beside it, which joins
   the camera path at the metadata phase so classification, notes, storage and
   failure handling stay one implementation. The metadata phase is now checked
-  before the camera permission gate, so a device that has refused the camera —
-  or has none — can still file a report. Imported photos take their capture time
+  before the camera permission gate, so a device that has refused the camera,
+  or has none, can still file a report. Imported photos take their capture time
   from EXIF (`DateTimeOriginal`, then `DateTimeDigitized`, then `DateTime`, then
   the asset creation time, then the clock), read as local time and discarded
   outright when it does not parse, because a wrong timestamp is worse than an
@@ -110,7 +130,7 @@ All notable changes to this project are documented here. Dates are YYYY-MM-DD.
   erases the chaser from the phone: call sign, every report, every photograph,
   the theme preference, the onboarding flag and both copies of the query cache.
   There is no server account to close, so `eraseAccount` composes all six in one
-  place and runs every step even after one fails — a half-erased device reported
+  place and runs every step even after one fails. A half-erased device reported
   as clean is the worst outcome available. Confirmed behind a destructive alert
   that says it cannot be undone, and it lands back on onboarding.
 
@@ -123,7 +143,7 @@ All notable changes to this project are documented here. Dates are YYYY-MM-DD.
   not change.
 - **The mark now appears inside the app, not just at the door.** It strikes at
   26px in every tab header on each tab change, and pulses at 28px in the
-  conditions loading state — the one place it is allowed to loop, because there
+  conditions loading state, the one place it is allowed to loop, because there
   it is standing in for a spinner rather than decorating a wait.
 - **The choreography is data.** `launchSequence.ts` holds the timing as pure
   numbers with a test suite on it, so each theme strikes the way it already
@@ -159,7 +179,7 @@ All notable changes to this project are documented here. Dates are YYYY-MM-DD.
   legend, the counts, the lore toggle and the "Document a storm" call to action
   all keep working in the browser. iOS and Android are untouched.
 
-## [1.2.0] — 2026-09-18
+## [1.2.0] / 2026-09-18
 
 ### Added
 
@@ -213,7 +233,7 @@ All notable changes to this project are documented here. Dates are YYYY-MM-DD.
   the lore layer.
 - Time log revised down and extended with session three.
 
-## [1.1.0] — 2026-09-18
+## [1.1.0] / 2026-09-18
 
 ### Added
 
@@ -229,7 +249,7 @@ All notable changes to this project are documented here. Dates are YYYY-MM-DD.
 - A muted token at 2.0:1 in dark mode.
 - A 26px touch target on the storm classification control.
 
-## [1.0.0] — 2026-09-18
+## [1.0.0] / 2026-09-18
 
 Initial build: weather domain over Open-Meteo, the Chase Index, the two phase
 storm capture flow, persistence behind an injected store port, the field log and
