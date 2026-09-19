@@ -8,10 +8,11 @@
  * separate mockup to keep in sync: this is the same `app/` and `src/` the
  * device builds use, rendered through react-native-web.
  *
- * What that costs: `react-native-maps` is native only — it calls
- * `codegenNativeComponent`, which has no web implementation — so the Map tab
- * cannot be captured this way and is left to a device run. Everything else is
- * the genuine screen.
+ * One caveat: `react-native-maps` is native only — it calls
+ * `codegenNativeComponent`, which has no web implementation — so on web the map
+ * surface itself resolves to a stand-in (see metro.maps-web.js). The Map tab
+ * renders rather than throwing, but its pins are a device run only. Everything
+ * else is the genuine screen.
  *
  * Weather is live. The Chase Index in the capture is whatever the atmosphere
  * over CAPTURE_LAT/CAPTURE_LON is doing at the moment you run it, which is the
