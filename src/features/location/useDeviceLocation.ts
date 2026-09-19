@@ -21,7 +21,7 @@ export interface DeviceLocationOptions {
    * Acquire a fix as soon as the caller mounts. The default, because the map
    * and the capture flow both want a position the moment they are open.
    *
-   * Pass `false` when the request has to belong to a deliberate press —
+   * Pass `false` when the request has to belong to a deliberate press;
    * onboarding's location primer is the whole reason this option exists. Note
    * that even `auto: true` waits for onboarding to be finished; see
    * `shouldAutoAcquire`.

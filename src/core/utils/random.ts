@@ -1,7 +1,7 @@
 /**
  * A seeded pseudo-random generator.
  *
- * Decorative layers — the starfield, the confetti burst — need a scatter that
+ * Decorative layers, the starfield and the confetti burst, need a scatter that
  * looks arbitrary but is not actually random. `Math.random()` called during
  * render is an impure read: React is free to render a component twice and throw
  * one result away, so a field built that way can reshuffle between a render and

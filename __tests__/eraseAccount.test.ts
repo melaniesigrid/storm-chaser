@@ -4,7 +4,7 @@ import { err, ok, type Result } from '@/core/utils/result';
 /**
  * Deleting the account is the one action in the app that cannot be undone and
  * has no server to fall back on, so what is asserted here is that every store
- * is asked — including after one of them fails — and that a failure is still
+ * is asked, including after one of them fails, and that a failure is still
  * reported rather than swallowed behind a screen that says it is all gone.
  */
 function spies() {

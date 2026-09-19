@@ -197,7 +197,7 @@ describe('useLastKnownPosition', () => {
 
   /**
    * Unsubscribing has to actually remove the listener. A leaked one is a
-   * setState on an unmounted component on every later fix — and the set grows
+   * setState on an unmounted component on every later fix, and the set grows
    * for the life of the process, so it is a leak as well as a warning.
    */
   it('stops listening once the screen unmounts', () => {

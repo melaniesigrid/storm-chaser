@@ -9,7 +9,7 @@ export interface AutoAcquireInput {
 
 /**
  * Whether `useDeviceLocation` may acquire a fix without anyone pressing
- * anything — which on a device means firing the OS permission dialog.
+ * anything, which on a device means firing the OS permission dialog.
  *
  * Two independent conditions, both of which have burned us:
  *
@@ -18,7 +18,7 @@ export interface AutoAcquireInput {
  *   dialog waits for the button.
  * - The welcome flow has to be finished. On first launch the Conditions tab
  *   mounts before the root layout's redirect to `/onboarding` lands, so an
- *   unconditional acquire put the OS dialog over the step-0 welcome screen —
+ *   unconditional acquire put the OS dialog over the step-0 welcome screen,
  *   before the user had read a word about why, and leaving the primer's two
  *   buttons decorative because the permission was already answered.
  *

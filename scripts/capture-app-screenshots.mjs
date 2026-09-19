@@ -8,8 +8,8 @@
  * separate mockup to keep in sync: this is the same `app/` and `src/` the
  * device builds use, rendered through react-native-web.
  *
- * One caveat: `react-native-maps` is native only — it calls
- * `codegenNativeComponent`, which has no web implementation — so on web the map
+ * One caveat: `react-native-maps` is native only. It calls
+ * `codegenNativeComponent`, which has no web implementation, so on web the map
  * surface itself resolves to a stand-in (see metro.maps-web.js). The Map tab
  * renders rather than throwing, but its pins are a device run only. Everything
  * else is the genuine screen.
@@ -196,4 +196,4 @@ await browser.close();
 server.close();
 await optimise(written);
 if (!process.env.CAPTURE_KEEP_EXPORT) rmSync(exportDir, { recursive: true, force: true });
-console.log(`\ndone — ${written.length} captures in docs/screenshots`);
+console.log(`\ndone, ${written.length} captures in docs/screenshots`);

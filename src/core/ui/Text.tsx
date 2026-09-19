@@ -183,7 +183,7 @@ function designedStyle(variant: TextVariant, theme: Theme): TextStyle {
     case 'caption':
       return { fontFamily: type.body, fontSize: 15, lineHeight: 21, color: colors.textMuted };
     // Mono readings inside a chart: hourly temperatures, the ends of an
-    // outlook bar. Sized between `label` and `body` on purpose — these are
+    // outlook bar. Sized between `label` and `body` on purpose, because these are
     // numbers to be read at a glance in a narrow column, and body-sized mono
     // digits are wide enough to crowd the chart they annotate. Charts used to
     // set 13, 14 and 16 inline; this is the one size they share.
@@ -208,8 +208,8 @@ function designedStyle(variant: TextVariant, theme: Theme): TextStyle {
  * Horizontal breathing room for a variant, in points.
  *
  * React Native measures a text box from the font's advance widths and then
- * clips to that box. A display face with real side bearings — Anton especially,
- * and worse once negative tracking pulls the glyphs tighter — paints outside
+ * clips to that box. A display face with real side bearings, Anton especially,
+ * and worse once negative tracking pulls the glyphs tighter, paints outside
  * that measurement, so the first and last letters lose a sliver of ink. It is
  * most obvious on a capital that overhangs, and it gets worse as the size goes
  * up, which is why it showed on headings and not on body copy.

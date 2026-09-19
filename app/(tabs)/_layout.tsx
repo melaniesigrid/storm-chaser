@@ -11,7 +11,7 @@ type TabGlyphName = 'conditions' | 'log' | 'map';
  * The three tab marks.
  *
  * Drawn rather than typed. These used to be the Unicode characters ◬ ▤ ◎,
- * which render in whatever the platform's fallback face happens to be — three
+ * which render in whatever the platform's fallback face happens to be: three
  * different weights, three different optical sizes, and nothing to do with the
  * rest of the app. One stroke width and one corner radius across all three is
  * most of what makes a tab bar look deliberate.

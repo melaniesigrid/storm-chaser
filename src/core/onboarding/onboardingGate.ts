@@ -6,7 +6,7 @@ import { onboardingStore, type OnboardingStore } from './onboardingStore';
  * Whether the welcome flow is behind us, as a value a screen can read
  * synchronously while it renders.
  *
- * `onboardingStore` is the source of truth and stays that way — this is a cache
+ * `onboardingStore` is the source of truth and stays that way. This is a cache
  * of the one flag it holds, not a second flag. It exists because the flag lives
  * in AsyncStorage and the decision that needs it is a render-time one: the
  * Conditions tab mounts before the root layout's redirect to `/onboarding`

@@ -75,8 +75,8 @@ describe('computeChaseIndex', () => {
 });
 
 /**
- * The intermediate bands. Each is exercised from a baseline that scores zero —
- * clear sky, no rain, no gusts, no convective indices — so the score IS the
+ * The intermediate bands. Each is exercised from a baseline that scores zero
+ * (clear sky, no rain, no gusts, no convective indices) so the score IS the
  * band's contribution and the driver line proves which branch produced it.
  * The top and bottom of the ladder were already covered; these are the middles
  * a real afternoon actually lands in.

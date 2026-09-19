@@ -6,7 +6,7 @@ Self-reported, and trimmed after review: the first pass logged generous
 estimates for blocks that ran shorter than they felt. Where the git history can
 bound a session it does, and the per-session spans below say so.
 
-## Session one — build (7 h 45 m)
+## Session one: build (7 h 45 m)
 
 Landed as a single initial commit, so git cannot bound this one; the figures are
 estimates.
@@ -27,7 +27,7 @@ estimates.
 | Tests | 0 h 35 m | 28 unit tests across formatting, severity, mapping and the repository |
 | Documentation | 0 h 30 m | README, architecture notes, AI disclosure |
 
-## Session two — themes, identity and accessibility (1 h 20 m)
+## Session two: themes, identity and accessibility (1 h 20 m)
 
 Commits span 16:24 to 17:42, which is what this total reflects.
 
@@ -43,7 +43,7 @@ Session two closed three accessibility defects that shipped in session one: an
 offline banner rendering at 1.22:1 in light mode, a muted token at 2.0:1 in dark
 mode, and a 26px touch target on the storm classification control.
 
-## Session three — community, legends, charts and review (1 h 10 m)
+## Session three: community, legends, charts and review (1 h 10 m)
 
 Commits span 17:44 to 18:55, which is what this total reflects.
 

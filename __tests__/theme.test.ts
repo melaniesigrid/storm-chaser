@@ -421,9 +421,9 @@ describe.each(THEME_NAMES)('%s', (name) => {
   /**
    * Volt's mood shells, as a token contract.
    *
-   * `Volt` swaps his shell for a tier fill when his mood changes — `alert`
+   * `Volt` swaps his shell for a tier fill when his mood changes. `alert`
    * takes `tier.severe`, `logged` takes `tier.unsettled`, `offline` and
-   * `asleep` take `tier.dormant` — and on the Skyward themes his pupils are
+   * `asleep` take `tier.dormant`. On the Skyward themes his pupils are
    * drawn straight onto that shell with no visor behind them. The component
    * itself needs a renderer this project does not configure, but the pairing it
    * depends on is pure data and is exactly where a palette change breaks him:

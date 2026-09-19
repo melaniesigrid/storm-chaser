@@ -97,7 +97,7 @@ demonstrated only on camera shots is hard to show without waiting for weather.
 **Directed by me**
 
 - That the camera stays the primary action and import sits beside it, rather than
-  the two being offered as equals — the brief asks for camera capture, and a
+  the two being offered as equals, since the brief asks for camera capture and a
   chaser's default is still the shutter
 - That an imported report must be marked as imported, because its coordinates and
   conditions belong to the import and not to the storm; the alternative was a log

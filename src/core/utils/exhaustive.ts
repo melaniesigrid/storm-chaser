@@ -8,7 +8,7 @@
  *
  * Calling this in the default branch keeps both. `value` is `never` only while
  * the cases above are exhaustive, so a new member is still a compile error
- * here — and because the body does nothing, the caller's fallback still runs
+ * here, and because the body does nothing, the caller's fallback still runs
  * for a value that was smuggled past the types (a report persisted under an
  * older schema, say).
  */

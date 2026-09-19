@@ -54,7 +54,7 @@ export const STORM_TYPES: StormTypeDefinition[] = [
     label: 'Shelf cloud',
     tier: 'notable',
     description:
-      'A low wedge attached to the front of the storm, rolling towards you ahead of the rain. It marks outflow — cold air spreading out — so the wind hits as it passes overhead.',
+      'A low wedge attached to the front of the storm, rolling towards you ahead of the rain. It marks outflow, cold air spreading out, so the wind hits as it passes overhead.',
   },
   {
     id: 'squall_line',
@@ -68,7 +68,7 @@ export const STORM_TYPES: StormTypeDefinition[] = [
     label: 'Hail',
     tier: 'notable',
     description:
-      'Ice falling from the storm. Log the largest stone you can measure against something known — a coin, a ball — since size is what makes the report useful to anyone else.',
+      'Ice falling from the storm. Log the largest stone you can measure against something known, a coin or a ball, since size is what makes the report useful to anyone else.',
   },
   {
     id: 'lightning',
@@ -82,7 +82,7 @@ export const STORM_TYPES: StormTypeDefinition[] = [
     label: 'Flooding',
     tier: 'severe',
     description:
-      'Water over ground that is normally dry — roads, fields, drains backing up. Flash flooding kills more chasers than tornadoes do, and moving water hides what it has removed.',
+      'Water over ground that is normally dry: roads, fields, drains backing up. Flash flooding kills more chasers than tornadoes do, and moving water hides what it has removed.',
   },
   {
     id: 'dust_storm',
@@ -142,7 +142,7 @@ export function chaseLevelForTier(tier: StormTypeDefinition['tier']): ChaseLevel
  *
  * Imports the string union, never an SVG, so it stays testable without a
  * bundler, exactly like `iconForCondition`. Where the icon set has nothing
- * literal — there is no shelf cloud glyph — it falls back to the nearest
+ * literal, and there is no shelf cloud glyph, it falls back to the nearest
  * honest thing rather than to `not-available`, which reads as a bug.
  */
 export function iconForStormType(id: StormTypeId): WeatherIconName {

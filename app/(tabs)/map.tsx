@@ -66,8 +66,8 @@ export default function MapScreen() {
   );
 
   /**
-   * Nothing of anyone's to plot. The map still renders — with lore on there are
-   * twenty-two pins on it — so the call to action rides above it in a panel
+   * Nothing of anyone's to plot. The map still renders (with lore on there are
+   * twenty-two pins on it), so the call to action rides above it in a panel
    * instead of replacing the screen. Replacing it hid the only onboarding CTA
    * in the app behind a toggle that defaults to on, and stranded anyone who
    * turned lore off with no way to turn it back on.
@@ -262,8 +262,8 @@ const CommunityMarkers = memo(function CommunityMarkers({
 });
 
 /**
- * Storm lore: famous places, not reports. A third shape — a diamond on the
- * accent colour — so the three kinds of pin stay tellable apart without reading
+ * Storm lore: famous places, not reports. A third shape, a diamond on the
+ * accent colour, so the three kinds of pin stay tellable apart without reading
  * a single label, including for anyone who cannot rely on the colour
  * difference.
  */
@@ -293,7 +293,7 @@ const LoreMarkers = memo(function LoreMarkers({
             A marker's child view is its whole hit area, and an 18px diamond is
             far under the 44px minimum the rest of the app holds to. The
             transparent 44x44 box is the target; the diamond stays the visual.
-            A marker anchors its child at {x: 0.5, y: 1.0} — bottom centre —
+            A marker anchors its child at {x: 0.5, y: 1.0}, bottom centre,
             so growing the box would hang the diamond above the place it marks
             and out of register with the community rings. The explicit centre
             anchor keeps the visual on its coordinate.

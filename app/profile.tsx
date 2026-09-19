@@ -120,7 +120,7 @@ export default function ProfileScreen() {
           hands the choice to the sun over wherever the phone is standing.
         */}
         <Button
-          title={isAuto ? `Following the sky — ${theme.label}` : 'Follow the sky where I am'}
+          title={isAuto ? `Following the sky: ${theme.label}` : 'Follow the sky where I am'}
           tone={isAuto ? 'primary' : 'secondary'}
           onPress={() => choose(AUTO_PREFERENCE)}
           style={{ marginTop: 4 }}

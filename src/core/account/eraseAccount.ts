@@ -12,8 +12,8 @@ import type { StormRepository } from '@/features/storms/data/StormRepository';
  * Erasing the account.
  *
  * Storm Chaser has no server account: everything the app knows about a chaser
- * — the call sign, the field log, its photographs, the chosen theme and the
- * fact that onboarding was finished — lives on this phone. "Delete my account"
+ * (the call sign, the field log, its photographs, the chosen theme and the
+ * fact that onboarding was finished) lives on this phone. "Delete my account"
  * therefore means every one of those, which is why it is composed here rather
  * than left to a screen to remember all five.
  *

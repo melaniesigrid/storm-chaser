@@ -89,7 +89,7 @@ describe('boundingRegion', () => {
    * the antimeridian are 2 degrees apart on the globe, but min/max longitude
    * describes them as 358 degrees apart, so the map opens on the whole world
    * centred on Africa instead of on the Pacific. Chasers do not straddle the
-   * date line in one session, so this is left as it is — but if that changes,
+   * date line in one session, so this is left as it is, but if that changes,
    * this test is where it will be noticed.
    */
   it('spans the long way round when reports straddle the antimeridian', () => {

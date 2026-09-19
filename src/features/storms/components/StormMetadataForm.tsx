@@ -89,7 +89,7 @@ export function StormMetadataForm({
 
       {photoSource === 'library' ? (
         <Text variant="message" tone="muted">
-          Imported photo. The position and conditions below are this device&apos;s, now —
+          Imported photo. The position and conditions below are this device&apos;s, now,
           not necessarily the storm&apos;s.
         </Text>
       ) : null}

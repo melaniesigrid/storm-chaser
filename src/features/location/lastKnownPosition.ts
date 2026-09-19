@@ -6,8 +6,8 @@ import type { Coordinates } from '@/features/weather/model/types';
  * The last position fix any screen in the app has resolved.
  *
  * `useDeviceLocation` acquires a fresh fix on every mount, which is right for
- * the screens that need an accurate, current position — capture stamps a report
- * with it — and wrong for a screen that only wants to print "420 km away".
+ * the screens that need an accurate, current position (capture stamps a report
+ * with it) and wrong for a screen that only wants to print "420 km away".
  * Opening five legend pins in a row should not mean five permission checks and
  * five trips to the satellites, seconds apiece, when the map behind them is
  * already holding a fix.

@@ -49,8 +49,8 @@ export const EMPTY_PROFILE: ChaserProfile = { name: null };
 /**
  * Persistence for who is holding the phone.
  *
- * Same shape as the theme store — an injected `KeyValueStore` port and a
- * `Result` on every call — so it is unit testable without a native module and
+ * Same shape as the theme store: an injected `KeyValueStore` port and a
+ * `Result` on every call, so it is unit testable without a native module and
  * a storage failure is a value the UI can render rather than a crash.
  */
 export interface ProfileStore {

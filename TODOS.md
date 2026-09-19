@@ -13,12 +13,12 @@ Session two and three totals are bounded by commit spans. Session one landed as 
 single initial commit, so its 7 h 45 m is an estimate with nothing to check it
 against. Confirm or correct before the assessor reads it.
 
-## Manual QA — first run
+## Manual QA: first run
 
 ### Verify the permission timing fix on a device
 **Priority:** P1
 **Files:** `app/onboarding.tsx`, `src/features/location/useDeviceLocation.ts`, `src/core/onboarding/onboardingGate.ts`
-The fix is reasoned, not observed — there is no simulator in the build
+The fix is reasoned rather than observed; there is no simulator in the build
 environment. Check on real hardware:
 - The OS dialog does NOT appear over the step 0 welcome screen on a genuine first
   launch, and DOES appear on pressing "Use my location".
@@ -55,7 +55,7 @@ hundred logged reports mounts a few hundred marker views at once.
 **Priority:** P3
 **Files:** `src/features/weather/model/mappers.ts`, `src/features/weather/components/ForecastStrip.tsx`
 `mappers.ts` substitutes `0` for a null temperature, which is finite, so the chart
-cannot filter it. A 24–31 °C day with one null hour collapses the curve into the
+cannot filter it. A 24 to 31 °C day with one null hour collapses the curve into the
 top of the chart with a spike to the floor. Make `HourlyPoint.temperatureC`
 nullable and let the chart's existing non-finite handling do its job.
 
@@ -64,7 +64,7 @@ nullable and let the chart's existing non-finite handling do its job.
 ### `ScaleOptions.min`/`max` are dead in production
 **Priority:** P4
 **Files:** `src/core/charts/geometry.ts`
-The forced domain branch is now exercised only by tests — the Sparkline
+The forced domain branch is now exercised only by tests. The Sparkline
 passthrough that used it was removed as dead config. Either delete it or note why
 it stays.
 

@@ -80,8 +80,8 @@ export default function OnboardingScreen() {
                 loading={location.status === 'requesting'}
                 onPress={() => void location.refresh()}
               />
-              {/* Skips without asking. The app is usable without a fix — every
-                  screen already renders a position-unknown state — and asking
+              {/* Skips without asking. The app is usable without a fix, since every
+                  screen already renders a position-unknown state, and asking
                   anyway would make this button a lie. */}
               <Button title="Not now" tone="ghost" onPress={() => advance(2)} />
             </>

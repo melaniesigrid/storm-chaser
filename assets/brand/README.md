@@ -4,7 +4,7 @@ Source SVGs for the app icon, the Android adaptive foreground and the splash mar
 
 They are geometry, not exports: the bolt is the same polygon `src/core/brand/Monogram.tsx`
 draws, and the gradient is `skyward-day`'s `brand.ray` from `src/core/theme/themes.ts`.
-If either changes, change these to match — nothing enforces it.
+If either changes, change these to match. Nothing enforces it.
 
 The `sc` letters that ride the bolt inside the app are dropped here. At 48px on a home
 screen they collide with the bolt's own crossbar, and the mark is more recognisable as one
@@ -12,7 +12,7 @@ silhouette than as a monogram nobody can resolve.
 
 `Monogram.tsx` now applies the same rule to itself: under `LETTER_FLOOR` (80px) it draws
 bolt and plate only, so the 26px mark in a tab header and these exports agree without
-anyone having to remember. Change the floor there and these files stay as they are — they
+anyone having to remember. Change the floor there and these files stay as they are; they
 are already below it at every size they ship at.
 
 ## Not yet wired into `app.json`

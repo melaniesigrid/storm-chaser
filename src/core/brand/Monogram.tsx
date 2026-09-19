@@ -25,7 +25,7 @@ import { strikeTiming } from './launchSequence';
 const AnimatedG = Animated.createAnimatedComponent(G);
 
 /**
- * The bolt, in a 0–100 box. Taller than the plate on purpose: it is cropped
+ * The bolt, in a 0 to 100 box. Taller than the plate on purpose: it is cropped
  * top and bottom by the plate, which is what makes it read as a strike passing
  * through the mark rather than as a sticker sitting inside it.
  */
@@ -78,7 +78,7 @@ export interface MonogramProps {
  *
  * Geometry rather than an exported image, so it is sharp from a 24px list row
  * to a 512px store listing and it repaints itself when the theme changes. The
- * SC is drawn twice — stroke pass, then fill pass — because SVG `paint-order`
+ * SC is drawn twice, stroke pass then fill pass, because SVG `paint-order`
  * is not supported in react-native-svg, and drawing the stroke underneath is
  * the only way to keep it outside the letterforms rather than eating into
  * them.

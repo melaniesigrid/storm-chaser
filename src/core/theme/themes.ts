@@ -134,7 +134,7 @@ export interface ThemeTypography {
  * Kept separate from `colors` on purpose. `colors` answers "what does a panel
  * look like in this theme"; `brand` answers "what do the mark, the ray and the
  * mascot look like in this theme". Volt is yellow because Volt is yellow, not
- * because yellow happens to be the accent — Skyward Day's accent is rust, and
+ * because yellow happens to be the accent. Skyward Day's accent is rust, and
  * pointing his shell at `accent` was exactly what made him the wrong character
  * on two themes out of three.
  */

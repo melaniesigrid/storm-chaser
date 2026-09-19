@@ -13,8 +13,8 @@ import type { HourlyPoint } from '../model/types';
 
 const COLUMN = 56;
 const GAP = 14;
-// Bar heights appear twice each — once as the track, once as the fill
-// multiplier — so they have to move together or the fill over/underruns.
+// Bar heights appear twice each, once as the track and once as the fill
+// multiplier, so they have to move together or the fill over/underruns.
 const RAIN_BAR_HEIGHT = 34;
 const CAPE_BAR_HEIGHT = 22;
 /** Below this the CAPE bar reads `active`; at or above it, `severe`. */

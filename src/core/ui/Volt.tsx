@@ -32,8 +32,8 @@ export interface VoltProps {
  * the visor, antenna, rivets and vents that match its heavier outlines.
  *
  * His shell colour comes from `theme.brand.voltShell`, not from the accent. He
- * is a character with a colour of his own — yellow by day, powered down to
- * slate at night — and moods are what light him up.
+ * is a character with a colour of his own, yellow by day and powered down to
+ * slate at night, and moods are what light him up.
  */
 export function Volt({ size = 128, mood = 'idle' }: VoltProps) {
   const { theme } = useAppTheme();

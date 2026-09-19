@@ -25,8 +25,8 @@ export interface WordmarkProps {
 /**
  * The wordmark: two words, two weights, one ray.
  *
- * The idea is weight contrast inside a single word — hairline `storm` sitting
- * on extrabold `chaser` — so the lockup needs no icon to be recognisable and
+ * The idea is weight contrast inside a single word: hairline `storm` sitting
+ * on extrabold `chaser`, so the lockup needs no icon to be recognisable and
  * survives being set at 20px in a header. The ray under it is the same
  * three-stop gradient the exported icon SVGs use, and it draws left to right once when
  * the lockup appears.

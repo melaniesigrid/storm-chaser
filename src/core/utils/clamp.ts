@@ -1,7 +1,7 @@
 /**
  * One clamp for the whole app.
  *
- * Three copies of this had grown independently — an inline 0..1 clamp in the
+ * Three copies of this had grown independently: an inline 0..1 clamp in the
  * chart geometry, a private helper scoring the chase index, and a latitude
  * guard in the community sample. They were identical in mechanics and differed
  * only in bounds, so the bounds stay at the call sites and the mechanic lives

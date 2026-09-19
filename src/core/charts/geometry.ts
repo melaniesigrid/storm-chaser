@@ -2,7 +2,7 @@
  * Chart geometry.
  *
  * Pure maths with no React and no SVG, so the part that is easy to get subtly
- * wrong — scaling, flat series, single points, sparse data — is unit tested
+ * wrong (scaling, flat series, single points, sparse data) is unit tested
  * rather than eyeballed on a device.
  *
  * SVG y grows downward, so every helper here inverts: the largest value maps to

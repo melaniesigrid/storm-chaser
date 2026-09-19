@@ -67,6 +67,12 @@ All notable changes to this project are documented here. Dates are YYYY-MM-DD.
   in four groups, using monochrome Simple Icons that inherit the theme's ink.
   Five pieces with no mark of their own get a typographic tile.
 
+- **Dashes out of the prose.** Every em and en dash in the repo is now a comma,
+  colon, semicolon or parenthesis, across code comments, docs and the handful of
+  user-visible strings that carried one, such as the storm type recognition
+  sentences on the capture form. No logic changed; 565 tests, typecheck and lint
+  all pass over it.
+
 ### Fixed
 
 - **The seven day outlook overlapped itself on every phone.** The row was six

@@ -91,7 +91,7 @@ export function resolveCapturedAt(asset: PickedAssetLike, fallback: Date): strin
 
 /**
  * EXIF dates look like `2025:06:11 18:04:22` and carry no timezone, so they are
- * read as local time — the same wall clock the photographer was standing in.
+ * read as local time, the same wall clock the photographer was standing in.
  */
 function parseExifDate(value: unknown): Date | null {
   if (typeof value !== 'string') return null;

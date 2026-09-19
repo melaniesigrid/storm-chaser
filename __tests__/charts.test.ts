@@ -269,8 +269,8 @@ describe('scaleSeries degenerate boxes and domains', () => {
  * does not configure, but everything that can actually go wrong in it is a
  * property of `normalise`: an end below its start is a negative span, and a
  * result outside 0..1 is a bar drawn past the end of its own track. A day
- * hotter than the week's domain — the outlook derives the domain from the same
- * seven days, but a caller elsewhere need not — has to fill the track rather
+ * hotter than the week's domain (the outlook derives the domain from the same
+ * seven days, but a caller elsewhere need not) has to fill the track rather
  * than overflow it.
  */
 describe('normalise as the range bar uses it', () => {
