@@ -40,28 +40,39 @@
 <!-- Table of Contents -->
 # :notebook_with_decorative_cover: Table of Contents
 
-- [About the Project](#star2-about-the-project)
-  * [Walkthrough](#clapper-walkthrough)
-  * [Screenshots](#camera-screenshots)
-  * [Tech Stack](#space_invader-tech-stack)
-  * [Features](#dart-features)
-  * [Branding](#art-branding)
-  * [Environment Variables](#key-environment-variables)
-- [Getting Started](#toolbox-getting-started)
-  * [Prerequisites](#bangbang-prerequisites)
-  * [Installation](#gear-installation)
-  * [Running Tests](#test_tube-running-tests)
-  * [Run Locally](#running-run-locally)
-  * [Deployment](#triangular_flag_on_post-deployment)
-- [Usage](#eyes-usage)
-- [Project Structure](#open_file_folder-project-structure)
-- [Architecture](#building_construction-architecture)
-- [Brief Coverage](#clipboard-brief-coverage)
-- [Roadmap](#compass-roadmap)
-- [Contributing](#wave-contributing)
-- [License](#warning-license)
-- [Contact](#handshake-contact)
-- [Acknowledgements](#gem-acknowledgements)
+- [:notebook\_with\_decorative\_cover: Table of Contents](#notebook_with_decorative_cover-table-of-contents)
+  - [:star2: About the Project](#star2-about-the-project)
+    - [:clapper: Walkthrough](#clapper-walkthrough)
+    - [:camera: Screenshots](#camera-screenshots)
+      - [The design system, and the showcase site](#the-design-system-and-the-showcase-site)
+    - [:space\_invader: Tech Stack](#space_invader-tech-stack)
+    - [:dart: Features](#dart-features)
+    - [:art: Branding](#art-branding)
+      - [Design process](#design-process)
+      - [Themes](#themes)
+      - [Color Reference](#color-reference)
+      - [The chase ladder](#the-chase-ladder)
+      - [Typography](#typography)
+      - [Icons](#icons)
+      - [Logo and mascot](#logo-and-mascot)
+    - [:key: Environment Variables](#key-environment-variables)
+  - [:toolbox: Getting Started](#toolbox-getting-started)
+    - [:bangbang: Prerequisites](#bangbang-prerequisites)
+    - [:gear: Installation](#gear-installation)
+    - [:test\_tube: Running Tests](#test_tube-running-tests)
+    - [:running: Run Locally](#running-run-locally)
+    - [:triangular\_flag\_on\_post: Deployment](#triangular_flag_on_post-deployment)
+  - [:eyes: Usage](#eyes-usage)
+  - [:open\_file\_folder: Project Structure](#open_file_folder-project-structure)
+  - [:building\_construction: Architecture](#building_construction-architecture)
+  - [:clipboard: Brief Coverage](#clipboard-brief-coverage)
+    - [Known limits](#known-limits)
+  - [:compass: Roadmap](#compass-roadmap)
+  - [:wave: Contributing](#wave-contributing)
+  - [:warning: License](#warning-license)
+  - [:handshake: Contact](#handshake-contact)
+  - [:gem: Acknowledgements](#gem-acknowledgements)
+  - [Author](#author)
 
 <!-- About the Project -->
 ## :star2: About the Project
@@ -123,7 +134,7 @@ of collected cards rather than one long white sheet.
 
 | Skyward Day | Field Card |
 | :---: | :---: |
-| <img src="docs/screenshots/app-conditions-mobile.png" alt="Conditions tab on Skyward Day: the temperature and condition over a live sky gradient, with the Chase Index and instruments on frosted panes" width="300" /> | <img src="docs/screenshots/app-conditions-field-card-mobile.png" alt="The same Conditions tab on Field Card: cream paper, heavy ink outlines and hard offset shadows, each card printed on a different mid-tone stock" width="300" /> |
+| <img src="docs/screenshots/app-conditions-mobile.webp" alt="Conditions tab on Skyward Day: the temperature and condition over a live sky gradient, with the Chase Index and instruments on frosted panes" width="300" /> | <img src="docs/screenshots/app-conditions-field-card-mobile.webp" alt="The same Conditions tab on Field Card: cream paper, heavy ink outlines and hard offset shadows, each card printed on a different mid-tone stock" width="300" /> |
 
 <details>
   <summary><b>More screens</b>: onboarding, the field log empty state, the theme picker</summary>
@@ -131,7 +142,7 @@ of collected cards rather than one long white sheet.
 
 | Onboarding | Field log | Appearance |
 | :---: | :---: | :---: |
-| <img src="docs/screenshots/app-onboarding-mobile.png" alt="Onboarding welcome screen: Volt the mascot above the storm chaser wordmark and a Get started button" width="240" /> | <img src="docs/screenshots/app-log-mobile.png" alt="Field log with no reports yet, explaining that a photograph gets stamped with coordinates, time and conditions" width="240" /> | <img src="docs/screenshots/app-settings-mobile.png" alt="Appearance screen showing the monogram and wordmark above the three theme choices" width="240" /> |
+| <img src="docs/screenshots/app-onboarding-mobile.webp" alt="Onboarding welcome screen: Volt the mascot above the storm chaser wordmark and a Get started button" width="240" /> | <img src="docs/screenshots/app-log-mobile.webp" alt="Field log with no reports yet, explaining that a photograph gets stamped with coordinates, time and conditions" width="240" /> | <img src="docs/screenshots/app-settings-mobile.webp" alt="Appearance screen showing the monogram and wordmark above the three theme choices" width="240" /> |
 
 </details>
 
@@ -148,7 +159,7 @@ of collected cards rather than one long white sheet.
 #### The design system, and the showcase site
 
 <div align="center">
-  <img src="docs/screenshots/themes.png" alt="The three themes side by side: Skyward Day, Skyward Night and Field Card, each rendering the same Chase Index panel" width="100%" />
+  <img src="docs/screenshots/themes.webp" alt="The three themes side by side: Skyward Day, Skyward Night and Field Card, each rendering the same Chase Index panel" width="100%" />
 </div>
 
 <details>
@@ -156,12 +167,12 @@ of collected cards rather than one long white sheet.
   <br />
 
 <div align="center">
-  <img src="docs/screenshots/desktop-landing.png" alt="Showcase site at desktop width, the wordmark over a sky gradient with the product summary" width="100%" />
+  <img src="docs/screenshots/desktop-landing.webp" alt="Showcase site at desktop width, the wordmark over a sky gradient with the product summary" width="100%" />
 </div>
 
 | Mobile (390 × 844) | Tablet (820 × 1180) |
 | :---: | :---: |
-| <img src="docs/screenshots/mobile-landing.png" alt="Showcase site at mobile width, wordmark and summary stacked in a single column" width="280" /> | <img src="docs/screenshots/tablet-landing.png" alt="Showcase site at tablet width, wordmark and summary with the sky gradient filling the upper half" width="380" /> |
+| <img src="docs/screenshots/mobile-landing.webp" alt="Showcase site at mobile width, wordmark and summary stacked in a single column" width="280" /> | <img src="docs/screenshots/tablet-landing.webp" alt="Showcase site at tablet width, wordmark and summary with the sky gradient filling the upper half" width="380" /> |
 
 </details>
 
@@ -310,7 +321,7 @@ Two rounds were drawn at full fidelity on a design canvas before any of it reach
 and identical layout, so the only variable was the treatment.
 
 <div align="center">
-  <img src="docs/screenshots/design.png" alt="The seven design proposals: three wordmark directions in Anton, Bricolage Grotesque and Big Shoulders Display, then the conditions screen drawn four ways as Storm Radar, Skyward, Field Card and High-Vis, each labelled shipped, partly kept or not chosen" width="100%" />
+  <img src="docs/screenshots/design.webp" alt="The seven design proposals: three wordmark directions in Anton, Bricolage Grotesque and Big Shoulders Display, then the conditions screen drawn four ways as Storm Radar, Skyward, Field Card and High-Vis, each labelled shipped, partly kept or not chosen" width="100%" />
 </div>
 
 <br />
@@ -802,7 +813,7 @@ is MIT, and the four typefaces are under the [SIL Open Font License](https://ope
 <!-- Contact -->
 ## :handshake: Contact
 
-Melanie Arellano, [melaniesigridab@gmail.com](mailto:melaniesigridab@gmail.com)
+Melanie Arellano, [melaniesigrid@protonmail.com](mailto:melaniesigrid@protonmail.com)
 
 Project: [github.com/melaniesigrid/storm-chaser](https://github.com/melaniesigrid/storm-chaser) ·
 Showcase: [stormchaser-field.vercel.app](https://stormchaser-field.vercel.app)

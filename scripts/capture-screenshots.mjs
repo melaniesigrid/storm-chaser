@@ -13,6 +13,7 @@
  * takes ~4.3MB down to ~780KB with no visible loss at README widths.
  */
 import { chromium } from 'playwright';
+import sharp from 'sharp';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { dirname, resolve } from 'node:path';
 import { mkdirSync } from 'node:fs';
@@ -45,8 +46,12 @@ for (const vp of VIEWPORTS) {
   await page.goto(target, { waitUntil: 'networkidle' });
   await page.evaluate(() => document.fonts.ready);
   await page.waitForTimeout(1200);
-  await page.screenshot({ path: resolve(outDir, `${vp.name}.png`), fullPage: !HERO_ONLY });
-  console.log(`wrote ${vp.name}.png`);
+  // Playwright only encodes PNG or JPEG, so the shot comes back as a buffer
+  // and sharp writes the WebP the README actually references. A PNG here
+  // would land beside the .webp and be silently ignored by every doc.
+  const shot = await page.screenshot({ fullPage: !HERO_ONLY });
+  await sharp(shot).webp({ quality: 80, effort: 6 }).toFile(resolve(outDir, `${vp.name}.webp`));
+  console.log(`wrote ${vp.name}.webp`);
   await context.close();
 }
 
@@ -63,8 +68,9 @@ for (const id of ['themes', 'design']) {
   await page.goto(target, { waitUntil: 'networkidle' });
   await page.evaluate(() => document.fonts.ready);
   await page.waitForTimeout(1200);
-  await page.locator(`#${id}`).screenshot({ path: resolve(outDir, `${id}.png`) });
-  console.log(`wrote ${id}.png`);
+  const section = await page.locator(`#${id}`).screenshot();
+  await sharp(section).webp({ quality: 80, effort: 6 }).toFile(resolve(outDir, `${id}.webp`));
+  console.log(`wrote ${id}.webp`);
   await context.close();
 }
 

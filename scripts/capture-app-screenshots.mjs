@@ -28,7 +28,8 @@
 import { chromium } from 'playwright';
 import { createServer } from 'node:http';
 import { execFileSync } from 'node:child_process';
-import { existsSync, mkdirSync, readFileSync, rmSync, statSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, statSync } from 'node:fs';
+import sharp from 'sharp';
 import { dirname, extname, join, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -122,26 +123,29 @@ function serve(dir) {
   return new Promise((done) => server.listen(PORT, '127.0.0.1', () => done(server)));
 }
 
-/** Shrinks the 2x captures to a size a README can load. Skipped if sharp is absent. */
+/**
+ * Shrinks the 2x captures to a size a README can load.
+ *
+ * sharp used to be optional here, with a "leaving captures at full size"
+ * fallback. It is not optional any more: the captures are written as WebP and
+ * sharp is the only thing in the toolchain that encodes it, so a missing sharp
+ * now means no screenshots rather than large ones. It is a devDependency, so
+ * anyone running this script has it.
+ */
 async function optimise(files) {
-  let sharp;
-  try {
-    ({ default: sharp } = await import('sharp'));
-  } catch {
-    console.log('› sharp not installed, leaving captures at full size');
-    return;
-  }
   for (const file of files) {
     const before = statSync(file).size;
     const tmp = `${file}.tmp`;
-    const image = sharp(file);
+    // Buffer in, so sharp holds no handle on the file being replaced --
+    // on Windows the rename below fails with EPERM otherwise.
+    const input = readFileSync(file);
+    const image = sharp(input);
     const { width } = await image.metadata();
     await image
       .resize({ width: Math.round(width * 0.66) })
-      .png({ palette: true, quality: 88, effort: 9 })
+      .webp({ quality: 80, effort: 6 })
       .toFile(tmp);
     rmSync(file);
-    const { renameSync } = await import('node:fs');
     renameSync(tmp, file);
     console.log(`  ${file.split(/[\\/]/).pop()}  ${(before / 1024) | 0}KB → ${(statSync(file).size / 1024) | 0}KB`);
   }
@@ -184,10 +188,14 @@ for (const shot of SHOTS) {
     await page.evaluate(() => document.fonts.ready);
     await page.waitForTimeout(shot.settle);
 
-    const file = resolve(outDir, `${shot.name}-${key}.png`);
-    await page.screenshot({ path: file });
+    // Captured as PNG into memory and written as WebP: the README references
+    // .webp, so emitting .png here would leave the docs pointing at files
+    // this script never produces.
+    const file = resolve(outDir, `${shot.name}-${key}.webp`);
+    const buffer = await page.screenshot();
+    await sharp(buffer).webp({ quality: 80, effort: 6 }).toFile(file);
     written.push(file);
-    console.log(`› ${shot.name}-${key}.png`);
+    console.log(`› ${shot.name}-${key}.webp`);
     await context.close();
   }
 }
