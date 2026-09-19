@@ -1095,33 +1095,22 @@
   }
 
 
-  .sky-band {
+  /*
+   * The weather crosses the whole hero, the reading column included.
+   *
+   * It used to be a 46vh band above the copy plus two rails in the gutters
+   * beside it, to keep moving imagery off the text. What that actually drew
+   * was a rectangular hole in the middle of the storm, and a hole in a
+   * downpour is far more distracting than a raindrop behind a word. The copy
+   * is still in front of the weather -- `.hero .wrap` keeps its z-index -- so
+   * nothing is ever read THROUGH a drop; the rain simply no longer stops at
+   * the edges of the sentence.
+   */
+  .sky-sheet {
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 46vh;
+    inset: 0;
     overflow: hidden;
-    /* The rain thins out before it reaches the reading column rather than
-       stopping at a line. A hard edge would read as a box of weather; this
-       reads as the far side of a squall. Either way nothing meaningful is
-       moving behind the body copy. */
-    -webkit-mask-image: linear-gradient(to bottom, #000 0 48%, transparent 100%);
-    mask-image: linear-gradient(to bottom, #000 0 48%, transparent 100%);
   }
-
-  .sky-rail {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    overflow: hidden;
-    /* Exactly the gutter outside the reading column. On a phone there is no
-       gutter, so the rails vanish on their own rather than by breakpoint. */
-    width: max(0px, calc((100vw - min(1120px, 100vw - 48px)) / 2));
-  }
-
-  .sky-rail--l { left: 0; }
-  .sky-rail--r { right: 0; }
 
   .rain,
   .shaft {
@@ -1135,9 +1124,15 @@
    * Rain drawn as hairlines is rain seen through a long exposure; rain seen by
    * an eye is fat little tadpoles -- round at the bottom, drawn to a point at
    * the top by the air they are falling through. That shape cannot come out of
-   * a linear-gradient, so it comes out of one tiled SVG carrying five drops at
-   * five sizes at five irregular positions. Regular spacing would read as
-   * polka dots; this is polka dots that got rained on.
+   * a linear-gradient, so it comes out of one tiled SVG carrying three drops
+   * at three sizes at three irregular positions. Regular spacing would read as
+   * polka dots; this is polka dots that got rained on. Three to a tile rather
+   * than five, and a bigger tile under them: now that the rain crosses the
+   * copy it has to be something you notice falling, not something you have to
+   * read through. The scales are small fractions of the tile rather than whole
+   * multiples of it: spacing the drops out by growing the tile alone would
+   * have grown the drops with it, and a sparser field of bigger drops is not
+   * a sparser field.
    *
    * The SVG is a MASK rather than a background image, because a data URI
    * cannot read `--sky-tint`. The tint is a flat fill underneath and the drops
@@ -1150,8 +1145,8 @@
        invisible as a raindrop on a white one. Falls back to the sky's own
        colour wherever a direction has nothing to say about it. */
     background: var(--rain-tint, var(--sky-tint));
-    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='%23fff'%3E%3Cg transform='translate(6 4) scale(1.15)'%3E%3Cpath d='M10 1C10 1 19 13 19 19.5A9 9 0 1 1 1 19.5C1 13 10 1 10 1Z'/%3E%3C/g%3E%3Cg transform='translate(48 18) scale(0.72)'%3E%3Cpath d='M10 1C10 1 19 13 19 19.5A9 9 0 1 1 1 19.5C1 13 10 1 10 1Z'/%3E%3C/g%3E%3Cg transform='translate(74 50) scale(1)'%3E%3Cpath d='M10 1C10 1 19 13 19 19.5A9 9 0 1 1 1 19.5C1 13 10 1 10 1Z'/%3E%3C/g%3E%3Cg transform='translate(24 54) scale(0.85)'%3E%3Cpath d='M10 1C10 1 19 13 19 19.5A9 9 0 1 1 1 19.5C1 13 10 1 10 1Z'/%3E%3C/g%3E%3Cg transform='translate(58 76) scale(0.6)'%3E%3Cpath d='M10 1C10 1 19 13 19 19.5A9 9 0 1 1 1 19.5C1 13 10 1 10 1Z'/%3E%3C/g%3E%3C/svg%3E");
-    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='%23fff'%3E%3Cg transform='translate(6 4) scale(1.15)'%3E%3Cpath d='M10 1C10 1 19 13 19 19.5A9 9 0 1 1 1 19.5C1 13 10 1 10 1Z'/%3E%3C/g%3E%3Cg transform='translate(48 18) scale(0.72)'%3E%3Cpath d='M10 1C10 1 19 13 19 19.5A9 9 0 1 1 1 19.5C1 13 10 1 10 1Z'/%3E%3C/g%3E%3Cg transform='translate(74 50) scale(1)'%3E%3Cpath d='M10 1C10 1 19 13 19 19.5A9 9 0 1 1 1 19.5C1 13 10 1 10 1Z'/%3E%3C/g%3E%3Cg transform='translate(24 54) scale(0.85)'%3E%3Cpath d='M10 1C10 1 19 13 19 19.5A9 9 0 1 1 1 19.5C1 13 10 1 10 1Z'/%3E%3C/g%3E%3Cg transform='translate(58 76) scale(0.6)'%3E%3Cpath d='M10 1C10 1 19 13 19 19.5A9 9 0 1 1 1 19.5C1 13 10 1 10 1Z'/%3E%3C/g%3E%3C/svg%3E");
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='%23fff'%3E%3Cg transform='translate(10 8) scale(0.8)'%3E%3Cpath d='M10 1C10 1 19 13 19 19.5A9 9 0 1 1 1 19.5C1 13 10 1 10 1Z'/%3E%3C/g%3E%3Cg transform='translate(62 34) scale(0.52)'%3E%3Cpath d='M10 1C10 1 19 13 19 19.5A9 9 0 1 1 1 19.5C1 13 10 1 10 1Z'/%3E%3C/g%3E%3Cg transform='translate(34 66) scale(0.66)'%3E%3Cpath d='M10 1C10 1 19 13 19 19.5A9 9 0 1 1 1 19.5C1 13 10 1 10 1Z'/%3E%3C/g%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='%23fff'%3E%3Cg transform='translate(10 8) scale(0.8)'%3E%3Cpath d='M10 1C10 1 19 13 19 19.5A9 9 0 1 1 1 19.5C1 13 10 1 10 1Z'/%3E%3C/g%3E%3Cg transform='translate(62 34) scale(0.52)'%3E%3Cpath d='M10 1C10 1 19 13 19 19.5A9 9 0 1 1 1 19.5C1 13 10 1 10 1Z'/%3E%3C/g%3E%3Cg transform='translate(34 66) scale(0.66)'%3E%3Cpath d='M10 1C10 1 19 13 19 19.5A9 9 0 1 1 1 19.5C1 13 10 1 10 1Z'/%3E%3C/g%3E%3C/svg%3E");
     /* Square, because `rain-fall` slides by exactly one tile down: any other
        ratio would either stretch the drops or expose the seam. */
     -webkit-mask-size: var(--tile, 88px) var(--tile, 88px);
@@ -1172,6 +1167,52 @@
     animation:
       rain-fall var(--d, 900ms) linear infinite,
       rain-burst 6s var(--ease) infinite;
+  }
+
+  /*
+   * The cloud that brings it.
+   *
+   * A beat of its own between the strike and the rain, because drops arriving
+   * out of an empty sky are a particle effect and drops arriving out of a
+   * cloud are weather. It rolls in at 62 per cent of the cycle, is fully there
+   * by 70 -- around 360ms ahead of the first drop at 76 -- and it holds to 97
+   * so that it is still overhead for the whole downpour. A cloud that clears
+   * while its own rain is still falling is worse than no cloud at all.
+   *
+   * Same construction as the drops: circles and a slab in one SVG, used as a
+   * mask over `--rain-tint`, so the cloud is whatever colour the direction
+   * rains in and there is no second place to update.
+   */
+  .cloud {
+    position: absolute;
+    top: 5%;
+    left: 50%;
+    width: clamp(200px, 30vw, 380px);
+    aspect-ratio: 200 / 92;
+    background: var(--rain-tint, var(--sky-tint));
+    -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 92' fill='%23fff'%3E%3Ccircle cx='58' cy='50' r='30'/%3E%3Ccircle cx='102' cy='36' r='36'/%3E%3Ccircle cx='148' cy='52' r='27'/%3E%3Crect x='28' y='50' width='146' height='32' rx='16'/%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 92' fill='%23fff'%3E%3Ccircle cx='58' cy='50' r='30'/%3E%3Ccircle cx='102' cy='36' r='36'/%3E%3Ccircle cx='148' cy='52' r='27'/%3E%3Crect x='28' y='50' width='146' height='32' rx='16'/%3E%3C/svg%3E");
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    opacity: 0;
+    will-change: transform, opacity;
+    animation: cloud-roll 6s var(--ease) infinite;
+  }
+
+  /*
+   * It drifts rather than appears: under thirty pixels of travel across the
+   * whole arrival, which is enough to read as moving air and not enough to
+   * read as an element sliding into place.
+   */
+  @keyframes cloud-roll {
+    0%, 62% { opacity: 0; transform: translate(calc(-50% - 18px), -6px); }
+    70%, 97% {
+      opacity: calc(0.6 * var(--rain-on, 0) * var(--rain-gain, 1));
+      transform: translate(-50%, 0);
+    }
+    100% { opacity: 0; transform: translate(calc(-50% + 10px), 4px); }
   }
 
   /*
@@ -1242,7 +1283,7 @@
    */
   @media (prefers-reduced-motion: reduce) {
     .sky { display: none; }
-    .rain, .shaft, .bloom { animation: none; }
+    .rain, .shaft, .bloom, .cloud { animation: none; }
     .btn, .feature, .tier, .switch button { transition: none; }
   }
 
@@ -1340,8 +1381,10 @@
   /* ---------- the sky is cheaper on a phone ---------- */
 
   @media (max-width: 767px) {
+    /* Two bands instead of three. The sheet is full-bleed everywhere now, so
+       the phone saves its frames by dropping a layer rather than by shrinking
+       the sky back into a strip. */
     .rain--far { display: none; }
-    .sky-band { height: 18vh; }
   }
 
   @media (max-width: 620px) {
@@ -1520,22 +1563,13 @@
       that do not key stay at zero.
     -->
     <div class="skyflash"></div>
-    <div class="sky-band">
-      <div class="rain rain--near" style="--ang:14deg; --tile:154px; --o:0.72; --d:880ms"></div>
-      <div class="rain rain--mid"  style="--ang:11deg; --tile:113px; --o:0.46; --d:1270ms"></div>
-      <div class="rain rain--far"  style="--ang:8deg;  --tile:79px;  --o:0.3;  --d:1790ms"></div>
+    <div class="sky-sheet">
+      <div class="cloud"></div>
+      <div class="rain rain--near" style="--ang:14deg; --tile:196px; --o:0.72; --d:1040ms"></div>
+      <div class="rain rain--mid"  style="--ang:11deg; --tile:143px; --o:0.46; --d:1460ms"></div>
+      <div class="rain rain--far"  style="--ang:8deg;  --tile:104px; --o:0.3;  --d:1980ms"></div>
       <div class="shaft" style="--ang:24deg; --tile:1600px; --o:0.7; --d:44s"></div>
       <div class="bloom"></div>
-    </div>
-
-    <div class="sky-rail sky-rail--l">
-      <div class="rain rain--near" style="--ang:14deg; --tile:146px; --o:0.7;  --d:940ms"></div>
-      <div class="rain rain--far"  style="--ang:9deg;  --tile:83px;  --o:0.34; --d:1810ms"></div>
-    </div>
-
-    <div class="sky-rail sky-rail--r">
-      <div class="rain rain--near" style="--ang:15deg; --tile:161px; --o:0.7;  --d:860ms"></div>
-      <div class="rain rain--far"  style="--ang:9deg;  --tile:74px;  --o:0.34; --d:1700ms"></div>
     </div>
   </div>
   <div class="wrap">

@@ -179,9 +179,20 @@ describe('the hero rain', () => {
     return block![1]!;
   }
 
-  /** Every percentage stop in the burst, in order. */
+  /**
+   * Every percentage stop in a keyframe block, in order.
+   *
+   * Only the selectors, never the declarations: `translate(-50%, 0)` is a
+   * percentage too, and reading those as stops puts a 50 in the middle of the
+   * timeline.
+   */
+  function stopsIn(block: string): number[] {
+    const selectors = [...block.matchAll(/([0-9%,\s]+)\{/g)].map((m) => m[1]!);
+    return selectors.flatMap((sel) => [...sel.matchAll(/(\d+)%/g)].map((m) => Number(m[1])));
+  }
+
   function burstStops(): number[] {
-    return [...burstKeyframes().matchAll(/(\d+)%/g)].map((m) => Number(m[1]));
+    return stopsIn(burstKeyframes());
   }
 
   it('falls in every direction, and in both skies', () => {
@@ -225,14 +236,46 @@ describe('the hero rain', () => {
     expect(burstKeyframes()).toMatch(/100%\s*\{\s*opacity:\s*0;/);
   });
 
+  it('crosses the copy instead of carving a hole around it', () => {
+    // One full-bleed sheet. The band-and-two-rails arrangement this replaced
+    // kept the weather off the text and drew a rectangular hole in the middle
+    // of the storm doing it.
+    expect(PAGE).toContain('class="sky-sheet"');
+    expect(PAGE).not.toContain('sky-rail');
+    expect(PAGE).toMatch(/\.sky-sheet \{[^}]*inset: 0;/);
+    // The copy still sits in front of the weather; nothing is read THROUGH a
+    // drop.
+    expect(PAGE).toContain('.hero .wrap { position: relative; z-index: 2; }');
+  });
+
+  it('rolls a cloud in ahead of the drops, and keeps it there', () => {
+    const cloud = PAGE.match(/@keyframes cloud-roll \{((?:[^{}]*\{[^{}]*\})*[^{}]*)\}/);
+    expect(cloud).not.toBeNull();
+    const stops = stopsIn(cloud![1]!);
+
+    const cloudArrives = stops[2]!;
+    const cloudLeaves = stops[3]!;
+    const rainArrives = burstStops()[1]!;
+
+    // Fully there before the first drop, and still there for the last.
+    expect(cloudArrives).toBeLessThan(rainArrives);
+    expect(cloudLeaves).toBeGreaterThanOrEqual(burstStops()[2]!);
+    // One clock, still.
+    expect(PAGE).toContain('animation: cloud-roll 6s var(--ease) infinite');
+  });
+
   it('is drawn as drops rather than as streaks', () => {
     // A tiled teardrop mask over a flat tint, not a hairline gradient.
     expect(PAGE).toContain("mask-image: url(\"data:image/svg+xml,");
     expect(PAGE).toContain('background: var(--rain-tint, var(--sky-tint));');
-    // Five drops in the tile, at five scales: regular spacing reads as dots.
+    // Three drops in the tile, at three scales: regular spacing reads as dots.
     const tile = PAGE.match(/data:image\/svg\+xml,[^"]*/)![0];
-    const scales = [...tile.matchAll(/scale\(([\d.]+)\)/g)].map((m) => m[1]);
-    expect(scales).toHaveLength(5);
-    expect(new Set(scales).size).toBe(5);
+    const scales = [...tile.matchAll(/scale\(([\d.]+)\)/g)].map((m) => Number(m[1]));
+    expect(scales).toHaveLength(3);
+    expect(new Set(scales).size).toBe(3);
+    // Fractions of the tile, never multiples of it. A drop scaled past 1 grows
+    // with every attempt to space the field out, and a sparser field of bigger
+    // drops is not a sparser field.
+    expect(Math.max(...scales)).toBeLessThan(1);
   });
 });

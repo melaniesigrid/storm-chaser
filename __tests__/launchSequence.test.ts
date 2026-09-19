@@ -100,12 +100,37 @@ describe('the launch weather', () => {
     expect(timing.weather.flashMs).toBeLessThanOrEqual(timing.holdMs);
   });
 
+  it.each(LANGUAGES)('brings the cloud in before the rain on %s', (language) => {
+    const { weather } = launchTiming(language, false);
+
+    // The order is the whole point: drops out of an empty sky are a particle
+    // effect, drops out of a cloud are weather.
+    expect(weather.cloudAtMs).toBeLessThan(weather.rainAtMs);
+    // And it is still overhead when the rain starts.
+    expect(weather.cloudAtMs + weather.cloudMs).toBeGreaterThanOrEqual(weather.rainAtMs);
+  });
+
+  it('rolls the cloud in even where the theme cuts', () => {
+    // Broadcast strikes in 140ms. A cloud that arrives that fast has not
+    // rolled in, it has appeared -- the cut is the bolt's language, not the
+    // sky's.
+    const broadcast = launchTiming('broadcast', false).weather;
+    expect(broadcast.cloudMs).toBeGreaterThan(launchTiming('broadcast', false).strike.durationMs);
+  });
+
   it.each(LANGUAGES)('has no weather at all under reduced motion on %s', (language) => {
     const { weather } = launchTiming(language, true);
 
-    // A bloom is a brightness change and a drop is travel. Both are exactly
-    // what the setting asked not to see.
-    expect(weather).toEqual({ flashAtMs: 0, flashMs: 0, rainAtMs: 0, rainMs: 0 });
+    // A bloom is a brightness change, a drop is travel, and a cloud is both.
+    // All three are exactly what the setting asked not to see.
+    expect(weather).toEqual({
+      cloudAtMs: 0,
+      cloudMs: 0,
+      flashAtMs: 0,
+      flashMs: 0,
+      rainAtMs: 0,
+      rainMs: 0,
+    });
   });
 });
 

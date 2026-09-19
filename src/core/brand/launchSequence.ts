@@ -33,6 +33,10 @@ export interface StrikeTiming {
  * is what happens in that time instead of nothing.
  */
 export interface LaunchWeatherTiming {
+  /** When the cloud starts rolling in, ahead of everything it brings. */
+  cloudAtMs: number;
+  /** How long it takes to arrive. It stays until the overlay goes. */
+  cloudMs: number;
   /** The moment of impact, measured from the overlay's first frame. */
   flashAtMs: number;
   /** How long the bloom takes to fall back to nothing. */
@@ -98,6 +102,15 @@ const HOLD_MS: Record<MotionLanguage, number> = {
  */
 const FLASH_MS = 260;
 
+/**
+ * The least time a cloud may take to roll in.
+ *
+ * Broadcast's strike is 140ms, and a cloud that materialises in 140ms has not
+ * rolled in, it has appeared. This is the one place the weather does not take
+ * the theme's word for it -- the cut is the BOLT's language, not the sky's.
+ */
+const CLOUD_MIN_MS = 260;
+
 const FADE_MS: Record<MotionLanguage, number> = {
   atmospheric: 320,
   mechanical: 180,
@@ -116,7 +129,7 @@ const REDUCED: LaunchTiming = {
   strike: { delayMs: 0, durationMs: 0 },
   // No sky and no rain. A bloom is a brightness change and a drop is travel;
   // stillness means the mark and its beat, and nothing else.
-  weather: { flashAtMs: 0, flashMs: 0, rainAtMs: 0, rainMs: 0 },
+  weather: { cloudAtMs: 0, cloudMs: 0, flashAtMs: 0, flashMs: 0, rainAtMs: 0, rainMs: 0 },
   holdMs: 400,
   fadeMs: 220,
   totalMs: 620,
@@ -149,6 +162,12 @@ export function launchTiming(
     plateMs,
     strike,
     weather: {
+      // The cloud arrives while the bolt is still falling. It is the only way
+      // to put a beat before the rain without buying one: the strike's own
+      // travel is time the overlay is already spending, and a cloud that shows
+      // up in it is a cloud the drops can be said to have come out of.
+      cloudAtMs: strike.delayMs,
+      cloudMs: Math.max(strike.durationMs, CLOUD_MIN_MS),
       flashAtMs: strike.delayMs + strike.durationMs,
       // Capped at the hold, so the sky is dark again before the curtain moves
       // rather than fading out with it -- a bloom that leaves on the crossfade

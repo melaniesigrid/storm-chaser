@@ -11,17 +11,27 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
+import Svg, { Circle, Rect } from 'react-native-svg';
+
 import { useAppTheme } from '@/core/theme/useAppTheme';
 
 import type { LaunchWeatherTiming } from './launchSequence';
 
+/** How far the cloud drifts across its arrival, in points. */
+const CLOUD_DRIFT = 22;
+
+/** Overcast, not opaque. It is a ground for the mark, never a shape on it. */
+const CLOUD_OPACITY = 0.22;
+
 /**
- * One drop, as data. Fifteen of these are the whole storm.
+ * One drop, as data. Ten of these are the whole storm.
  *
  * Hand-placed rather than random, for the same reason the launch timings are
  * hand-placed: a random field cannot be looked at twice, and half of these
- * numbers exist to keep the drops OFF the mark in the middle of the screen.
- * `x` is a fraction of the width, `delayMs` is measured from the first drop.
+ * numbers exist to space the field out. `x` is a fraction of the width,
+ * `delayMs` is measured from the first drop. Ten is deliberately too few to
+ * be a downpour: on an overlay that lives under a second, a dense field reads
+ * as noise over the mark rather than as rain behind it.
  */
 interface DropSpec {
   x: number;
@@ -32,21 +42,17 @@ interface DropSpec {
 
 const DROPS: readonly DropSpec[] = [
   { x: 0.06, size: 13, delayMs: 0, opacity: 0.5 },
-  { x: 0.15, size: 8, delayMs: 120, opacity: 0.32 },
-  { x: 0.23, size: 17, delayMs: 40, opacity: 0.55 },
-  { x: 0.31, size: 10, delayMs: 190, opacity: 0.38 },
-  { x: 0.38, size: 14, delayMs: 90, opacity: 0.46 },
-  { x: 0.46, size: 7, delayMs: 230, opacity: 0.28 },
-  { x: 0.53, size: 11, delayMs: 20, opacity: 0.42 },
-  { x: 0.61, size: 16, delayMs: 150, opacity: 0.52 },
-  { x: 0.68, size: 9, delayMs: 70, opacity: 0.34 },
-  { x: 0.76, size: 13, delayMs: 210, opacity: 0.48 },
-  { x: 0.83, size: 8, delayMs: 110, opacity: 0.3 },
-  { x: 0.9, size: 15, delayMs: 30, opacity: 0.5 },
-  { x: 0.96, size: 10, delayMs: 170, opacity: 0.36 },
-  { x: 0.11, size: 11, delayMs: 260, opacity: 0.4 },
-  { x: 0.72, size: 12, delayMs: 280, opacity: 0.44 },
+  { x: 0.19, size: 8, delayMs: 120, opacity: 0.32 },
+  { x: 0.28, size: 16, delayMs: 40, opacity: 0.52 },
+  { x: 0.4, size: 10, delayMs: 190, opacity: 0.38 },
+  { x: 0.52, size: 13, delayMs: 20, opacity: 0.44 },
+  { x: 0.63, size: 8, delayMs: 230, opacity: 0.3 },
+  { x: 0.71, size: 15, delayMs: 90, opacity: 0.5 },
+  { x: 0.84, size: 9, delayMs: 160, opacity: 0.34 },
+  { x: 0.93, size: 12, delayMs: 60, opacity: 0.46 },
+  { x: 0.34, size: 9, delayMs: 270, opacity: 0.36 },
 ];
+
 
 /**
  * A raindrop, drawn with border radii rather than with a path.
@@ -121,9 +127,59 @@ function Drop({
 }
 
 /**
- * The sky on the launch overlay: one flash, then rain.
+ * The cloud the rain comes out of.
  *
- * The mark strikes, the sky answers, and the drops it brought down fall
+ * Circles and a slab, the same silhouette the landing page masks its cloud
+ * with, because they are one mark in two runtimes and a cloud drawn twice by
+ * eye is two clouds. It arrives while the bolt is still falling and it is
+ * still there when the last drop goes, so the drops are always leaving
+ * something rather than starting out of nothing.
+ */
+function Cloud({ timing, color, width }: { timing: LaunchWeatherTiming; color: string; width: number }) {
+  const roll = useSharedValue(0);
+
+  useEffect(() => {
+    if (timing.cloudMs <= 0) return;
+
+    roll.value = 0;
+    roll.value = withDelay(
+      timing.cloudAtMs,
+      withTiming(1, { duration: timing.cloudMs, easing: Easing.out(Easing.cubic) }),
+    );
+
+    return () => cancelAnimation(roll);
+  }, [roll, timing.cloudAtMs, timing.cloudMs]);
+
+  const style = useAnimatedStyle(() => ({
+    opacity: CLOUD_OPACITY * roll.value,
+    // Drifting in on the wind that brought it, not sliding into a slot.
+    transform: [{ translateX: (roll.value - 1) * CLOUD_DRIFT }],
+  }));
+
+  const size = Math.min(width * 0.62, 320);
+
+  return (
+    <Animated.View
+      style={[
+        { position: 'absolute', top: '14%', alignSelf: 'center', width: size },
+        style,
+      ]}
+    >
+      <Svg width={size} height={(size * 92) / 200} viewBox="0 0 200 92">
+        <Circle cx="58" cy="50" r="30" fill={color} />
+        <Circle cx="102" cy="36" r="36" fill={color} />
+        <Circle cx="148" cy="52" r="27" fill={color} />
+        <Rect x="28" y="50" width="146" height="32" rx="16" fill={color} />
+      </Svg>
+    </Animated.View>
+  );
+}
+
+/**
+ * The sky on the launch overlay: a cloud, a flash, then rain.
+ *
+ * The cloud rolls in behind the falling bolt, the mark strikes, the sky
+ * answers, and the drops it brought down fall
  * through the beat the overlay was already spending on a held mark. It costs
  * the launch nothing -- `LaunchWeatherTiming` is derived from the hold and the
  * fade, never added to them -- which is the only reason a brand moment is
@@ -138,7 +194,7 @@ function Drop({
  */
 export function LaunchWeather({ timing }: { timing: LaunchWeatherTiming }) {
   const { theme } = useAppTheme();
-  const { height } = useWindowDimensions();
+  const { height, width } = useWindowDimensions();
 
   const flash = useSharedValue(0);
 
@@ -165,7 +221,7 @@ export function LaunchWeather({ timing }: { timing: LaunchWeatherTiming }) {
     opacity: theme.motion.safety.flashLuminanceDelta * flash.value,
   }));
 
-  if (timing.rainMs <= 0 && timing.flashMs <= 0) return null;
+  if (timing.rainMs <= 0 && timing.flashMs <= 0 && timing.cloudMs <= 0) return null;
 
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents="none">
@@ -187,6 +243,8 @@ export function LaunchWeather({ timing }: { timing: LaunchWeatherTiming }) {
           style={StyleSheet.absoluteFill}
         />
       </Animated.View>
+
+      <Cloud timing={timing} color={theme.colors.textMuted} width={width} />
 
       {DROPS.map((spec) => (
         <Drop
