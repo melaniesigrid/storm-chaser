@@ -55,6 +55,22 @@ const SCREENSHOT_QUALITY = 80;
 const LANDING_MAX_EDGE = 1600;
 const LANDING_QUALITY = 80;
 
+/**
+ * The demo GIF is the largest single file in the repository: 174 frames of a
+ * 360x780 screen recording, 35 seconds, 3.6MB.
+ *
+ * Animated WebP is the honest ceiling here without new tooling. A real video
+ * (H.264/VP9) would be roughly a tenth of this, but it needs ffmpeg, a
+ * <video> element on the page, and it stops working in the README, where
+ * GitHub renders <img> and will not play an MP4. Animated WebP keeps one file
+ * serving both surfaces with no markup change.
+ *
+ * q55 rather than lower: the content is UI with text in it, where WebP has
+ * little redundancy to exploit. Dropping to q40 buys only another 3
+ * percentage points and starts to smear the type.
+ */
+const GIF_QUALITY = 55;
+
 function kb(bytes) {
   return `${Math.round(bytes / 1024)}KB`;
 }
@@ -123,6 +139,29 @@ async function toWebp(file, { maxEdge, quality }) {
   return { before, after, target };
 }
 
+/**
+ * Converts an animated GIF to an animated WebP.
+ *
+ * `{ animated: true }` on the way in is what makes this a conversion rather
+ * than a still of frame one -- without it sharp reads the first frame and
+ * silently produces a 35-second animation collapsed into a single image,
+ * which looks like a successful optimisation right up until someone opens
+ * the page. Not resized: the recording is already displayed at its native
+ * 360x780, so scaling it would only soften the UI text it exists to show.
+ */
+async function animatedGifToWebp(file, { quality }) {
+  const before = statSync(file).size;
+  const target = file.replace(/\.gif$/i, '.webp');
+  const input = await readFile(file);
+
+  await sharp(input, { animated: true })
+    .webp({ quality, effort: 4 })
+    .toFile(target);
+
+  const after = statSync(target).size;
+  return { before, after, target };
+}
+
 async function runLegends() {
   const files = listFiles('assets/legends', /\.jpe?g$/i);
   let before = 0;
@@ -143,13 +182,15 @@ async function runLegends() {
 }
 
 async function runWebpGroup(dir, options, label) {
-  const files = listFiles(dir, /\.(png|jpe?g)$/i);
+  const files = listFiles(dir, /\.(png|jpe?g|gif)$/i);
   let before = 0;
   let after = 0;
   const converted = [];
 
   for (const file of files) {
-    const result = await toWebp(file, options);
+    const result = /\.gif$/i.test(file)
+      ? await animatedGifToWebp(file, { quality: GIF_QUALITY })
+      : await toWebp(file, options);
     before += result.before;
     after += result.after;
     converted.push({ from: file, to: result.target });

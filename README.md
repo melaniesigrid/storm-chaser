@@ -93,7 +93,7 @@ It is a judgement aid, not a forecast product, and it says so in the UI.
 ### :clapper: Walkthrough
 
 <div align="center">
-  <img src="landing/demo.gif" alt="A full run through the app on a phone: onboarding and the theme picker, live conditions and the Chase Index, the forecast strip and seven day outlook, the camera capture flow through to a saved report, the field log and the map" width="300" />
+  <img src="landing/demo.webp" alt="A full run through the app on a phone: onboarding and the theme picker, live conditions and the Chase Index, the forecast strip and seven day outlook, the camera capture flow through to a saved report, the field log and the map" width="300" />
 </div>
 
 **[Watch it with sound and at full size on Google Drive](https://drive.google.com/file/d/1hHfLGWvkn_EwCxRvGiozFD_H-ZrF_eAD/view?usp=sharing)**
