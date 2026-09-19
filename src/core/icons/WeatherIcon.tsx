@@ -10,6 +10,7 @@ import Drizzle from '@meteocons/svg-static/flat/drizzle.svg';
 import FogDay from '@meteocons/svg-static/flat/fog-day.svg';
 import FogNight from '@meteocons/svg-static/flat/fog-night.svg';
 import Hail from '@meteocons/svg-static/flat/hail.svg';
+import LightningBolt from '@meteocons/svg-static/flat/lightning-bolt.svg';
 import NotAvailable from '@meteocons/svg-static/flat/not-available.svg';
 import OvercastDay from '@meteocons/svg-static/flat/overcast-day.svg';
 import OvercastNight from '@meteocons/svg-static/flat/overcast-night.svg';
@@ -65,6 +66,7 @@ const REGISTRY: Record<WeatherIconName, ComponentType<SvgProps>> = {
   windsock: Windsock,
   raindrops: Raindrops,
   'code-yellow': CodeYellow,
+  'lightning-bolt': LightningBolt,
   'starry-night': StarryNight,
 };
 

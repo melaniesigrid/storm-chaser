@@ -209,7 +209,8 @@ export default function ConditionsScreen() {
             <StormLoreCard origin={location.coordinates} />
 
             <Button
-              title="Document this storm"
+              title="Document a storm"
+              icon={<WeatherIcon name="lightning-bolt" size={24} />}
               onPress={() => router.push('/capture')}
               style={{ marginTop: 8 }}
             />
