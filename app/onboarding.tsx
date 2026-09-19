@@ -18,7 +18,7 @@ import { onboardingGate } from '@/core/onboarding/onboardingGate';
 import { onboardingStore } from '@/core/onboarding/onboardingStore';
 import { ThemeCard } from '@/core/theme/ThemeCard';
 import { AUTO_PREFERENCE, type ThemePreference } from '@/core/theme/themeStore';
-import { THEME_NAMES } from '@/core/theme/themes';
+import { SELECTABLE_THEME_NAMES } from '@/core/theme/themes';
 import { useAppTheme } from '@/core/theme/useAppTheme';
 import { Button, Screen, StatusBanner, Text, Volt } from '@/core/ui';
 import type { AppError } from '@/core/utils/result';
@@ -246,7 +246,28 @@ function PickTheme({
         showsVerticalScrollIndicator={false}
       >
         <View style={{ gap: 12 }}>
-          {THEME_NAMES.map((name) => (
+          {/*
+            Skyward leads, and it is one card rather than two.
+
+            Day and night are the same theme at two times of day, and which
+            one is correct is a fact about where the phone is standing, not a
+            preference. Picking "day" at midnight does not make it day, it
+            makes the app wrong about the sky it claims to be reading. So this
+            card previews whichever half is currently correct and hands the
+            choice to the sun. It is also the default, which is why it is
+            first: the honest answer should be the one you do not have to pick.
+          */}
+          <ThemeCard
+            name="skyward-day"
+            description="Follows the sky where you are. Turns over at sunrise and sunset on its own."
+            selected={active === AUTO_PREFERENCE}
+            onPress={() => {
+              onPick(AUTO_PREFERENCE);
+              void Haptics.selectionAsync();
+            }}
+          />
+
+          {SELECTABLE_THEME_NAMES.map((name) => (
             <ThemeCard
               key={name}
               name={name}
@@ -258,20 +279,6 @@ function PickTheme({
             />
           ))}
         </View>
-
-        {/*
-          Offered under the three cards rather than as a fourth one: it is not a
-          look, it is handing the look to the sky over wherever you are standing.
-        */}
-        <Button
-          title="Or follow the sky where I am"
-          tone={active === AUTO_PREFERENCE ? 'primary' : 'secondary'}
-          onPress={() => {
-            onPick(AUTO_PREFERENCE);
-            void Haptics.selectionAsync();
-          }}
-          style={{ marginTop: 12 }}
-        />
 
         {/* Introduces Volt as a character before he shows up celebrating a log. */}
         <View

@@ -9,3 +9,4 @@ export { StatusBanner } from './StatusBanner';
 export { Text } from './Text';
 export { Volt } from './Volt';
 export { Starfield } from './Starfield';
+export { StormyCheer } from './StormyCheer';

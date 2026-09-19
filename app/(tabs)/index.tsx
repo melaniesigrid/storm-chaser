@@ -2,7 +2,7 @@ import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { RefreshControl, ScrollView } from 'react-native';
 
-import { WeatherIcon } from '@/core/icons/WeatherIcon';
+import { Bolt } from '@/core/icons/Bolt';
 import { useAppTheme } from '@/core/theme/useAppTheme';
 import { useNow } from '@/core/utils/useNow';
 import { Button, Panel, PanelSurface, Screen, StatusBanner } from '@/core/ui';
@@ -204,9 +204,18 @@ export default function ConditionsScreen() {
 
             <StormLoreCard origin={location.coordinates} />
 
+            {/*
+              The bolt is drawn rather than borrowed, and it takes the button's
+              own label ink. The Meteocons bolt that used to sit here carries
+              its own yellow, which put a yellow glyph on the yellow accent
+              that Broadcast and Field Card both use -- invisible, and reading
+              as a fault rather than as an icon. `onAccent` is near-black in
+              three of the four themes and white on Skyward Day, whose accent
+              is a dark red that black would only reach 3.6:1 against.
+            */}
             <Button
               title="Document a storm"
-              icon={<WeatherIcon name="lightning-bolt" size={30} />}
+              icon={<Bolt size={44} color={theme.colors.onAccent} />}
               onPress={() => router.push('/capture')}
               style={{ marginTop: 8 }}
             />

@@ -3,10 +3,11 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useCallback, useEffect } from 'react';
 import { FlatList, Pressable, View } from 'react-native';
 
+import { Bolt } from '@/core/icons/Bolt';
 import { WeatherIcon } from '@/core/icons/WeatherIcon';
 import { useProfile } from '@/core/profile';
 import { useAppTheme } from '@/core/theme/useAppTheme';
-import { Confetti, EmptyState, Panel, Skeleton, Text } from '@/core/ui';
+import { Confetti, EmptyState, Panel, Skeleton, StormyCheer, Text } from '@/core/ui';
 import { StormCard } from '@/features/storms/components/StormCard';
 import { useStormReports } from '@/features/storms/hooks/useStormLog';
 
@@ -110,17 +111,23 @@ export default function FieldLogScreen() {
             borderColor: theme.colors.border,
           }}
         >
-          <Text
-            variant="title"
-            color={theme.colors.onAccent}
-            style={{ fontSize: 30, lineHeight: 34 }}
-          >
-            +
-          </Text>
+          {/*
+            A bolt rather than a plus. A plus means "add a row"; this button
+            means "go and photograph the sky", and the app already has a mark
+            for that. Drawn in the button's own label ink so it cannot end up
+            yellow-on-yellow the way the Meteocons glyph did.
+          */}
+          <Bolt size={32} color={theme.colors.onAccent} />
         </Pressable>
       ) : null}
 
+      {/*
+        Both fire together and only the confetti clears the flag. The cheer is
+        the shorter of the two, so letting it call endCelebration would cut
+        the burst off halfway.
+      */}
       <Confetti active={celebrating} onDone={endCelebration} />
+      <StormyCheer active={celebrating} />
     </View>
   );
 }

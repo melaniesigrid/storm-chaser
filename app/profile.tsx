@@ -9,7 +9,7 @@ import { onboardingGate } from '@/core/onboarding/onboardingGate';
 import { MAX_CHASER_NAME_LENGTH, useProfile } from '@/core/profile';
 import { ThemeCard } from '@/core/theme/ThemeCard';
 import { AUTO_PREFERENCE, type ThemePreference } from '@/core/theme/themeStore';
-import { THEME_NAMES } from '@/core/theme/themes';
+import { SELECTABLE_THEME_NAMES } from '@/core/theme/themes';
 import { useAppTheme } from '@/core/theme/useAppTheme';
 import { Button, Panel, Screen, Text, Volt } from '@/core/ui';
 
@@ -104,7 +104,25 @@ export default function ProfileScreen() {
         </Text>
 
         <View style={{ gap: 12 }}>
-          {THEME_NAMES.map((name) => (
+          {/*
+            Skyward is one card, not two.
+
+            Day and night are the same theme seen at two times of day, and
+            which one is right is a fact about where the phone is standing
+            rather than a preference. Offering them as separate options let a
+            chaser pick "day" at midnight, which does not make it day -- it
+            makes the app wrong about the sky it claims to be reading. So the
+            card previews whichever half is currently correct and hands the
+            choice to the sun.
+          */}
+          <ThemeCard
+            name={themeName === 'skyward-night' ? 'skyward-night' : 'skyward-day'}
+            description="Follows the sky where you are. Turns over at sunrise and sunset on its own."
+            selected={isAuto}
+            onPress={() => choose(AUTO_PREFERENCE)}
+          />
+
+          {SELECTABLE_THEME_NAMES.map((name) => (
             <ThemeCard
               key={name}
               name={name}
@@ -113,18 +131,6 @@ export default function ProfileScreen() {
             />
           ))}
         </View>
-
-        {/*
-          Auto is a preference, not a fourth theme, so it sits apart from the
-          cards rather than beside them: picking it does not pin a look, it
-          hands the choice to the sun over wherever the phone is standing.
-        */}
-        <Button
-          title={isAuto ? `Following the sky: ${theme.label}` : 'Follow the sky where I am'}
-          tone={isAuto ? 'primary' : 'secondary'}
-          onPress={() => choose(AUTO_PREFERENCE)}
-          style={{ marginTop: 4 }}
-        />
 
         <Panel tone="following" label="Following" style={{ marginTop: 4 }}>
           <Text variant="body">

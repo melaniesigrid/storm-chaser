@@ -27,6 +27,15 @@ export interface ThemeCardProps {
   name: ThemeName;
   selected: boolean;
   onPress: () => void;
+  /**
+   * Overrides the line under the temperature.
+   *
+   * One card in the picker is not a theme at all: Skyward is offered as a
+   * single choice that follows the sun, so it previews whichever half is
+   * currently correct while describing itself as the pair. The card still
+   * paints itself in a real theme; only the sentence changes.
+   */
+  description?: string;
 }
 
 /**
@@ -49,8 +58,9 @@ export interface ThemeCardProps {
  * without the override, all four cards would be lettered in whichever theme
  * the user is currently wearing.
  */
-export function ThemeCard({ name, selected, onPress }: ThemeCardProps) {
+export function ThemeCard({ name, selected, onPress, description }: ThemeCardProps) {
   const preview = getTheme(name);
+  const caption = description ?? preview.description;
   const { colors, type } = preview;
   const hard = preview.elevation === 'hard';
   // Field Card and Broadcast are signage faces: they set their condition line
@@ -61,7 +71,7 @@ export function ThemeCard({ name, selected, onPress }: ThemeCardProps) {
     <Pressable
       accessibilityRole="radio"
       accessibilityState={{ selected }}
-      accessibilityLabel={`${preview.label}. ${preview.description}`}
+      accessibilityLabel={`${preview.label}. ${caption}`}
       onPress={onPress}
       style={({ pressed }) => ({
         borderRadius: preview.radius.panel,
@@ -116,7 +126,7 @@ export function ThemeCard({ name, selected, onPress }: ThemeCardProps) {
                 signage ? bleedFor('title', 16) : null,
               ]}
             >
-              {preview.description}
+              {caption}
             </Text>
           </View>
 

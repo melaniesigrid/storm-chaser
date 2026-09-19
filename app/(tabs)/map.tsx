@@ -4,6 +4,7 @@ import { View } from 'react-native';
 import MapView, { Marker, PROVIDER_DEFAULT, type Region } from 'react-native-maps';
 
 import { WeatherIcon } from '@/core/icons/WeatherIcon';
+import { Bolt } from '@/core/icons/Bolt';
 import { useAppTheme } from '@/core/theme/useAppTheme';
 import { Button, Chip, Panel, Text } from '@/core/ui';
 import { usePublishLastKnownPosition } from '@/features/location/lastKnownPosition';
@@ -142,6 +143,7 @@ export default function MapScreen() {
             <Button
               title="Document a storm"
               tone="secondary"
+              icon={<Bolt size={30} color={theme.colors.text} />}
               style={{ marginTop: 14, borderColor: theme.colors.text }}
               onPress={() => router.push('/capture')}
             />

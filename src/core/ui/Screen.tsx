@@ -2,6 +2,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { View, type StyleProp, type ViewProps, type ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { NightMoon } from '@/core/sky/NightMoon';
 import { useAppTheme } from '@/core/theme/useAppTheme';
 
 import { Starfield } from './Starfield';
@@ -32,9 +33,11 @@ export function Screen({ edgeToEdge = false, style, children, ...rest }: ScreenP
         locations={theme.colors.backgroundGradientLocations}
         style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
       />
-      {/* Above the gradient, below everything else. Renders nothing at all in
-          the daylight themes. */}
+      {/* Above the gradient, below everything else. Both render nothing at
+          all in the daylight themes. The moon is drawn at its real phase, so
+          on the nights around new there is correctly nothing up there. */}
       <Starfield />
+      <NightMoon />
       <View
         style={[{ flex: 1 }, edgeToEdge ? null : { paddingTop: insets.top }, style]}
         {...rest}

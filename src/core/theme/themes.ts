@@ -48,6 +48,25 @@ export const THEME_NAMES: readonly ThemeName[] = [
   'field-card',
 ] as const;
 
+/**
+ * The themes a chaser can pick by hand.
+ *
+ * Skyward Day and Skyward Night are deliberately not on this list. They are
+ * the same theme seen at two times of day, and which one is correct is a fact
+ * about where the phone is standing rather than a preference: picking "day"
+ * at midnight does not make it day, it makes the app wrong about the sky it
+ * claims to be reading. So Skyward is chosen as one thing, and the sun
+ * decides which half of it you get.
+ *
+ * They stay in `THEME_NAMES` because both are real themes that must still
+ * resolve, be persisted, and satisfy the theme contract. This list governs
+ * what the pickers offer, nothing else.
+ */
+export const SELECTABLE_THEME_NAMES: readonly ThemeName[] = [
+  'broadcast',
+  'field-card',
+] as const;
+
 export interface ThemeColors {
   /** Flat background, and the fallback when a gradient cannot be drawn. */
   background: string;
