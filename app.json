@@ -61,7 +61,9 @@
       "expo-sharing"
     ],
     "experiments": {
-      "typedRoutes": true
+      "typedRoutes": true,
+      "_comment_baseUrl": "Vercel serves the web build of the app under /app on stormchaser-field.vercel.app, and a web export whose assets are absolute-rooted at / returns a clean 200 serving a blank page there. Web-only: native builds do not read it.",
+      "baseUrl": "/app"
     },
     "web": {
       "bundler": "metro",

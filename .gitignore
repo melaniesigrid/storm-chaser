@@ -17,3 +17,5 @@ landing/.vercel/
 
 # Claude Code local state and worktrees
 .claude/
+dist-web/
+dist-web-base/

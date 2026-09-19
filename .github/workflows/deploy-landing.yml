@@ -23,6 +23,18 @@
 # writes into landing/.vercel/project.json, which is gitignored. They live in
 # secrets so the workflow reads one way whether or not that file is present.
 
+# SINCE ADDED: this also publishes the app itself at /app.
+#
+# The landing page describes the app; there was no way to open the app without
+# a laptop, a cable and a simulator. The Expo web target fixes that, and it
+# has to ride along in THIS workflow rather than in one of its own: a Vercel
+# prebuilt deploy publishes one static tree and replaces whatever was there,
+# so two workflows aiming at the same project would take turns deleting each
+# other's output. One deploy, two things in it.
+#
+# What /app is NOT: a substitute for a device. No camera, no real GPS, and
+# react-native-maps renders through the web shim. It is for reading layout,
+# typography, themes and the seal on a real screen.
 name: Deploy landing
 
 # Every push to main, with no path filter.
@@ -66,6 +78,41 @@ jobs:
 
       - name: Install the Vercel CLI
         run: npm install --global vercel@latest
+
+      - name: Install the app's dependencies
+        run: npm ci
+
+      # Typecheck and test before publishing the app. A deploy of a build
+      # nobody checked is how production spent months on a stale commit; the
+      # same mistake is cheaper to avoid than to find.
+      - run: npm run typecheck
+      - run: npm test -- --ci
+
+      # `experiments.baseUrl` in app.json is "/app" so every asset resolves
+      # under that prefix. Absolute-rooted assets would 404 and the page would
+      # be blank behind a clean 200 -- checked explicitly below, because from
+      # the outside that looks exactly like a working deploy.
+      - name: Export the app for web
+        run: npx expo export --platform web --output-dir dist-web
+
+      - name: Check the app export is the app
+        run: |
+          set -euo pipefail
+          page=dist-web/index.html
+          if [ ! -s "$page" ]; then
+            echo "::error::$page is missing or empty -- the export produced no app"
+            find dist-web -maxdepth 2 2>/dev/null || echo "  (no dist-web at all)"
+            exit 1
+          fi
+          grep -q '/app/_expo/static/js' "$page" || {
+            echo "::error::$page does not reference its bundle under the /app base url"
+            echo "what it does reference:"
+            grep -o 'src="[^"]*"' "$page" || true
+            exit 1
+          }
+          bundle=$(find dist-web/_expo/static/js -name '*.js' -size +100k | head -n1)
+          [ -n "$bundle" ] || { echo "::error::no JS bundle over 100k -- the export is a stub"; exit 1; }
+          echo "app page is $(wc -c < "$page") bytes, bundle is $(du -h "$bundle" | cut -f1)"
 
       # Fails loudly rather than deploying a page that lost its themes: these
       # are the markers that were missing from production the whole time.
@@ -134,10 +181,23 @@ jobs:
                  .vercel/output/static/.gitignore \
                  .vercel/output/static/vercel.json
 
+          # The app goes under /app, matching experiments.baseUrl.
+          mkdir -p .vercel/output/static/app
+          cp -R dist-web/. .vercel/output/static/app/
+
           # `landing/vercel.json` is a project-level config and is NOT read from
           # a prebuilt output, so its one real behaviour is restated here as a
           # route. `cleanUrls` is not carried over because it has nothing to act
           # on: the site is a single index.html plus an icon directory.
+          #
+          # The app is `output: "single"`, a client-side-routed SPA, so a deep
+          # link like /app/storm/abc123 asks for a file that was never
+          # exported. `handle: filesystem` serves the real files first --
+          # bundles, assets, the landing page itself -- and anything left over
+          # under /app falls through to the app's index, where expo-router
+          # picks the route back up on the client. The fallback is scoped to
+          # /app so a genuinely missing landing-page URL still 404s honestly
+          # instead of silently booting the app.
           cat > .vercel/output/config.json <<'JSON'
           {
             "version": 3,
@@ -146,7 +206,14 @@ jobs:
                 "src": "^/icons/(.*)$",
                 "headers": { "cache-control": "public, max-age=31536000, immutable" },
                 "continue": true
-              }
+              },
+              {
+                "src": "^/app/_expo/(.*)$",
+                "headers": { "cache-control": "public, max-age=31536000, immutable" },
+                "continue": true
+              },
+              { "handle": "filesystem" },
+              { "src": "^/app(?:/.*)?$", "dest": "/app/index.html" }
             ]
           }
           JSON
@@ -171,6 +238,18 @@ jobs:
             exit 1
           }
           echo "built page is $(wc -c < "$out") bytes"
+
+          app=.vercel/output/static/app/index.html
+          if [ ! -s "$app" ]; then
+            echo "::error::$app is missing or empty -- the output has no app in it"
+            find .vercel/output/static/app -maxdepth 2 2>/dev/null || echo "  (no app directory at all)"
+            exit 1
+          fi
+          grep -q '/app/_expo/static/js' "$app" || {
+            echo "::error::$app does not reference its bundle under /app"
+            exit 1
+          }
+          echo "built app is $(wc -c < "$app") bytes"
 
       # Capture the deployment URL. Every production deploy gets an immutable
       # one; the stable domain is an alias pointed at it, and aliasing is a
@@ -232,8 +311,17 @@ jobs:
                 *) missing="$missing $theme" ;;
               esac
             done
+            # The app is checked at the same edge and in the same retry, so a
+            # half-propagated deploy fails rather than passing on the page
+            # alone. /app is the URL a phone actually opens.
+            appbody=$(curl -fsS --max-time 30 "$url/app" || true)
+            case "$appbody" in
+              *"/app/_expo/static/js"*) ;;
+              *) missing="$missing the-app-at-/app" ;;
+            esac
+
             if [ -z "$missing" ]; then
-              echo "$url is serving this build (after ${attempt} attempt(s))"
+              echo "$url is serving this build, page and app (after ${attempt} attempt(s))"
               exit 0
             fi
             echo "attempt $attempt:$url is missing$missing -- waiting for the edge"
