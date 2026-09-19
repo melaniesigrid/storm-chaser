@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { FlatList, Pressable, View } from 'react-native';
 
 import { WeatherIcon } from '@/core/icons/WeatherIcon';
+import { useProfile } from '@/core/profile';
 import { useAppTheme } from '@/core/theme/useAppTheme';
 import { Confetti, EmptyState, Panel, Skeleton, Text } from '@/core/ui';
 import { StormCard } from '@/features/storms/components/StormCard';
@@ -13,6 +14,9 @@ export default function FieldLogScreen() {
   const router = useRouter();
   const { theme } = useAppTheme();
   const { data, isLoading, refetch, isRefetching } = useStormReports();
+  // The log is the one list that belongs to a person rather than to the sky,
+  // so it carries their name when they have given one.
+  const { profile } = useProfile();
 
   // The capture flow redirects here with ?celebrate=1 after a successful save.
   // Celebrating on the destination rather than inside the modal means the burst
@@ -54,7 +58,9 @@ export default function FieldLogScreen() {
         ListHeaderComponent={
           reports.length ? (
             <Text variant="label" style={{ marginBottom: 12 }}>
-              {`${reports.length} report${reports.length === 1 ? '' : 's'} on this device`}
+              {`${reports.length} report${reports.length === 1 ? '' : 's'} on this device${
+                profile.name ? ` · ${profile.name}` : ''
+              }`}
             </Text>
           ) : null
         }
