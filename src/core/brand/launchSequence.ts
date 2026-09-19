@@ -23,10 +23,31 @@ export interface StrikeTiming {
   durationMs: number;
 }
 
+/**
+ * The weather the strike brings with it.
+ *
+ * Derived from the timings above rather than declared beside them, so the sky
+ * cannot light up before the bolt has landed and the rain cannot outlive the
+ * overlay it is falling through. Nothing here adds to `totalMs`: the launch
+ * already spends its last beats holding and fading a finished mark, and this
+ * is what happens in that time instead of nothing.
+ */
+export interface LaunchWeatherTiming {
+  /** The moment of impact, measured from the overlay's first frame. */
+  flashAtMs: number;
+  /** How long the bloom takes to fall back to nothing. */
+  flashMs: number;
+  /** When the first drop starts falling. */
+  rainAtMs: number;
+  /** How long it rains. It stops when the curtain does. */
+  rainMs: number;
+}
+
 export interface LaunchTiming {
   /** The plate easing up under the bolt. Zero where the theme cuts. */
   plateMs: number;
   strike: StrikeTiming;
+  weather: LaunchWeatherTiming;
   /** The beat the finished mark is allowed to hold before it leaves. */
   holdMs: number;
   /** The overlay's exit. Zero where the theme cuts. */
@@ -68,6 +89,15 @@ const HOLD_MS: Record<MotionLanguage, number> = {
   broadcast: 360,
 };
 
+/**
+ * The longest a launch bloom may last, before the hold cuts it shorter.
+ *
+ * It is a decay, not a strobe: one bloom, once, on an overlay that exists for
+ * under a second. `MotionSafety.flashLuminanceDelta` is what keeps it legal;
+ * this is only what keeps it brief.
+ */
+const FLASH_MS = 260;
+
 const FADE_MS: Record<MotionLanguage, number> = {
   atmospheric: 320,
   mechanical: 180,
@@ -84,6 +114,9 @@ const FADE_MS: Record<MotionLanguage, number> = {
 const REDUCED: LaunchTiming = {
   plateMs: 0,
   strike: { delayMs: 0, durationMs: 0 },
+  // No sky and no rain. A bloom is a brightness change and a drop is travel;
+  // stillness means the mark and its beat, and nothing else.
+  weather: { flashAtMs: 0, flashMs: 0, rainAtMs: 0, rainMs: 0 },
   holdMs: 400,
   fadeMs: 220,
   totalMs: 620,
@@ -115,6 +148,15 @@ export function launchTiming(
   return {
     plateMs,
     strike,
+    weather: {
+      flashAtMs: strike.delayMs + strike.durationMs,
+      // Capped at the hold, so the sky is dark again before the curtain moves
+      // rather than fading out with it -- a bloom that leaves on the crossfade
+      // reads as the screen dimming, not as lightning.
+      flashMs: Math.min(holdMs, FLASH_MS),
+      rainAtMs: markMs,
+      rainMs: holdMs + fadeMs,
+    },
     holdMs,
     fadeMs,
     totalMs: markMs + holdMs + fadeMs,

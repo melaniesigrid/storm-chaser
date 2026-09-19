@@ -14,6 +14,7 @@ import Animated, {
 
 import { useAppTheme } from '@/core/theme/useAppTheme';
 
+import { LaunchWeather } from './LaunchWeather';
 import { Monogram } from './Monogram';
 import { launchTiming } from './launchSequence';
 
@@ -109,6 +110,13 @@ export function LaunchMark({ onDone, size = 132 }: LaunchMarkProps) {
         locations={theme.colors.backgroundGradientLocations}
         style={StyleSheet.absoluteFill}
       />
+      {/*
+        Above the ground and below the mark. Weather in front of the wordmark
+        would be weather ON the wordmark, and the mark is the thing the second
+        is being spent on.
+      */}
+      <LaunchWeather timing={timing.weather} />
+
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="Storm Chaser"

@@ -68,6 +68,47 @@ describe('launchTiming', () => {
   });
 });
 
+/**
+ * The launch grew a second act -- a flash and then rain -- and the whole
+ * defence of that is that it grew INTO time the overlay was already spending.
+ * These are the tests that fail the moment someone buys the weather a beat of
+ * its own.
+ */
+describe('the launch weather', () => {
+  it.each(LANGUAGES)('costs %s nothing it was not already spending', (language) => {
+    const timing = launchTiming(language, false);
+    const mark = Math.max(timing.plateMs, timing.strike.delayMs + timing.strike.durationMs);
+
+    // The rain starts when the mark lands and ends when the overlay does.
+    expect(timing.weather.rainAtMs).toBe(mark);
+    expect(timing.weather.rainAtMs + timing.weather.rainMs).toBe(timing.totalMs);
+    expect(timing.totalMs).toBeLessThanOrEqual(LAUNCH_CEILING_MS);
+  });
+
+  it.each(LANGUAGES)('does not light the sky before the bolt lands on %s', (language) => {
+    const { weather, strike } = launchTiming(language, false);
+
+    expect(weather.flashAtMs).toBe(strike.delayMs + strike.durationMs);
+    expect(weather.flashMs).toBeGreaterThan(0);
+  });
+
+  it.each(LANGUAGES)('is dark again before the curtain moves on %s', (language) => {
+    const timing = launchTiming(language, false);
+
+    // A bloom still decaying while the overlay cross-fades reads as the screen
+    // dimming rather than as lightning.
+    expect(timing.weather.flashMs).toBeLessThanOrEqual(timing.holdMs);
+  });
+
+  it.each(LANGUAGES)('has no weather at all under reduced motion on %s', (language) => {
+    const { weather } = launchTiming(language, true);
+
+    // A bloom is a brightness change and a drop is travel. Both are exactly
+    // what the setting asked not to see.
+    expect(weather).toEqual({ flashAtMs: 0, flashMs: 0, rainAtMs: 0, rainMs: 0 });
+  });
+});
+
 describe('strikeTiming', () => {
   it.each(LANGUAGES)('matches the launch strike for %s', (language) => {
     // The mark in a tab header and the mark on the launch overlay are the same

@@ -184,11 +184,21 @@ describe('the hero rain', () => {
     return [...burstKeyframes().matchAll(/(\d+)%/g)].map((m) => Number(m[1]));
   }
 
-  it('falls only where a direction asks for it', () => {
+  it('falls in every direction, and in both skies', () => {
     const declared = [...PAGE.matchAll(/--rain-on:\s*([01]);/g)].map((m) => Number(m[1]));
-    expect(declared.length).toBeGreaterThan(0);
-    // Broadcast and Signage draw no sky at all, so exactly one direction rains.
-    expect(declared.filter((on) => on === 1)).toHaveLength(1);
+    // Atmospheric night, Atmospheric day, Broadcast, Signage.
+    expect(declared).toHaveLength(4);
+    expect(declared.every((on) => on === 1)).toBe(true);
+  });
+
+  it('gives every direction a drop colour of its own', () => {
+    // The `:root` block is ALSO Broadcast's, so a direction that leaves
+    // `--rain-tint` unsaid does not get a sensible default -- it gets
+    // Broadcast's yellow. Atmospheric did, once, and it took a screenshot to
+    // notice. Four blocks rain, so four blocks name their own tint.
+    const tints = [...PAGE.matchAll(/--rain-tint:\s*(#[0-9A-Fa-f]{6});/g)].map((m) => m[1]);
+    expect(tints).toHaveLength(4);
+    expect(new Set(tints).size).toBe(4);
   });
 
   it('runs on the same clock as the ray and the bolt', () => {
@@ -218,7 +228,7 @@ describe('the hero rain', () => {
   it('is drawn as drops rather than as streaks', () => {
     // A tiled teardrop mask over a flat tint, not a hairline gradient.
     expect(PAGE).toContain("mask-image: url(\"data:image/svg+xml,");
-    expect(PAGE).toMatch(/\.rain \{[^}]*background: var\(--sky-tint\)/);
+    expect(PAGE).toContain('background: var(--rain-tint, var(--sky-tint));');
     // Five drops in the tile, at five scales: regular spacing reads as dots.
     const tile = PAGE.match(/data:image\/svg\+xml,[^"]*/)![0];
     const scales = [...tile.matchAll(/scale\(([\d.]+)\)/g)].map((m) => m[1]);

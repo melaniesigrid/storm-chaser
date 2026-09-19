@@ -105,6 +105,10 @@
        than under it. Held off until the strike has read so the copy is never
        being streaked while someone is still meeting the wordmark. */
     --rain-on: 1;
+    /* Stated rather than inherited. The `:root` block this page falls back to
+       is ALSO Broadcast's, so a drop colour left unsaid here is not the
+       default -- it is yellow. */
+    --rain-tint: #8FA3C8;
     --shaft-on: 0;
     --bloom-on: 1;
     --hazard-w: 0px;
@@ -172,7 +176,13 @@
        the day sky growing a flash. */
     --sky-tint: #FFF4D6;
     --sky-density: 0.12;
-    --rain-on: 0;
+    /* A sun shower. The shaft keeps the cream it rakes the sky with; the drops
+       take a slate of their own, because nothing pale is legible falling
+       against a bright sky, and lift on `--rain-gain` rather than on the
+       density the shaft is also reading. */
+    --rain-on: 1;
+    --rain-tint: #4E6288;
+    --rain-gain: 2.4;
     --shaft-on: 1;
     --bloom-on: 0;
     --hazard-w: 0px;
@@ -246,11 +256,14 @@
     --bolt-core: #FFFFFF;
     --bolt-glow: #FFD400;
     --flash: rgba(255, 212, 0, 0.8);
-    /* No sky. Bricolage is the only face whose background comes from the
-       weather; this one is switched off out loud rather than left out. */
+    /* No weather in the ground -- Bricolage is still the only face whose
+       BACKGROUND comes from the sky -- but the board does rain, and it rains
+       in the one colour it owns. A bulletin's rain is keyed over the picture
+       the same way its lower third is. */
     --sky-tint: #07090E;
-    --sky-density: 0;
-    --rain-on: 0;
+    --sky-density: 0.24;
+    --rain-on: 1;
+    --rain-tint: #FFD400;
     --shaft-on: 0;
     --bloom-on: 0;
     --hazard-w: 0px;
@@ -336,8 +349,13 @@
     --bolt-glow: #4FD1C5;
     --flash: rgba(79, 209, 197, 0.8);
     --sky-tint: #14140F;
-    --sky-density: 0;
-    --rain-on: 0;
+    /* Teal, not the hazard amber: on a signage board amber is a WARNING and
+       the rain is not warning anyone about anything. Teal is the Unsettled
+       rung of the same ladder, and it is the only thing on this board that is
+       allowed to be weather. */
+    --sky-density: 0.22;
+    --rain-on: 1;
+    --rain-tint: #4FD1C5;
     --shaft-on: 0;
     --bloom-on: 0;
     /* The hazard stripe, promoted off the board and onto the page edge. */
@@ -1114,7 +1132,11 @@
    */
   .rain {
     transform: rotate(var(--ang, 14deg));
-    background: var(--sky-tint);
+    /* The drops get a tint of their own, because `--sky-tint` also paints the
+       day shaft and a cream streak that reads as sunlight on a blue sky is
+       invisible as a raindrop on a white one. Falls back to the sky's own
+       colour wherever a direction has nothing to say about it. */
+    background: var(--rain-tint, var(--sky-tint));
     -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='%23fff'%3E%3Cg transform='translate(6 4) scale(1.15)'%3E%3Cpath d='M10 1C10 1 19 13 19 19.5A9 9 0 1 1 1 19.5C1 13 10 1 10 1Z'/%3E%3C/g%3E%3Cg transform='translate(48 18) scale(0.72)'%3E%3Cpath d='M10 1C10 1 19 13 19 19.5A9 9 0 1 1 1 19.5C1 13 10 1 10 1Z'/%3E%3C/g%3E%3Cg transform='translate(74 50) scale(1)'%3E%3Cpath d='M10 1C10 1 19 13 19 19.5A9 9 0 1 1 1 19.5C1 13 10 1 10 1Z'/%3E%3C/g%3E%3Cg transform='translate(24 54) scale(0.85)'%3E%3Cpath d='M10 1C10 1 19 13 19 19.5A9 9 0 1 1 1 19.5C1 13 10 1 10 1Z'/%3E%3C/g%3E%3Cg transform='translate(58 76) scale(0.6)'%3E%3Cpath d='M10 1C10 1 19 13 19 19.5A9 9 0 1 1 1 19.5C1 13 10 1 10 1Z'/%3E%3C/g%3E%3C/svg%3E");
     mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='%23fff'%3E%3Cg transform='translate(6 4) scale(1.15)'%3E%3Cpath d='M10 1C10 1 19 13 19 19.5A9 9 0 1 1 1 19.5C1 13 10 1 10 1Z'/%3E%3C/g%3E%3Cg transform='translate(48 18) scale(0.72)'%3E%3Cpath d='M10 1C10 1 19 13 19 19.5A9 9 0 1 1 1 19.5C1 13 10 1 10 1Z'/%3E%3C/g%3E%3Cg transform='translate(74 50) scale(1)'%3E%3Cpath d='M10 1C10 1 19 13 19 19.5A9 9 0 1 1 1 19.5C1 13 10 1 10 1Z'/%3E%3C/g%3E%3Cg transform='translate(24 54) scale(0.85)'%3E%3Cpath d='M10 1C10 1 19 13 19 19.5A9 9 0 1 1 1 19.5C1 13 10 1 10 1Z'/%3E%3C/g%3E%3Cg transform='translate(58 76) scale(0.6)'%3E%3Cpath d='M10 1C10 1 19 13 19 19.5A9 9 0 1 1 1 19.5C1 13 10 1 10 1Z'/%3E%3C/g%3E%3C/svg%3E");
     /* Square, because `rain-fall` slides by exactly one tile down: any other
@@ -1123,7 +1145,7 @@
     mask-size: var(--tile, 88px) var(--tile, 88px);
     -webkit-mask-repeat: repeat;
     mask-repeat: repeat;
-    opacity: calc(var(--o, 0.5) * var(--rain-on, 0));
+    opacity: calc(var(--o, 0.5) * var(--rain-on, 0) * var(--rain-gain, 1));
     will-change: transform;
     /*
      * Two animations, two jobs. `rain-fall` is the endless slide, always
@@ -1148,7 +1170,7 @@
    */
   @keyframes rain-burst {
     0%, 76% { opacity: 0; }
-    82%, 97% { opacity: calc(var(--o, 0.5) * var(--rain-on, 0)); }
+    82%, 97% { opacity: calc(var(--o, 0.5) * var(--rain-on, 0) * var(--rain-gain, 1)); }
     100% { opacity: 0; }
   }
 
