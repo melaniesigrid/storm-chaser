@@ -7,6 +7,7 @@ import {
   WCAG_MAX_FLASHES_PER_SECOND,
   compositeHex,
   contrastRatio,
+  meetsAA,
   parseHex,
   relativeLuminance,
 } from '@/core/theme/contrast';
@@ -403,6 +404,17 @@ describe.each(THEME_NAMES)('%s', (name) => {
   });
 
   /**
+   * The capture screen puts its failures on the viewfinder in the severe tier
+   * colour. A capture error the user cannot read is a photo they think they
+   * took.
+   */
+  it('keeps a capture failure readable on the camera ground', () => {
+    expect(
+      contrastRatio(theme.colors.tier.severe, theme.colors.cameraGround),
+    ).toBeGreaterThanOrEqual(AA_TEXT);
+  });
+
+  /**
    * Token TOTALITY.
    *
    * This assertion did not exist before the atmosphere and motion groups were
@@ -608,5 +620,82 @@ describe('the motion contract across themes', () => {
     const safeties = THEME_NAMES.map((name) => JSON.stringify(getTheme(name).motion.safety));
 
     expect(new Set(safeties).size).toBe(1);
+  });
+});
+
+/**
+ * `compositeHex` is the ground truth every atmosphere contrast assertion above
+ * rests on: if it mixes wrong, those assertions pass while the real screen
+ * fails. It is asserted here directly rather than only through them.
+ */
+describe('compositeHex', () => {
+  it('returns the ground untouched at zero alpha, and the overlay at full', () => {
+    expect(compositeHex('#FFFFFF', '#000000', 0)).toBe('#000000');
+    expect(compositeHex('#FFFFFF', '#000000', 1)).toBe('#ffffff');
+  });
+
+  it('lands halfway between the two at half alpha', () => {
+    expect(parseHex(compositeHex('#FFFFFF', '#000000', 0.5))).toEqual({
+      r: 128,
+      g: 128,
+      b: 128,
+    });
+  });
+
+  /**
+   * Alpha arrives from accumulated layer opacities, which can drift outside the
+   * unit range. Clamping rather than producing a channel outside 0-255 is what
+   * keeps a malformed colour from reaching a native view.
+   */
+  it('clamps an alpha outside the unit range instead of overshooting', () => {
+    expect(compositeHex('#FFFFFF', '#000000', 4)).toBe(compositeHex('#FFFFFF', '#000000', 1));
+    expect(compositeHex('#FFFFFF', '#000000', -2)).toBe(compositeHex('#FFFFFF', '#000000', 0));
+  });
+
+  /**
+   * A channel below 16 is one hex digit unless it is padded, and an unpadded
+   * channel silently shortens the string into an invalid colour.
+   */
+  it('pads a single-digit channel, so the result is always seven characters', () => {
+    const composited = compositeHex('#0A0B0C', '#000000', 1);
+
+    expect(composited).toHaveLength(7);
+    expect(composited).toBe('#0a0b0c');
+  });
+
+  it('returns something the rest of this module can read back', () => {
+    const composited = compositeHex('#9FD4FF', '#0B1026', 0.28);
+
+    expect(() => parseHex(composited)).not.toThrow();
+    expect(relativeLuminance(composited)).toBeGreaterThan(relativeLuminance('#0B1026'));
+  });
+
+  it('takes the short hex form on either side', () => {
+    expect(compositeHex('#FFF', '#000', 1)).toBe('#ffffff');
+    expect(compositeHex('#FFF', '#000', 0)).toBe('#000000');
+  });
+
+  it('rejects a colour it cannot parse rather than mixing nonsense', () => {
+    expect(() => compositeHex('rebeccapurple', '#000000', 0.5)).toThrow(/Not a hex colour/);
+    expect(() => compositeHex('#000000', '#12345', 0.5)).toThrow(/Not a hex colour/);
+  });
+});
+
+describe('the AA helper and the WCAG thresholds', () => {
+  it('reads meetsAA off the same ratio the assertions use', () => {
+    expect(meetsAA('#000000', '#FFFFFF')).toBe(true);
+    expect(meetsAA('#777777', '#808080')).toBe(false);
+    // Large text clears at a lower bar than body text, on the same pair.
+    expect(meetsAA('#767676', '#FFFFFF', AA_LARGE_TEXT)).toBe(true);
+  });
+
+  /**
+   * These are quoted from WCAG 2.3.1, not chosen. A theme is allowed to move;
+   * the line it is held to is not, so it is pinned separately from any theme.
+   */
+  it('pins the flash thresholds to the values the spec states', () => {
+    expect(WCAG_MAX_FLASHES_PER_SECOND).toBe(3);
+    expect(WCAG_GENERAL_FLASH_LUMINANCE_DELTA).toBeCloseTo(0.1, 5);
+    expect(WCAG_GENERAL_FLASH_AREA_FRACTION).toBeCloseTo(0.25, 5);
   });
 });

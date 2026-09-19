@@ -127,3 +127,56 @@ describe('dayLabel input shapes', () => {
     expect(labels.filter((label) => label === 'Today')).toHaveLength(1);
   });
 });
+
+/**
+ * Hostile date strings. The outlook is built from whatever the API sent, and
+ * the 48px column has room for a weekday abbreviation and nothing else. The
+ * contract is that the label is always SOMETHING the column can hold and never
+ * the string "Invalid Date", whatever arrives.
+ */
+describe('dayLabel on input it was not promised', () => {
+  it('echoes an empty date rather than inventing a weekday', () => {
+    expect(dayLabel('', 3)).toBe('');
+  });
+
+  /**
+   * Every one of these either parses to a real day or falls back to the raw
+   * string. None may render "Invalid Date", which is what `toLocaleDateString`
+   * produces on a NaN date and what would otherwise overflow the column on
+   * every row at once.
+   */
+  it('never renders Invalid Date, whatever it is handed', () => {
+    const hostile = [
+      '',
+      '   ',
+      'not a date',
+      '2026-09',
+      '2026-09-19T',
+      '0000-00-00',
+      '2026-13-45',
+      '19/09/2026',
+      'null',
+    ];
+
+    for (const value of hostile) {
+      for (const index of [1, 5]) {
+        const label = dayLabel(value, index);
+
+        expect(label).not.toBe('Invalid Date');
+        expect(label).not.toMatch(/NaN/);
+      }
+    }
+  });
+
+  /**
+   * A full UTC instant is a legitimate shape here -- anything holding an
+   * Open-Meteo timestamp reaches this helper. It has to resolve to a weekday
+   * rather than echoing an 20-character string into a 48px column.
+   */
+  it('reads a zoned timestamp as a weekday rather than echoing it', () => {
+    const label = dayLabel('2026-09-19T12:00:00Z', 1);
+
+    expect(label).not.toBe('2026-09-19T12:00:00Z');
+    expect(label.length).toBeLessThanOrEqual(5);
+  });
+});

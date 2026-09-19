@@ -99,11 +99,11 @@ export default function CaptureScreen() {
 
   if (phase.name === 'camera') {
     return (
-      <View style={{ flex: 1, backgroundColor: '#05070B' }}>
+      <View style={{ flex: 1, backgroundColor: theme.colors.cameraGround }}>
         <CameraView ref={cameraRef} style={{ flex: 1 }} facing="back" />
 
         <View style={{ position: 'absolute', left: 0, right: 0, top: 16, paddingHorizontal: 20 }}>
-          <Text variant="label" color="#F2F6FA">
+          <Text variant="label" color={theme.colors.onCameraGround}>
             {location.coordinates
               ? `FIX ACQUIRED · ${location.coordinates.latitude.toFixed(3)}, ${location.coordinates.longitude.toFixed(3)}`
               : 'NO POSITION FIX'}
@@ -112,7 +112,7 @@ export default function CaptureScreen() {
 
         <View style={{ position: 'absolute', bottom: 0, left: 0, right: 0, alignItems: 'center', paddingBottom: 48 }}>
           {errorMessage ? (
-            <Text variant="message" color="#FF6B57" style={{ marginBottom: 12 }}>
+            <Text variant="message" color={theme.colors.tier.severe} style={{ marginBottom: 12 }}>
               {errorMessage}
             </Text>
           ) : null}
@@ -121,7 +121,20 @@ export default function CaptureScreen() {
             accessibilityLabel="Capture photo"
             disabled={shooting}
             onPress={() => void takePhoto()}
-            style={{ height: 84, width: 84, alignItems: 'center', justifyContent: 'center', borderRadius: 42, borderWidth: 5, borderColor: '#F2F6FA', backgroundColor: shooting ? '#3A4553' : theme.colors.accent }}
+            style={{
+              height: 84,
+              width: 84,
+              alignItems: 'center',
+              justifyContent: 'center',
+              borderRadius: 42,
+              borderWidth: 5,
+              borderColor: theme.colors.onCameraGround,
+              backgroundColor: theme.colors.accent,
+              // Dimming the shutter while it fires, rather than swapping in a
+              // second grey, keeps the button one colour in every theme. The
+              // old grey was a fourth hardcoded value with no token behind it.
+              opacity: shooting ? 0.5 : 1,
+            }}
           />
         </View>
       </View>
