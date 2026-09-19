@@ -58,16 +58,36 @@ jobs:
 
       # Fails loudly rather than deploying a page that lost its themes: these
       # are the markers that were missing from production the whole time.
+      #
+      # The three names are read out of the switcher rather than hardcoded. The
+      # first version of this step spelled the third one `fieldcard`, the page
+      # later renamed it `signage`, and the guard then blocked every deploy --
+      # a check that names the themes itself goes stale the moment they are
+      # renamed, which is exactly when the deploy matters most. What is worth
+      # asserting is that the picker and the stylesheet agree, and that there
+      # are still three of them.
       - name: Check the build is the one we think it is
         run: |
           set -euo pipefail
           page=landing/index.html
-          for marker in 'data-theme="atmospheric"' 'data-theme="broadcast"' 'data-theme="fieldcard"'; do
-            grep -q "$marker" "$page" || { echo "::error::missing $marker in $page"; exit 1; }
+
+          themes=$(grep -o 'data-set="[a-z-]*"' "$page" | sed 's/.*="//;s/"//' | sort -u)
+          count=$(echo "$themes" | grep -c . || true)
+          if [ "$count" -ne 3 ]; then
+            echo "::error::expected 3 themes in the switcher in $page, found $count"
+            exit 1
+          fi
+
+          for theme in $themes; do
+            grep -q "data-theme=\"$theme\"" "$page" || {
+              echo "::error::the switcher offers $theme but $page has no data-theme=\"$theme\" rule"
+              exit 1
+            }
           done
+
           grep -q 'Anton' "$page" || { echo "::error::Anton is not in $page"; exit 1; }
           grep -q 'Big Shoulders' "$page" || { echo "::error::Big Shoulders is not in $page"; exit 1; }
-          echo "three themes and three display faces present"
+          echo "three themes ($(printf '%s ' $themes)) and three display faces present"
 
       - name: Pull the project settings
         run: vercel pull --yes --environment=production --token="${{ secrets.VERCEL_TOKEN }}"
