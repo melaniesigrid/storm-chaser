@@ -988,6 +988,107 @@
     line-height: var(--display-leading);
   }
 
+/* ---------- architecture ---------- */
+
+  .layers { display: grid; gap: 12px; margin-top: 28px; }
+  .layer {
+    display: grid;
+    grid-template-columns: minmax(130px, 170px) 1fr;
+    gap: 20px;
+    align-items: start;
+    padding: 18px 20px;
+    background: var(--surface);
+    border-width: var(--card-border);
+    border-style: solid;
+    border-color: var(--line);
+    border-radius: var(--radius);
+  }
+  .layer .lname {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--accent);
+    word-break: break-word;
+  }
+  .layer .ldesc { color: var(--ink-soft); line-height: 1.6; font-size: 16px; }
+  .rule {
+    margin: 22px 0 0;
+    padding-left: 18px;
+    border-left: 3px solid var(--accent);
+    color: var(--ink-soft);
+    line-height: 1.6;
+    max-width: 68ch;
+  }
+
+  .qa { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px; margin-top: 44px; }
+  .qa article {
+    padding: 24px;
+    background: var(--surface);
+    border-width: var(--card-border);
+    border-style: solid;
+    border-color: var(--line);
+    border-radius: var(--radius);
+  }
+  .qa h3 { margin: 0 0 12px; font-size: 20px; line-height: 1.25; }
+  .qa p { margin: 0 0 12px; color: var(--ink-soft); line-height: 1.6; font-size: 16px; }
+  .qa .pt { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; }
+  .qa .pt a {
+    color: var(--accent);
+    text-decoration: none;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-pill);
+    padding: 4px 10px;
+  }
+  .qa .pt a:hover { text-decoration: underline; }
+
+  /* ---------- coverage matrix ---------- */
+
+  .matrix-head {
+    font-family: var(--display);
+    font-weight: var(--display-weight);
+    letter-spacing: var(--display-tracking);
+    text-transform: var(--display-case);
+    font-size: 22px;
+    margin: 46px 0 0;
+  }
+  table.matrix { width: 100%; border-collapse: collapse; margin-top: 14px; }
+  table.matrix th, table.matrix td {
+    text-align: left;
+    padding: 14px 12px;
+    border-bottom: 1px solid var(--line);
+    font-size: 15px;
+    line-height: 1.55;
+    vertical-align: top;
+    color: var(--ink-soft);
+  }
+  table.matrix th {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+  table.matrix td.req { font-weight: 600; width: 24%; color: var(--ink); }
+  table.matrix td.files { width: 32%; font-size: 13px; }
+  /*
+   * Paths break at their slashes and nowhere else. `overflow-wrap: break-word`
+   * on its own split them mid-identifier -- "useDeviceLocation." over "ts" --
+   * which is unreadable and, worse, looks like two files. Every slash carries
+   * a <wbr>, so a directory boundary is the only place a line can end.
+   */
+  table.matrix td.files code, .qa .pt code { word-break: normal; overflow-wrap: normal; }
+  table.matrix td.files a { color: var(--accent); text-decoration: none; }
+  table.matrix td.files a:hover { text-decoration: underline; }
+  code { font-family: 'IBM Plex Mono', monospace; font-size: 0.88em; word-break: break-word; }
+
+  @media (max-width: 720px) {
+    .layer { grid-template-columns: 1fr; gap: 8px; }
+    table.matrix thead { display: none; }
+    table.matrix tr { display: block; padding: 14px 0; border-bottom: 1px solid var(--line); }
+    table.matrix td { display: block; width: auto; border: 0; padding: 2px 0; }
+    table.matrix td.req { font-size: 17px; padding-bottom: 6px; }
+    table.matrix td.files { padding-top: 8px; }
+  }
+
   /* ---------- rhythm ---------- */
 
   section { padding: var(--section-pad) 0; }
@@ -1589,6 +1690,7 @@
 
     <div class="cta-row">
       <a class="btn btn-primary" href="https://github.com/melaniesigrid/storm-chaser">View the code</a>
+      <a class="btn btn-ghost" href="#architecture">How it is built</a>
       <a class="btn btn-ghost" href="#submission">Submission details</a>
     </div>
 
@@ -1907,6 +2009,287 @@
       <div class="tier"><div class="bar" style="background:var(--t-severe)"></div><div class="range">60 &ndash; 79</div><p class="name">Severe</p></div>
       <div class="tier"><div class="bar" style="background:var(--t-extreme)"></div><div class="range">80 &ndash; 100</div><p class="name">Extreme</p></div>
     </div>
+  </div>
+</section>
+
+<section id="architecture" class="arch">
+  <div class="wrap">
+    <h2>How it is put together</h2>
+    <p class="section-lede">
+      The short answer to &ldquo;which architectural pattern&rdquo;: feature-sliced layers
+      with a one-way dependency rule, a repository over storage, and hooks standing between
+      the screens and everything else. The longer answers are below, each one pointing at
+      the file that settles it.
+    </p>
+
+    <div class="layers">
+      <div class="layer">
+        <div class="lname">app/</div>
+        <div class="ldesc">
+          Routes only. A screen composes hooks and components and decides what a person
+          sees; it never talks to storage, never parses a response and never does maths on
+          a reading. Expo Router means the route tree IS the file tree.
+        </div>
+      </div>
+      <div class="layer">
+        <div class="lname">src/features/</div>
+        <div class="ldesc">
+          One slice per domain &mdash; <code>weather</code>, <code>storms</code>,
+          <code>location</code> &mdash; and every slice is the same four folders:
+          <code>api/<wbr></code> at the wire, <code>model/<wbr></code> for pure domain logic and
+          types, <code>data/<wbr></code> for persistence, <code>hooks/<wbr></code> for the state a
+          screen consumes. Slices do not reach into each other's internals.
+        </div>
+      </div>
+      <div class="layer">
+        <div class="lname">src/core/</div>
+        <div class="ldesc">
+          What every feature shares and no feature owns: the UI primitives, the theme
+          contract, the chart layer, the storage interface, the formatters. Core knows
+          nothing about storms or weather.
+        </div>
+      </div>
+      <div class="layer">
+        <div class="lname">src/services/</div>
+        <div class="ldesc">
+          The outside world that is not a feature: the query client and its persistence,
+          the network probe, the cloud client. Swappable, and stubbed in tests.
+        </div>
+      </div>
+    </div>
+    <p class="rule">
+      The rule that makes it a pattern rather than a folder layout: dependencies point down
+      that list and never back up. Core may not import a feature. A model may not import a
+      component. A screen may not import a repository. The layering is the thing that keeps
+      a four-theme redesign from touching a single line of domain logic.
+    </p>
+
+    <div class="qa">
+      <article>
+        <h3>Where does the business logic live?</h3>
+        <p>
+          In <code>model/<wbr></code>, as pure functions. The Chase Index is a number derived
+          from a reading, not a piece of UI state: same input, same score, no clock, no
+          network, no React. That is why most of the suite needs no renderer and runs in
+          milliseconds &mdash; the interesting logic was never entangled with a view.
+        </p>
+        <p class="pt"><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/src/features/weather/model/severity.ts"><code>src/<wbr>features/<wbr>weather/<wbr>model/<wbr>severity.ts</code></a><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/src/features/weather/model/mappers.ts"><code>src/<wbr>features/<wbr>weather/<wbr>model/<wbr>mappers.ts</code></a></p>
+      </article>
+
+      <article>
+        <h3>How is state managed?</h3>
+        <p>
+          Split by who owns it. Server state is TanStack Query, keyed by rounded
+          coordinates and persisted, so a cold start with no signal still renders. Owned
+          data goes through a repository. Cross-cutting preferences &mdash; theme, profile,
+          onboarding &mdash; are small contexts over a key-value store. There is no global
+          store, because no piece of state needed one.
+        </p>
+        <p class="pt"><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/src/services/query/queryClient.ts"><code>src/<wbr>services/<wbr>query/<wbr>queryClient.ts</code></a><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/src/features/storms/data/StormRepository.ts"><code>src/<wbr>features/<wbr>storms/<wbr>data/<wbr>StormRepository.ts</code></a><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/src/core/theme/ThemeProvider.tsx"><code>src/<wbr>core/<wbr>theme/<wbr>ThemeProvider.tsx</code></a></p>
+      </article>
+
+      <article>
+        <h3>What crosses the boundary from the API?</h3>
+        <p>
+          Nothing in its wire shape. <code>contracts.ts</code> describes what Open-Meteo
+          sends, <code>mappers.ts</code> turns it into the app's own types, and everything
+          above that point works in domain terms. Swapping to weather.gov is a new client
+          and a new mapper, not a change to a screen.
+        </p>
+        <p class="pt"><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/src/features/weather/api/contracts.ts"><code>src/<wbr>features/<wbr>weather/<wbr>api/<wbr>contracts.ts</code></a><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/src/features/weather/model/mappers.ts"><code>src/<wbr>features/<wbr>weather/<wbr>model/<wbr>mappers.ts</code></a></p>
+      </article>
+
+      <article>
+        <h3>Why is the weather copied onto a saved report?</h3>
+        <p>
+          Because no forecast API serves historical conditions for an arbitrary past
+          timestamp. A reference would be a record that degrades; the snapshot is written
+          onto the report at capture time and stays readable years later. The same
+          reasoning orders the write: the photo is copied into permanent storage first, so
+          the log can never hold an entry pointing at a file that is not there.
+        </p>
+        <p class="pt"><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/src/features/storms/model/types.ts"><code>src/<wbr>features/<wbr>storms/<wbr>model/<wbr>types.ts</code></a><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/src/features/storms/data/photoStore.ts"><code>src/<wbr>features/<wbr>storms/<wbr>data/<wbr>photoStore.ts</code></a></p>
+      </article>
+
+      <article>
+        <h3>What makes the components reusable?</h3>
+        <p>
+          There is one of each. Every card in the app is a <code>Panel</code>, every string
+          is a <code>Text</code> variant, and both read the active theme rather than a
+          colour. No screen knows which theme is running, so a fourth theme is a data
+          change &mdash; and a card that wants a colour of its own asks for a
+          <code>tone</code>, which twelve stocks answer in one theme and nothing answers in
+          the other three.
+        </p>
+        <p class="pt"><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/src/core/ui/Panel.tsx"><code>src/<wbr>core/<wbr>ui/<wbr>Panel.tsx</code></a><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/src/core/ui/Text.tsx"><code>src/<wbr>core/<wbr>ui/<wbr>Text.tsx</code></a></p>
+      </article>
+
+      <article>
+        <h3>How do you know it holds?</h3>
+        <p>
+          561 tests, and the ones worth naming guard a decision rather than a line: WCAG AA
+          is asserted for every text colour on every surface in every theme, the flash
+          cadence is held under WCAG 2.3.1, and the repository is tested against a
+          substituted store, so persistence is verified without a device.
+        </p>
+        <p class="pt"><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/__tests__/theme.test.ts"><code>__tests__/<wbr>theme.test.ts</code></a><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/__tests__/stormRepository.test.ts"><code>__tests__/<wbr>stormRepository.test.ts</code></a></p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section id="coverage" class="coverage">
+  <div class="wrap">
+    <h2>Every requirement, and the file that answers it</h2>
+    <p class="section-lede">
+      The brief in the left column, the implementation in the right. Every path is a link
+      into the repository.
+    </p>
+
+    <h3 class="matrix-head">Required</h3>
+    <table class="matrix">
+      <thead>
+        <tr><th>Requirement</th><th>How</th><th>Where</th></tr>
+      </thead>
+      <tbody>
+      <tr>
+        <td class="req">Current weather from the device position</td>
+        <td>A permission-gated position fix feeds a keyed query; the screen renders whatever the hook resolves to.</td>
+        <td class="files"><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/src/features/location/useDeviceLocation.ts"><code>src/<wbr>features/<wbr>location/<wbr>useDeviceLocation.ts</code></a><br><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/src/features/weather/hooks/useWeather.ts"><code>src/<wbr>features/<wbr>weather/<wbr>hooks/<wbr>useWeather.ts</code></a><br><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/app/(tabs)/index.tsx"><code>app/<wbr>(tabs)/<wbr>index.tsx</code></a></td>
+      </tr>
+      <tr>
+        <td class="req">A free, keyless weather API</td>
+        <td>Open-Meteo, reached through one client. The wire shape is parsed at the boundary and never leaves it.</td>
+        <td class="files"><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/src/features/weather/api/weatherClient.ts"><code>src/<wbr>features/<wbr>weather/<wbr>api/<wbr>weatherClient.ts</code></a><br><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/src/features/weather/api/contracts.ts"><code>src/<wbr>features/<wbr>weather/<wbr>api/<wbr>contracts.ts</code></a></td>
+      </tr>
+      <tr>
+        <td class="req">Mock data when live data is unavailable</td>
+        <td>A bundled snapshot the user opts into from the error state, always labelled as sample data in the UI.</td>
+        <td class="files"><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/src/features/weather/api/mockForecast.ts"><code>src/<wbr>features/<wbr>weather/<wbr>api/<wbr>mockForecast.ts</code></a><br><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/src/core/ui/StatusBanner.tsx"><code>src/<wbr>core/<wbr>ui/<wbr>StatusBanner.tsx</code></a></td>
+      </tr>
+      <tr>
+        <td class="req">Meteorological detail for chasers</td>
+        <td>Temperature, apparent temperature, wind, gusts, bearing, pressure, humidity, cloud, precipitation, CAPE and lifted index.</td>
+        <td class="files"><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/src/features/weather/components/MetricGrid.tsx"><code>src/<wbr>features/<wbr>weather/<wbr>components/<wbr>MetricGrid.tsx</code></a><br><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/src/features/weather/model/mappers.ts"><code>src/<wbr>features/<wbr>weather/<wbr>model/<wbr>mappers.ts</code></a><br><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/src/features/weather/model/types.ts"><code>src/<wbr>features/<wbr>weather/<wbr>model/<wbr>types.ts</code></a></td>
+      </tr>
+      <tr>
+        <td class="req">A &ldquo;not found&rdquo; view</td>
+        <td>One component for every failure: no fix, no network, no data for the position. It carries the reason, a retry and the sample-data escape.</td>
+        <td class="files"><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/src/features/weather/components/WeatherUnavailable.tsx"><code>src/<wbr>features/<wbr>weather/<wbr>components/<wbr>WeatherUnavailable.tsx</code></a></td>
+      </tr>
+      <tr>
+        <td class="req">Photo capture with the device camera</td>
+        <td>The photo is copied into app document storage before anything is written. If the copy fails, no report exists.</td>
+        <td class="files"><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/app/capture.tsx"><code>app/<wbr>capture.tsx</code></a><br><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/src/features/storms/data/photoStore.ts"><code>src/<wbr>features/<wbr>storms/<wbr>data/<wbr>photoStore.ts</code></a></td>
+      </tr>
+      <tr>
+        <td class="req">Photo import from the library</td>
+        <td>EXIF capture time is preferred over the import clock, and the source is recorded on the report.</td>
+        <td class="files"><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/src/features/storms/data/photoPicker.ts"><code>src/<wbr>features/<wbr>storms/<wbr>data/<wbr>photoPicker.ts</code></a></td>
+      </tr>
+      <tr>
+        <td class="req">Metadata on the photo</td>
+        <td>Conditions, coordinates, accuracy, date and time, notes and storm classification, on one form and one record type.</td>
+        <td class="files"><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/src/features/storms/components/StormMetadataForm.tsx"><code>src/<wbr>features/<wbr>storms/<wbr>components/<wbr>StormMetadataForm.tsx</code></a><br><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/src/features/storms/model/types.ts"><code>src/<wbr>features/<wbr>storms/<wbr>model/<wbr>types.ts</code></a><br><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/src/features/storms/model/stormTypes.ts"><code>src/<wbr>features/<wbr>storms/<wbr>model/<wbr>stormTypes.ts</code></a></td>
+      </tr>
+      <tr>
+        <td class="req">Local persistence and real data models</td>
+        <td>A repository over a versioned AsyncStorage envelope with a migration hook, behind a storage interface the tests substitute.</td>
+        <td class="files"><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/src/features/storms/data/StormRepository.ts"><code>src/<wbr>features/<wbr>storms/<wbr>data/<wbr>StormRepository.ts</code></a><br><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/src/core/storage/KeyValueStore.ts"><code>src/<wbr>core/<wbr>storage/<wbr>KeyValueStore.ts</code></a><br><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/src/features/storms/model/types.ts"><code>src/<wbr>features/<wbr>storms/<wbr>model/<wbr>types.ts</code></a></td>
+      </tr>
+      <tr>
+        <td class="req">Navigation between sections</td>
+        <td>File-based routing: three tabs, a modal capture flow, and detail routes for a report and a storm legend.</td>
+        <td class="files"><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/app/_layout.tsx"><code>app/<wbr>_layout.tsx</code></a><br><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/app/(tabs)/_layout.tsx"><code>app/<wbr>(tabs)/<wbr>_layout.tsx</code></a><br><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/app/storm/[id].tsx"><code>app/<wbr>storm/<wbr>[id].tsx</code></a></td>
+      </tr>
+      </tbody>
+    </table>
+
+    <h3 class="matrix-head">Bonus &mdash; all seven, as a senior submission is asked to</h3>
+    <table class="matrix">
+      <thead>
+        <tr><th>Feature</th><th>How</th><th>Where</th></tr>
+      </thead>
+      <tbody>
+      <tr>
+        <td class="req">Weather forecast integration</td>
+        <td>A 12-hour strip and a 7-day outlook off the same fetch, drawn with the in-house chart layer.</td>
+        <td class="files"><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/src/features/weather/components/ForecastStrip.tsx"><code>src/<wbr>features/<wbr>weather/<wbr>components/<wbr>ForecastStrip.tsx</code></a><br><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/src/features/weather/components/OutlookList.tsx"><code>src/<wbr>features/<wbr>weather/<wbr>components/<wbr>OutlookList.tsx</code></a><br><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/src/core/charts/geometry.ts"><code>src/<wbr>core/<wbr>charts/<wbr>geometry.ts</code></a></td>
+      </tr>
+      <tr>
+        <td class="req">Map visualisation of stored storms</td>
+        <td>Severity-coloured pins for your reports, community reports and storm legends, with the region fitted to the set.</td>
+        <td class="files"><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/app/(tabs)/map.tsx"><code>app/<wbr>(tabs)/<wbr>map.tsx</code></a><br><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/src/features/storms/model/mapRegion.ts"><code>src/<wbr>features/<wbr>storms/<wbr>model/<wbr>mapRegion.ts</code></a></td>
+      </tr>
+      <tr>
+        <td class="req">Offline functionality</td>
+        <td>A query cache persisted for 24 hours, a network probe, and explicit offline and stale banners over the last good reading.</td>
+        <td class="files"><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/src/services/query/queryClient.ts"><code>src/<wbr>services/<wbr>query/<wbr>queryClient.ts</code></a><br><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/src/services/net/useNetworkStatus.ts"><code>src/<wbr>services/<wbr>net/<wbr>useNetworkStatus.ts</code></a><br><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/src/core/ui/StatusBanner.tsx"><code>src/<wbr>core/<wbr>ui/<wbr>StatusBanner.tsx</code></a></td>
+      </tr>
+      <tr>
+        <td class="req">Dark mode</td>
+        <td>Four themes on one token contract, following the system until the user picks one. Two of them are dark.</td>
+        <td class="files"><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/src/core/theme/themes.ts"><code>src/<wbr>core/<wbr>theme/<wbr>themes.ts</code></a><br><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/src/core/theme/ThemeProvider.tsx"><code>src/<wbr>core/<wbr>theme/<wbr>ThemeProvider.tsx</code></a><br><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/src/core/theme/resolveAutoTheme.ts"><code>src/<wbr>core/<wbr>theme/<wbr>resolveAutoTheme.ts</code></a></td>
+      </tr>
+      <tr>
+        <td class="req">Skeleton screens</td>
+        <td>Layout-matched placeholders on both data screens, so nothing reflows when the data lands.</td>
+        <td class="files"><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/src/core/ui/Skeleton.tsx"><code>src/<wbr>core/<wbr>ui/<wbr>Skeleton.tsx</code></a><br><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/src/features/weather/components/WeatherSkeleton.tsx"><code>src/<wbr>features/<wbr>weather/<wbr>components/<wbr>WeatherSkeleton.tsx</code></a></td>
+      </tr>
+      <tr>
+        <td class="req">Pull to refresh</td>
+        <td>On Conditions and on the field log.</td>
+        <td class="files"><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/app/(tabs)/index.tsx"><code>app/<wbr>(tabs)/<wbr>index.tsx</code></a><br><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/app/(tabs)/log.tsx"><code>app/<wbr>(tabs)/<wbr>log.tsx</code></a></td>
+      </tr>
+      <tr>
+        <td class="req">Cloud integration, no keys</td>
+        <td>The client half only, as the brief asks. Nothing uploads; <code>syncState</code> is modelled and stored but only moves when a sync target is configured.</td>
+        <td class="files"><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/src/services/cloud/CloudSyncClient.ts"><code>src/<wbr>services/<wbr>cloud/<wbr>CloudSyncClient.ts</code></a><br><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/src/services/cloud/communitySample.ts"><code>src/<wbr>services/<wbr>cloud/<wbr>communitySample.ts</code></a></td>
+      </tr>
+      </tbody>
+    </table>
+
+    <h3 class="matrix-head">Grading criteria</h3>
+    <table class="matrix">
+      <thead>
+        <tr><th>Criterion</th><th>How</th><th>Where</th></tr>
+      </thead>
+      <tbody>
+      <tr>
+        <td class="req">Unit tests</td>
+        <td>561 tests over 28 suites: severity scoring, mappers, the repository, the theme contract, EXIF dates, chart geometry, the community layer and the storm legends.</td>
+        <td class="files"><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/__tests__/severity.test.ts"><code>__tests__/<wbr>severity.test.ts</code></a><br><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/__tests__/stormRepository.test.ts"><code>__tests__/<wbr>stormRepository.test.ts</code></a><br><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/__tests__/theme.test.ts"><code>__tests__/<wbr>theme.test.ts</code></a></td>
+      </tr>
+      <tr>
+        <td class="req">Documented code, and a README that explains the decisions</td>
+        <td>The reasoning lives beside the code it explains, including the arguments that were lost. The README carries setup, structure and the known limits.</td>
+        <td class="files"><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/README.md"><code>README.md</code></a><br><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/docs/ARCHITECTURE.md"><code>docs/<wbr>ARCHITECTURE.md</code></a><br><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/src/core/theme/themes.ts"><code>src/<wbr>core/<wbr>theme/<wbr>themes.ts</code></a></td>
+      </tr>
+      <tr>
+        <td class="req">An architectural pattern</td>
+        <td>Feature-sliced layers with a one-way dependency rule, described in full above.</td>
+        <td class="files"><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/src/features/"><code>src/<wbr>features/<wbr></code></a><br><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/src/core/"><code>src/<wbr>core/<wbr></code></a><br><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/src/services/"><code>src/<wbr>services/<wbr></code></a></td>
+      </tr>
+      <tr>
+        <td class="req">Reusable components</td>
+        <td>One surface primitive, one text primitive, one button. Corner radius, elevation and the type scale change in one place and every screen follows.</td>
+        <td class="files"><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/src/core/ui/Panel.tsx"><code>src/<wbr>core/<wbr>ui/<wbr>Panel.tsx</code></a><br><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/src/core/ui/Text.tsx"><code>src/<wbr>core/<wbr>ui/<wbr>Text.tsx</code></a><br><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/src/core/ui/index.ts"><code>src/<wbr>core/<wbr>ui/<wbr>index.ts</code></a></td>
+      </tr>
+      <tr>
+        <td class="req">AI tool disclosure</td>
+        <td>Which tools, for what, and which parts of the code they wrote.</td>
+        <td class="files"><a href="https://github.com/melaniesigrid/storm-chaser/blob/main/docs/AI_DISCLOSURE.md"><code>docs/<wbr>AI_DISCLOSURE.md</code></a></td>
+      </tr>
+      </tbody>
+    </table>
+
+    <p class="stock-note">
+      Two things are deliberately not claimed. <b>Cloud sync is the client half only</b>,
+      which is what the brief asks for: there is no backend and nothing is uploaded.
+      <b>The map cannot be captured on the web</b> &mdash; <code>react-native-maps</code>
+      calls <code>codegenNativeComponent</code>, which has no web implementation &mdash; so
+      it is in the screen recording rather than in the stills.
+    </p>
   </div>
 </section>
 

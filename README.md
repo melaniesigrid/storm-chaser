@@ -699,6 +699,13 @@ The snapshot is copied onto the record at capture time rather than referenced.
 <!-- Brief coverage -->
 ## :clipboard: Brief Coverage
 
+Each row below says what was built. For the row-by-row map of **which files answer which
+requirement** — every path a link into this repository — see
+[the coverage matrix on the showcase site](https://stormchaser-field.vercel.app/#coverage),
+and [How it is put together](https://stormchaser-field.vercel.app/#architecture) for the
+architecture questions: where the business logic lives, how state is managed, what crosses
+the API boundary, and what makes the components reusable.
+
 | Requirement | Status |
 |---|---|
 | Current weather from device location | Open-Meteo, keyless, live |
