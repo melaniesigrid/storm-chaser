@@ -4,15 +4,6 @@ Open work, grouped by area then priority. P0 is "before anyone else sees this",
 P4 is "someday". Completed items move to the bottom with the version that
 closed them.
 
-## Submission
-
-### Time log figures need a human check
-**Priority:** P2
-**Files:** `docs/TIME_LOG.md`, `landing/index.html`
-Session two and three totals are bounded by commit spans. Session one landed as a
-single initial commit, so its 7 h 45 m is an estimate with nothing to check it
-against. Confirm or correct before the assessor reads it.
-
 ## Manual QA: first run
 
 ### Verify the permission timing fix on a device
@@ -41,6 +32,15 @@ bottom centre. Confirm the diamond sits on its coordinate and in register with
 the community rings.
 
 ## Completed
+
+### Time log figures needed a human check
+**Completed:** v1.3.0 (2026-09-19)
+Confirmed by the author: the figures stand as written and are not revised
+upward. Session one's 7 h 45 m stays an estimate, which `docs/TIME_LOG.md`
+already says on its face, and the preamble already records that the first pass
+was trimmed because it logged generous estimates for blocks that ran shorter
+than they felt. Total stays 10 h 15 m, inside the 24 hour window.
+
 
 ### Markers were unbounded
 **Completed:** v1.3.0 (2026-09-19)
