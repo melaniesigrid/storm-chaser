@@ -4,6 +4,35 @@ All notable changes to this project are documented here. Dates are YYYY-MM-DD.
 
 ## [Unreleased]
 
+### Added
+
+- **The mark strikes on every launch.** An overlay paints the SC monogram on the
+  active theme's own gradient, drops the bolt through it once, and leaves. It
+  plays every launch rather than only the first, which is affordable only
+  because the whole thing is capped: `LAUNCH_CEILING_MS` is 1200ms, the app
+  mounts and fetches underneath it, and a tap skips it. The ground is the same
+  four stops `Screen` paints, so the exit fades the mark out of a sky that does
+  not change.
+- **The mark now appears inside the app, not just at the door.** It strikes at
+  26px in every tab header on each tab change, and pulses at 28px in the
+  conditions loading state — the one place it is allowed to loop, because there
+  it is standing in for a spinner rather than decorating a wait.
+- **The choreography is data.** `launchSequence.ts` holds the timing as pure
+  numbers with a test suite on it, so each theme strikes the way it already
+  moves: Skyward eases, Field Card stamps, Broadcast cuts with no approach and
+  no exit. Reduced motion collapses every theme to the same still mark and a
+  cross-fade.
+
+### Changed
+
+- **`Monogram` takes `motion` instead of `animated`.** Three named modes
+  (`none`, `strike`, `pulse`) rather than a boolean, and the strike timing now
+  comes from the theme rather than being hardcoded in the component.
+- **The monogram drops its letters below 80px.** The rule
+  `assets/brand/README.md` already stated for the exported icon now lives in the
+  component too: under `LETTER_FLOOR` the `sc` collides with the bolt's own
+  crossbar, so small marks draw one silhouette instead.
+
 ### Fixed
 
 - **The Map tab no longer white-screens on web.** `react-native-maps` is native
