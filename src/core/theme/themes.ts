@@ -62,6 +62,19 @@ export interface ThemeColors {
   backgroundGradientLocations: readonly [number, number, number, number];
   surface: string;
   surfaceSunken: string;
+  /**
+   * Optional palette for cards that want to differ from one another rather than
+   * repeat one surface.
+   *
+   * Only Field Card defines it. That theme's argument is that a report is a
+   * collectible card, and a run of identical white rectangles is the one place
+   * the argument visibly failed. Every other theme leaves it undefined and gets
+   * `surface`, so this is an opt-in a theme makes rather than a behaviour
+   * components have to switch on a theme name to avoid.
+   *
+   * Values must carry `text` at AA; the theme test asserts it.
+   */
+  cardTints?: readonly string[];
   border: string;
   text: string;
   textMuted: string;
@@ -643,6 +656,34 @@ const fieldCard: Theme = {
     backgroundGradientLocations: [0, 0.33, 0.66, 1],
     surface: '#FFFFFF',
     surfaceSunken: '#FFF8EC',
+    /**
+     * Six card stocks, cycled by report id so a card keeps its colour for life.
+     *
+     * Each is a tint of a hue the theme already uses -- the accent yellow, the
+     * four tier colours, and plain stock -- rather than six new hues, so the
+     * run reads as one set rather than as a swatch book. The severity rail
+     * stays the saturated tier colour on top of them, which is what keeps the
+     * tint decorative and the rail informative.
+     */
+    cardTints: [
+      // Twelve stocks, not six. A run of reports is meant to read as a handful
+      // of collected cards, and at six the repeat was visible inside one
+      // screenful -- which made the palette look like a bug rather than a
+      // print shop. Every value is a light stock carrying the theme's ink
+      // (#14140F) far clear of AA; the theme test holds the whole list to it.
+      '#FFFFFF',
+      '#FFEFC2',
+      '#CFEDE8',
+      '#FFD9D2',
+      '#E4DCFF',
+      '#F4EAD7',
+      '#CFE4FF',
+      '#DDEFC8',
+      '#FFE0C2',
+      '#FFD8EA',
+      '#D6F2FB',
+      '#E8E6DF',
+    ],
     border: '#14140F',
     text: '#14140F',
     textMuted: '#3F3E34',
