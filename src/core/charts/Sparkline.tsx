@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useId } from 'react';
 import Svg, { Circle, Defs, LinearGradient, Path, Stop } from 'react-native-svg';
 
 import { scaleSeries, toAreaPath, toSmoothPath } from './geometry';
@@ -13,7 +13,11 @@ export interface SparklineProps {
   /** Marks the most recent reading. */
   showLast?: boolean;
   strokeWidth?: number;
-  /** Unique across mounted sparklines: SVG gradient ids are document global. */
+  /**
+   * SVG gradient ids are document global, so two sparklines sharing one id
+   * make the second reuse the first one's fill. Omitted, each instance gets its
+   * own via `useId`; pass one only to target the gradient from outside.
+   */
   gradientId?: string;
 }
 
@@ -37,8 +41,12 @@ export const Sparkline = memo(function Sparkline({
   fill = true,
   showLast = true,
   strokeWidth = 2.5,
-  gradientId = 'sparkFill',
+  gradientId,
 }: SparklineProps) {
+  // Before the early return: a hook cannot sit behind a conditional.
+  const autoId = useId();
+  const fillId = gradientId ?? `spark-${autoId}`;
+
   if (values.length < 2 || width <= 0 || height <= 0) return null;
 
   const padding = Math.max(strokeWidth, showLast ? 4 : strokeWidth);
@@ -51,14 +59,14 @@ export const Sparkline = memo(function Sparkline({
     <Svg width={width} height={height}>
       {fill ? (
         <Defs>
-          <LinearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+          <LinearGradient id={fillId} x1="0" y1="0" x2="0" y2="1">
             <Stop offset="0" stopColor={color} stopOpacity={0.36} />
             <Stop offset="1" stopColor={color} stopOpacity={0} />
           </LinearGradient>
         </Defs>
       ) : null}
 
-      {area ? <Path d={area} fill={`url(#${gradientId})`} /> : null}
+      {area ? <Path d={area} fill={`url(#${fillId})`} /> : null}
 
       <Path
         d={line}

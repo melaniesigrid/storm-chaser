@@ -19,7 +19,11 @@ import {
   isThemeName,
   themeForColorScheme,
 } from '@/core/theme/themes';
-import { createThemeStore, THEME_STORAGE_KEY } from '@/core/theme/themeStore';
+import {
+  createThemeStore,
+  isThemePreference,
+  THEME_STORAGE_KEY,
+} from '@/core/theme/themeStore';
 import { createMemoryStore, type KeyValueStore } from '@/core/storage/KeyValueStore';
 import type { ChaseLevel } from '@/features/weather/model/types';
 
@@ -145,6 +149,24 @@ describe('theme store', () => {
     const backing = createMemoryStore({ [THEME_STORAGE_KEY]: 'solarized-dark' });
 
     expect(await createThemeStore(backing).load()).toEqual({ ok: true, value: null });
+  });
+
+  /**
+   * `'auto'` is a preference, not a theme name, so it has to survive a round
+   * trip through the same key without being mistaken for the unrecognised
+   * value above. If it degrades to null, auto silently becomes "follow the
+   * phone" on the next cold start and the user never learns it stopped.
+   */
+  it('round-trips the auto preference, which is not a theme name', async () => {
+    const backing = createMemoryStore();
+    const store = createThemeStore(backing);
+
+    await store.save('auto');
+
+    expect(await store.load()).toEqual({ ok: true, value: 'auto' });
+    expect(isThemeName('auto')).toBe(false);
+    expect(isThemePreference('auto')).toBe(true);
+    expect(isThemePreference('solarized-dark')).toBe(false);
   });
 
   it('clearing returns to following system appearance', async () => {
@@ -297,6 +319,21 @@ describe.each(THEME_NAMES)('%s', (name) => {
     const [top] = theme.colors.backgroundGradient;
     expect(contrastRatio(theme.colors.text, top)).toBeGreaterThanOrEqual(AA_LARGE_TEXT);
   });
+
+  /**
+   * `Screen` paints the gradient behind every screen, so muted copy is drawn on
+   * a stop, not on `surface`. It is body and caption text at 15px and 17px --
+   * never large text -- so the bar is AA_TEXT on EVERY stop, not the large-text
+   * bar on the top one.
+   *
+   * This is the assertion that was missing when Skyward Day's muted token sat
+   * at 3.21:1 against its own top stop, with onboarding's lede drawn in it.
+   */
+  it('keeps muted copy readable on every stop of its own gradient', () => {
+    for (const stop of theme.colors.backgroundGradient) {
+      expect(contrastRatio(theme.colors.textMuted, stop)).toBeGreaterThanOrEqual(AA_TEXT);
+    }
+  });
   /**
    * The rest of the brand contract. `voltShell` and `ray` are checked above;
    * these are the four tokens Volt and the Monogram read that nothing else
@@ -432,6 +469,10 @@ describe.each(THEME_NAMES)('%s', (name) => {
 
     expect(['rain', 'sun', 'none']).toContain(atmosphere.kind);
     expect(Array.isArray(atmosphere.layers)).toBe(true);
+    // A real colour in every theme, including the one with no layers to tint:
+    // the composite check below skips a themeless sky, so without this line
+    // Field Card's layerTint is never looked at by any test.
+    expect(atmosphere.layerTint).toMatch(colour);
 
     for (const layer of atmosphere.layers) {
       for (const value of [layer.speed, layer.angle, layer.opacity, layer.scale]) {
@@ -534,6 +575,10 @@ describe.each(THEME_NAMES)('%s', (name) => {
       const ground = compositeHex(layerTint, stop, densest);
 
       expect(contrastRatio(theme.colors.text, ground)).toBeGreaterThanOrEqual(AA_LARGE_TEXT);
+      // `textMuted` is the token `tone="muted"` and the whole caption variant
+      // resolve to, at 15px and 17px. Checking only `text` here left the muted
+      // token free to wash out behind the very band this test exists to police.
+      expect(contrastRatio(theme.colors.textMuted, ground)).toBeGreaterThanOrEqual(AA_TEXT);
     }
   });
 
@@ -650,6 +695,22 @@ describe('compositeHex', () => {
   it('clamps an alpha outside the unit range instead of overshooting', () => {
     expect(compositeHex('#FFFFFF', '#000000', 4)).toBe(compositeHex('#FFFFFF', '#000000', 1));
     expect(compositeHex('#FFFFFF', '#000000', -2)).toBe(compositeHex('#FFFFFF', '#000000', 0));
+  });
+
+  /**
+   * A non-finite alpha is the clamp's blind spot: NaN passes straight through
+   * Math.min/Math.max, and the result is '#NaNNaNNaN' rather than a colour.
+   * Alpha arrives from accumulated layer opacities, so a division by zero
+   * upstream is all it takes.
+   */
+  it('returns a real colour for a non-finite alpha', () => {
+    expect(compositeHex('#FFFFFF', '#000000', Number.NaN)).toMatch(/^#[0-9a-f]{6}$/);
+    expect(compositeHex('#FFFFFF', '#000000', Number.NaN)).toBe(
+      compositeHex('#FFFFFF', '#000000', 0),
+    );
+    expect(compositeHex('#FFFFFF', '#000000', Number.POSITIVE_INFINITY)).toBe(
+      compositeHex('#FFFFFF', '#000000', 1),
+    );
   });
 
   /**

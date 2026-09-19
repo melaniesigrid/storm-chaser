@@ -330,13 +330,13 @@ const skywardDay: Theme = {
   isDark: false,
   colors: {
     background: '#F2F0E8',
-    backgroundGradient: ['#6E9AD4', '#A9C3E4', '#E8E4DA', '#F7F4EC'],
+    backgroundGradient: ['#8DB0DF', '#A9C3E4', '#E8E4DA', '#F7F4EC'],
     backgroundGradientLocations: [0, 0.42, 0.78, 1],
     surface: '#FFFFFF',
     surfaceSunken: '#EDEAE0',
     border: '#D6D2C6',
     text: '#14213A',
-    textMuted: '#3A4761',
+    textMuted: '#33405A',
     accent: '#C4402E',
     onAccent: '#FFFFFF',
     cameraGround: '#05070B',
@@ -407,7 +407,7 @@ const skywardNight: Theme = {
     surfaceSunken: '#0D1226',
     border: '#2B3558',
     text: '#EDF1FA',
-    textMuted: '#98A3C0',
+    textMuted: '#AEB8D2',
     accent: '#FFB84D',
     onAccent: '#0B1026',
     cameraGround: '#05070B',
@@ -454,8 +454,9 @@ const skywardNight: Theme = {
    * `minGapMs` is not a style choice. It is the safety floor that keeps the
    * bloom under the WCAG 2.3.1 flash rate however severe the storm gets: the
    * cadence tightens toward it as the chase level rises and never past it. Its
-   * value is the period implied by `safety.flashMaxPerSecond`, and a test holds
-   * the two together so neither can drift away from the other.
+   * value sits at or above the period implied by `safety.flashMaxPerSecond`
+   * (3333ms at 0.3/s, rounded up to 3400), and a test asserts that inequality
+   * so neither can drift under the other.
    */
   atmosphere: {
     kind: 'rain',
@@ -464,7 +465,7 @@ const skywardNight: Theme = {
       { speed: 0.62, angle: 12, opacity: 0.18, scale: 42 },
       { speed: 0.34, angle: 10, opacity: 0.1, scale: 26 },
     ],
-    layerTint: '#C3D4F0',
+    layerTint: '#8FA3C8',
     lightning: { enabled: true, minGapMs: 3400, maxGapMs: 14000, bloom: '#9FD4FF' },
     clouds: { count: 2, speed: 0.05, blur: 36, tint: '#2A2140' },
     shimmer: { enabled: false, amplitude: 0, periodMs: 0 },

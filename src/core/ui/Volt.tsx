@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { View } from 'react-native';
 import Animated, {
   Easing,
+  cancelAnimation,
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
@@ -41,6 +42,9 @@ export function Volt({ size = 128, mood = 'idle' }: VoltProps) {
 
   const bob = useSharedValue(0);
 
+  // Every infinite loop below returns a cleanup. Without one, an effect that
+  // re-runs (Eye on a mood change) leaves the previous sequence driving the UI
+  // thread, and a loop outlives the element that was reading it.
   useEffect(() => {
     if (reduceMotion) return;
     bob.value = withRepeat(
@@ -51,6 +55,7 @@ export function Volt({ size = 128, mood = 'idle' }: VoltProps) {
       -1,
       false,
     );
+    return () => cancelAnimation(bob);
   }, [bob, reduceMotion]);
 
   const bobStyle = useAnimatedStyle(() => ({
@@ -207,6 +212,7 @@ function Antenna({ size, theme }: { size: number; theme: Theme }) {
       -1,
       false,
     );
+    return () => cancelAnimation(pulse);
   }, [pulse, reduceMotion]);
 
   const style = useAnimatedStyle(() => ({
@@ -262,6 +268,7 @@ function Visor({ size, mood, tint }: { size: number; mood: VoltMood; tint: strin
       -1,
       false,
     );
+    return () => cancelAnimation(sweep);
   }, [reduceMotion, sweep]);
 
   const width = size * 0.72;
@@ -319,7 +326,10 @@ function Eye({
   const blink = useSharedValue(1);
 
   useEffect(() => {
-    if (reduceMotion || mood === 'asleep' || mood === 'offline') return;
+    // Only `idle` reaches the animated pupil below; every other mood returns a
+    // static View, so starting the loop for them span a UI-thread animation
+    // whose output nothing rendered.
+    if (reduceMotion || mood !== 'idle') return;
     blink.value = withRepeat(
       withSequence(
         withTiming(1, { duration: 3400 }),
@@ -329,6 +339,7 @@ function Eye({
       -1,
       false,
     );
+    return () => cancelAnimation(blink);
   }, [blink, mood, reduceMotion]);
 
   const style = useAnimatedStyle(() => ({ transform: [{ scaleY: blink.value }] }));
@@ -441,6 +452,7 @@ function Zed({
       delay,
       withRepeat(withTiming(1, { duration: 3000, easing: Easing.out(Easing.quad) }), -1, false),
     );
+    return () => cancelAnimation(drift);
   }, [delay, drift, reduceMotion]);
 
   const style = useAnimatedStyle(() => ({

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { View } from 'react-native';
 import Animated, {
   Easing,
+  cancelAnimation,
   useAnimatedStyle,
   useReducedMotion,
   useSharedValue,
@@ -16,7 +17,8 @@ import { Wordmark } from '@/core/brand';
 import { onboardingGate } from '@/core/onboarding/onboardingGate';
 import { onboardingStore } from '@/core/onboarding/onboardingStore';
 import { ThemeCard } from '@/core/theme/ThemeCard';
-import { THEME_NAMES, type ThemeName } from '@/core/theme/themes';
+import { AUTO_PREFERENCE, type ThemePreference } from '@/core/theme/themeStore';
+import { THEME_NAMES } from '@/core/theme/themes';
 import { useAppTheme } from '@/core/theme/useAppTheme';
 import { Button, Screen, StatusBanner, Text, Volt } from '@/core/ui';
 import type { AppError } from '@/core/utils/result';
@@ -29,7 +31,7 @@ type Step = 0 | 1 | 2;
 
 export default function OnboardingScreen() {
   const router = useRouter();
-  const { theme, themeName, setTheme } = useAppTheme();
+  const { theme, themeName, setTheme, preference } = useAppTheme();
   // `auto: false` is the fix for the defect this screen used to only describe:
   // the OS dialog now waits for the button below rather than firing from a
   // mount, which on first launch happened over the step-0 welcome copy.
@@ -63,7 +65,7 @@ export default function OnboardingScreen() {
         {step === 0 ? <Welcome /> : null}
         {step === 1 ? <Locate status={location.status} error={location.error} /> : null}
         {step === 2 ? (
-          <PickTheme active={themeName} onPick={(name) => setTheme(name)} />
+          <PickTheme active={preference ?? themeName} onPick={(next) => setTheme(next)} />
         ) : null}
 
         <View style={{ marginTop: 'auto', gap: 12 }}>
@@ -136,7 +138,7 @@ function Locate({ status, error }: { status: LocationStatus; error: AppError | n
       {status === 'ready' ? (
         <Text
           variant="message"
-          color={theme.colors.tier.active}
+          color={theme.colors.tierText.active}
           style={{ marginTop: 18, textAlign: 'center' }}
         >
           Got it. Conditions will come from where you are standing.
@@ -177,6 +179,7 @@ function Ring({ delay }: { delay: number }) {
       delay,
       withRepeat(withTiming(1, { duration: 2400, easing: Easing.out(Easing.quad) }), -1, false),
     );
+    return () => cancelAnimation(grow);
   }, [delay, grow, reduceMotion]);
 
   const style = useAnimatedStyle(() => ({
@@ -206,12 +209,22 @@ function Ring({ delay }: { delay: number }) {
   );
 }
 
+/**
+ * The theme step.
+ *
+ * `active` is the PREFERENCE, not the resolved theme name, which is the whole
+ * reason auto can be offered here at all: this screen used to write a fixed
+ * theme name the moment anything was tapped, and a stored name is what the
+ * provider reads as "the user has decided, stop following anything". Offering
+ * auto while writing a name would have shipped the feature dead on first run
+ * for every user.
+ */
 function PickTheme({
   active,
   onPick,
 }: {
-  active: ThemeName;
-  onPick: (name: ThemeName) => void;
+  active: ThemePreference;
+  onPick: (preference: ThemePreference) => void;
 }) {
   const { theme } = useAppTheme();
 
@@ -235,6 +248,20 @@ function PickTheme({
           />
         ))}
       </View>
+
+      {/*
+        Offered under the three cards rather than as a fourth one: it is not a
+        look, it is handing the look to the sky over wherever you are standing.
+      */}
+      <Button
+        title="Or follow the sky where I am"
+        tone={active === AUTO_PREFERENCE ? 'primary' : 'secondary'}
+        onPress={() => {
+          onPick(AUTO_PREFERENCE);
+          void Haptics.selectionAsync();
+        }}
+        style={{ marginTop: 12 }}
+      />
 
       {/* Introduces Volt as a character before he shows up celebrating a log. */}
       <View

@@ -63,7 +63,12 @@ export default function LegendDetailScreen() {
   }
 
   const type = describeStormType(legend.stormType);
-  const tierColor = theme.colors.tier[chaseLevelForTier(type.tier)];
+  const tierLevel = chaseLevelForTier(type.tier);
+  // The Chip tints an outline, so it takes the FILL value; the Row draws text on
+  // `surface`, which is what `tierText` exists for. Sharing one value here put
+  // #F5C242 on white at 1.75:1.
+  const tierColor = theme.colors.tier[tierLevel];
+  const tierTextColor = theme.colors.tierText[tierLevel];
 
   const distanceKm = coordinates ? haversineKm(coordinates, legend.coordinates) : null;
 
@@ -96,7 +101,7 @@ export default function LegendDetailScreen() {
       </Panel>
 
       <Panel label="Field notes" style={{ marginBottom: 12 }}>
-        <Row label="Classification" value={type.label} accent={tierColor} />
+        <Row label="Classification" value={type.label} accent={tierTextColor} />
         <Row label="When" value={legend.season} />
         <Row
           label="Position"

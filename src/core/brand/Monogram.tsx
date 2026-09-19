@@ -36,8 +36,6 @@ export interface MonogramProps {
    * header.
    */
   animated?: boolean;
-  /** Swaps plate and mark, for the second lockup in a pair. */
-  inverted?: boolean;
 }
 
 /**
@@ -50,12 +48,12 @@ export interface MonogramProps {
  * the only way to keep it outside the letterforms rather than eating into
  * them.
  */
-export function Monogram({ size = 104, animated = false, inverted = false }: MonogramProps) {
+export function Monogram({ size = 104, animated = false }: MonogramProps) {
   const { theme } = useAppTheme();
   const reduceMotion = useReducedMotion();
 
-  const plate = inverted ? theme.brand.monogramMark : theme.brand.monogramPlate;
-  const mark = inverted ? theme.brand.monogramPlate : theme.brand.monogramMark;
+  const plate = theme.brand.monogramPlate;
+  const mark = theme.brand.monogramMark;
 
   const strike = useSharedValue(animated && !reduceMotion ? -130 : 0);
 

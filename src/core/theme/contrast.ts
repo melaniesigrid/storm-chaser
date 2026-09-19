@@ -89,7 +89,12 @@ export function meetsAA(foreground: string, background: string, threshold = AA_T
 export function compositeHex(top: string, bottom: string, alpha: number): string {
   const over = parseHex(top);
   const under = parseHex(bottom);
-  const a = Math.min(1, Math.max(0, alpha));
+  // Math.min/Math.max already fold both infinities into the unit range; NaN is
+  // the one value that survives them, and `NaN.toString(16).padStart(2, '0')`
+  // is the string 'NaN', so an unguarded NaN returns the malformed
+  // '#NaNNaNNaN' -- exactly the value this function exists to keep away from a
+  // native view. Treat it as fully transparent: the ground, unchanged.
+  const a = Number.isNaN(alpha) ? 0 : Math.min(1, Math.max(0, alpha));
 
   const mix = (x: number, y: number) => Math.round(x * a + y * (1 - a));
   const pair = (n: number) => n.toString(16).padStart(2, '0');

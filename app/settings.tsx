@@ -3,17 +3,21 @@ import { ScrollView, View } from 'react-native';
 
 import { Monogram, Wordmark } from '@/core/brand';
 import { ThemeCard } from '@/core/theme/ThemeCard';
-import { THEME_NAMES, type ThemeName } from '@/core/theme/themes';
+import { AUTO_PREFERENCE, type ThemePreference } from '@/core/theme/themeStore';
+import { THEME_NAMES } from '@/core/theme/themes';
 import { useAppTheme } from '@/core/theme/useAppTheme';
 import { Button, Panel, Screen, Text } from '@/core/ui';
 
 export default function SettingsScreen() {
-  const { theme, themeName, setTheme, followSystem, isExplicit } = useAppTheme();
+  const { theme, themeName, setTheme, followSystem, isExplicit, preference, isAwaitingPosition } =
+    useAppTheme();
 
-  function choose(name: ThemeName) {
-    setTheme(name);
+  function choose(next: ThemePreference) {
+    setTheme(next);
     void Haptics.selectionAsync();
   }
+
+  const isAuto = preference === AUTO_PREFERENCE;
 
   return (
     <Screen edgeToEdge>
@@ -39,17 +43,33 @@ export default function SettingsScreen() {
             <ThemeCard
               key={name}
               name={name}
-              selected={themeName === name}
+              selected={!isAuto && themeName === name}
               onPress={() => choose(name)}
             />
           ))}
         </View>
 
+        {/*
+          Auto is a preference, not a fourth theme, so it sits apart from the
+          cards rather than beside them: picking it does not pin a look, it
+          hands the choice to the sun over wherever the phone is standing.
+        */}
+        <Button
+          title={isAuto ? `Following the sky — ${theme.label}` : 'Follow the sky where I am'}
+          tone={isAuto ? 'primary' : 'secondary'}
+          onPress={() => choose(AUTO_PREFERENCE)}
+          style={{ marginTop: 4 }}
+        />
+
         <Panel label="Following" style={{ marginTop: 4 }}>
           <Text variant="body">
-            {isExplicit
-              ? `You chose ${theme.label}. It stays put until you change it, even when your phone switches to dark mode.`
-              : 'Following your phone light and dark setting. Picking a theme above overrides that.'}
+            {isAuto
+              ? isAwaitingPosition
+                ? 'Following the sky. Until a position fix arrives it follows your phone light and dark setting instead.'
+                : `Following the sky where you are standing. It is ${theme.label} there now, and it turns over at sunrise and sunset on its own.`
+              : isExplicit
+                ? `You chose ${theme.label}. It stays put until you change it, even when your phone switches to dark mode.`
+                : 'Following your phone light and dark setting. Picking a theme above overrides that.'}
           </Text>
 
           {isExplicit ? (
