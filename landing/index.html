@@ -1,5 +1,11 @@
 <!doctype html>
-<html lang="en" data-theme="atmospheric">
+<html lang="en" data-theme="atmospheric" data-sky="night">
+<!--
+  data-sky is resolved again in the head script below, before first paint, so
+  the page never renders one sky and snaps to the other. It ships as night
+  because that is the sky this work is meant to be judged in and the honest
+  answer when nothing is known yet.
+-->
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -98,6 +104,60 @@
     --bloom-on: 1;
     --ray-image: linear-gradient(90deg, var(--t-active) 0%, var(--t-severe) 62%, var(--accent) 100%);
     --ray-tilt: rotate(0deg);
+  }
+
+  /*
+   * ---- Atmospheric, by day ----
+   *
+   * The same design at the other end of the day, which is why this block holds
+   * colour and sky and nothing else: the face, the weights, the radii, the
+   * measure and the motion all come from the block above and are not restated
+   * here. Skyward Day and Skyward Night are ONE direction, and if a type or
+   * spacing token appeared below then they would quietly be two.
+   *
+   * This is also the only sky on the page that moves with the visitor.
+   * Broadcast and Field Card are taste, and a taste does not have a sunrise.
+   */
+  html[data-theme="atmospheric"][data-sky="day"] {
+    /* The haze band at stop three is the horizon; without it the sky flattens
+       into a two-colour wash, exactly as it does at night. */
+    --bg-1: #8DB0DF;
+    --bg-2: #A9C3E4;
+    --bg-3: #E8E4DA;
+    --bg-4: #F7F4EC;
+    --page: #F4F1E8;
+    --band: #EDEAE0;
+    --surface: #FFFFFF;
+    --ink: #14213A;
+    --ink-soft: #33405A;
+    --line: #D6D2C6;
+    --accent: #C4402E;
+    --on-accent: #FFFFFF;
+    --t-dormant: #5B6472;
+    --t-unsettled: #4FD1C5;
+    --t-active: #F5C242;
+    --t-severe: #FF5A47;
+    --t-extreme: #8E7CFF;
+    /* Darkened off the fill: #FF5A47 as type on white is 2.9:1. */
+    --t-severe-text: #C4402E;
+
+    /* Lit from above rather than from the storm: the shadow falls, nothing
+       glows. The night block's inset highlight would read as a seam here. */
+    --lift: 0 10px 30px rgba(20, 33, 58, 0.16);
+    --lift-hover: 0 16px 40px rgba(20, 33, 58, 0.22);
+
+    --bolt-core: #14213A;
+    --bolt-glow: #FFB400;
+    --flash: rgba(255, 244, 214, 0.9);
+
+    /* Sun, not rain: one slow raking shaft and no bloom. Daylight has no
+       lightning -- a daytime storm is resolved by switching to night, not by
+       the day sky growing a flash. */
+    --sky-tint: #FFF4D6;
+    --sky-density: 0.12;
+    --rain-on: 0;
+    --shaft-on: 1;
+    --bloom-on: 0;
   }
 
   :root,
@@ -1584,6 +1644,129 @@
     .spec-theme { flex-wrap: wrap; }
   }
 </style>
+<script>
+  /*
+   * Which sky Atmospheric is wearing.
+   *
+   * Runs in the head, before first paint, so the page never renders one sky
+   * and snaps to the other. It resolves in three widening steps, and every one
+   * of them is optional except the first:
+   *
+   *   1. The local clock. Synchronous, no permission, no network, always
+   *      available. This is what actually ships the feature; the rest only
+   *      sharpen it.
+   *   2. Sunrise and sunset for a real position, which is minutes-accurate
+   *      where the clock is hours-crude. Only if geolocation has ALREADY been
+   *      granted -- a landing page that throws a location prompt at a stranger
+   *      has misjudged what it is owed.
+   *   3. The weather there. A thunderstorm in the afternoon is a darker sky
+   *      than the clock knows about, and darkening for it is the whole premise
+   *      of the app this page is for.
+   *
+   * Steps 2 and 3 can fail in every way a browser API can, and each failure
+   * leaves the previous step's answer standing rather than throwing one.
+   *
+   * Only Atmospheric reads this. Broadcast and Field Card are taste, and a
+   * taste does not have a sunrise.
+   */
+  (function () {
+    var root = document.documentElement;
+    var coords = null;
+
+    function set(sky) {
+      if (root.getAttribute('data-sky') !== sky) root.setAttribute('data-sky', sky);
+    }
+
+    /* Sunrise and sunset as absolute instants, so no timezone conversion
+       happens anywhere here. Same arithmetic the app uses. */
+    function sunTimes(date, lat, lon) {
+      var rad = Math.PI / 180, J1970 = 2440588, J2000 = 2451545, MS = 86400000;
+      var days = date.getTime() / MS - 0.5 + J1970 - J2000;
+      var lw = rad * -lon, phi = rad * lat;
+      var cycle = Math.round(days - 0.0009 - lw / (2 * Math.PI));
+      var ds = 0.0009 + lw / (2 * Math.PI) + cycle;
+      var M = rad * (357.5291 + 0.98560028 * ds);
+      var C = rad * (1.9148 * Math.sin(M) + 0.02 * Math.sin(2 * M) + 0.0003 * Math.sin(3 * M));
+      var L = M + C + rad * 102.9372 + Math.PI;
+      var dec = Math.asin(Math.sin(rad * 23.4397) * Math.sin(L));
+      var noon = J2000 + ds + 0.0053 * Math.sin(M) - 0.0069 * Math.sin(2 * L);
+      /* The sun's upper limb touching the horizon, refraction folded in. Not
+         zero, which is why a naive "is it above the horizon" check is minutes
+         out. Outside [-1, 1] it never crosses at all: polar day or night. */
+      var cosH = (Math.sin(rad * -0.833) - Math.sin(phi) * Math.sin(dec)) /
+                 (Math.cos(phi) * Math.cos(dec));
+      if (cosH > 1) return 'polar-night';
+      if (cosH < -1) return 'polar-day';
+      var H = Math.acos(cosH);
+      var jset = J2000 + (0.0009 + (H + lw) / (2 * Math.PI) + cycle) +
+                 0.0053 * Math.sin(M) - 0.0069 * Math.sin(2 * L);
+      return {
+        rise: (noon - (jset - noon) + 0.5 - J1970) * MS,
+        set: (jset + 0.5 - J1970) * MS
+      };
+    }
+
+    function fromClock() {
+      var h = new Date().getHours();
+      return h >= 6 && h < 18 ? 'day' : 'night';
+    }
+
+    function fromSun() {
+      if (!coords) return null;
+      var now = new Date();
+      var sun = sunTimes(now, coords.lat, coords.lon);
+      if (sun === 'polar-day') return 'day';
+      if (sun === 'polar-night') return 'night';
+      var t = now.getTime();
+      return t >= sun.rise && t <= sun.set ? 'day' : 'night';
+    }
+
+    var stormy = false;
+
+    function resolve() {
+      /* A thunderstorm darkens a daytime sky enough to be worth switching for.
+         Rain alone does not: an overcast afternoon is still an afternoon. */
+      if (stormy) return 'night';
+      return fromSun() || fromClock();
+    }
+
+    set(resolve());
+
+    /* Turns over while the page is open rather than only on the next load.
+       Ten minutes is far finer than a sunset needs and costs nothing: the
+       resolution is arithmetic on a date and a coordinate, with no I/O. */
+    setInterval(function () { set(resolve()); }, 600000);
+
+    /* Steps 2 and 3, best effort. Wrapped whole: an older browser without
+       Permissions or fetch simply keeps the clock's answer. */
+    try {
+      if (!navigator.permissions || !navigator.geolocation) return;
+
+      navigator.permissions.query({ name: 'geolocation' }).then(function (status) {
+        /* Only when it is already granted. Asking here would be a prompt the
+           visitor did not come for, to change a background. */
+        if (status.state !== 'granted') return;
+
+        navigator.geolocation.getCurrentPosition(function (position) {
+          coords = { lat: position.coords.latitude, lon: position.coords.longitude };
+          set(resolve());
+
+          if (typeof fetch !== 'function') return;
+          fetch('https://api.open-meteo.com/v1/forecast?latitude=' + coords.lat +
+                '&longitude=' + coords.lon + '&current=weather_code')
+            .then(function (response) { return response.ok ? response.json() : null; })
+            .then(function (data) {
+              var code = data && data.current && data.current.weather_code;
+              /* WMO 95, 96 and 99 are the thunderstorm codes. */
+              stormy = code === 95 || code === 96 || code === 99;
+              set(resolve());
+            })
+            .catch(function () { /* the sky is not worth a broken page */ });
+        }, function () { /* no fix; the clock already answered */ }, { timeout: 8000 });
+      }).catch(function () { /* Permissions API present but unhappy */ });
+    } catch (error) { /* keep the clock's answer */ }
+  })();
+</script>
 </head>
 <body>
 
@@ -2149,13 +2332,15 @@
       try { localStorage.setItem('sc-theme', name); } catch (error) { /* private mode */ }
     }
 
-    // Everyone arrives in the storm.
+    // Everyone arrives in the weather.
     //
-    // Night is the default for every visitor on every load -- not restored from
-    // a previous visit, and not inherited from the OS light/dark setting. A
-    // storm app that opens on a bright clear page is arguing against itself,
-    // and this is the theme the work is meant to be judged in. The switcher
-    // still does everything it ever did; it just starts from the sky.
+    // Atmospheric is the theme on every load -- not restored from a previous
+    // visit, and not inherited from the OS light/dark setting. It is the theme
+    // the work is meant to be judged in, and it is the only one of the three
+    // that answers to anything outside the page: WHICH Atmospheric sky you get
+    // is resolved in the head script from your clock, your sunrise and, if the
+    // browser will say, the storm actually overhead. Broadcast and Field Card
+    // are taste, and a taste does not have a sunrise.
     apply('atmospheric');
 
     buttons.forEach(function (button) {
