@@ -3,7 +3,7 @@ import { Pressable, View } from 'react-native';
 
 import { WeatherIcon } from '@/core/icons/WeatherIcon';
 import type { WeatherIconName } from '@/core/icons/names';
-import { Text } from '@/core/ui/Text';
+import { bleedFor, Text } from '@/core/ui/Text';
 
 import { getTheme, type ThemeName } from './themes';
 
@@ -85,18 +85,24 @@ export function ThemeCard({ name, selected, onPress }: ThemeCardProps) {
           <View style={{ flex: 1 }}>
             <Text
               color={colors.text}
-              style={{
-                fontFamily: type.display,
-                fontSize: 46,
-                lineHeight: 48,
-                letterSpacing: -1.6 * type.displayTracking,
-              }}
+              style={[
+                {
+                  fontFamily: type.display,
+                  fontSize: 46,
+                  lineHeight: 52,
+                  letterSpacing: -1.6 * type.displayTracking,
+                },
+                // The card sizes its own type, so it has to ask for the same
+                // ink allowance the scale gives a display variant -- otherwise
+                // Anton loses the edge of a glyph here and nowhere else.
+                bleedFor('display', 46),
+              ]}
             >
               {PREVIEW[name].temperature}
             </Text>
             <Text
               color={colors.textMuted}
-              style={
+              style={[
                 signage
                   ? {
                       fontFamily: type.display,
@@ -106,8 +112,9 @@ export function ThemeCard({ name, selected, onPress }: ThemeCardProps) {
                       textTransform: 'uppercase',
                       marginTop: 4,
                     }
-                  : { fontFamily: type.bodySemibold, fontSize: 16, lineHeight: 22, marginTop: 4 }
-              }
+                  : { fontFamily: type.bodySemibold, fontSize: 16, lineHeight: 22, marginTop: 4 },
+                signage ? bleedFor('title', 16) : null,
+              ]}
             >
               {preview.description}
             </Text>
@@ -157,13 +164,16 @@ export function ThemeCard({ name, selected, onPress }: ThemeCardProps) {
         >
           <Text
             color={colors.textMuted}
-            style={{
-              fontFamily: type.monoMedium,
-              fontSize: 12,
-              lineHeight: 16,
-              letterSpacing: 1,
-              textTransform: 'uppercase',
-            }}
+            style={[
+              {
+                fontFamily: type.monoMedium,
+                fontSize: 12,
+                lineHeight: 16,
+                letterSpacing: 1,
+                textTransform: 'uppercase',
+              },
+              bleedFor('label', 12),
+            ]}
           >
             Chase index
           </Text>
@@ -171,12 +181,15 @@ export function ThemeCard({ name, selected, onPress }: ThemeCardProps) {
           <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 10 }}>
             <Text
               color={colors.tierText.severe}
-              style={{
-                fontFamily: type.display,
-                fontSize: 38,
-                lineHeight: 38,
-                letterSpacing: -1.2 * type.displayTracking,
-              }}
+              style={[
+                {
+                  fontFamily: type.display,
+                  fontSize: 38,
+                  lineHeight: 42,
+                  letterSpacing: -1.2 * type.displayTracking,
+                },
+                bleedFor('display', 38),
+              ]}
             >
               72
             </Text>
@@ -209,13 +222,16 @@ export function ThemeCard({ name, selected, onPress }: ThemeCardProps) {
         {/* The name last, the way the page captions its own preview. */}
         <Text
           color={colors.text}
-          style={{
-            fontFamily: type.monoBold,
-            fontSize: 12,
-            lineHeight: 16,
-            letterSpacing: 2,
-            textTransform: 'uppercase',
-          }}
+          style={[
+            {
+              fontFamily: type.monoBold,
+              fontSize: 12,
+              lineHeight: 16,
+              letterSpacing: 2,
+              textTransform: 'uppercase',
+            },
+            bleedFor('label', 12),
+          ]}
         >
           {preview.label}
         </Text>

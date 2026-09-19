@@ -17,6 +17,7 @@ import {
 } from '@/core/utils/format';
 import { usePublishLastKnownPosition } from '@/features/location/lastKnownPosition';
 import { useDeviceLocation } from '@/features/location/useDeviceLocation';
+import { usePlaceName } from '@/features/location/usePlaceName';
 import { StormLoreCard } from '@/features/storms/components/StormLoreCard';
 import { mockSnapshot } from '@/features/weather/api/weatherClient';
 import { ChaseIndexPanel } from '@/features/weather/components/ChaseIndexPanel';
@@ -39,6 +40,10 @@ export default function ConditionsScreen() {
   // screen, so it publishes too. Without this, tapping through from the card
   // showed "Position unknown" on the same data the card had just measured.
   usePublishLastKnownPosition(location.coordinates);
+  // Decoration over a number the screen already has: null until the lookup
+  // lands, and null forever if it cannot, in which case the readout below
+  // stands on its own exactly as it used to.
+  const place = usePlaceName(location.coordinates);
   const network = useNetworkStatus();
   const [useSample, setUseSample] = useState(false);
 
@@ -170,7 +175,9 @@ export default function ConditionsScreen() {
             <Panel style={{ marginBottom: 12 }}>
               <View style={{ flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' }}>
                 <View style={{ flex: 1 }}>
-                  <Text variant="label" style={{ marginBottom: 10 }}>
+                  {place ? <Text variant="title">{place}</Text> : null}
+
+                  <Text variant="label" style={{ marginTop: place ? 4 : 0, marginBottom: 10 }}>
                     {location.coordinates
                       ? formatCoordinates(
                           location.coordinates.latitude,
