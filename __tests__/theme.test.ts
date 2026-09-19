@@ -70,8 +70,17 @@ describe('contrast', () => {
 });
 
 describe('theme registry', () => {
-  it('exposes exactly the three declared themes', () => {
-    expect(THEME_NAMES).toHaveLength(3);
+  /**
+   * Four themes, three display faces: the two Skyward variants share Bricolage
+   * because they are one design at two times of day, which is the pair the sun
+   * switches between.
+   */
+  it('exposes exactly the four declared themes, in three display faces', () => {
+    expect(THEME_NAMES).toHaveLength(4);
+
+    const faces = new Set(THEME_NAMES.map((name) => getTheme(name).type.display));
+    expect(faces.size).toBe(3);
+
     expect(Object.keys(THEMES).sort()).toEqual([...THEME_NAMES].sort());
   });
 
@@ -502,12 +511,12 @@ describe.each(THEME_NAMES)('%s', (name) => {
   it('defines every motion token', () => {
     const { motion } = theme;
 
-    expect(['atmospheric', 'mechanical']).toContain(motion.language);
+    expect(['atmospheric', 'mechanical', 'broadcast']).toContain(motion.language);
     expect(motion.pressScale).toBeGreaterThan(0);
     expect(motion.pressScale).toBeLessThanOrEqual(1);
     expect(motion.pressDurationMs).toBeGreaterThan(0);
     expect(['inOut', 'linear', 'snap']).toContain(motion.pressEasing);
-    expect(['rise', 'stamp']).toContain(motion.revealKind);
+    expect(['rise', 'stamp', 'cut']).toContain(motion.revealKind);
     expect(['wipe', 'registration']).toContain(motion.manualTransition);
     expect(motion.autoTransition).toBe('dissolve');
     expect(motion.autoTransitionMs).toBeGreaterThan(0);
@@ -650,8 +659,14 @@ describe('the motion contract across themes', () => {
         expect(motion.revealKind).toBe('stamp');
         // It sits down on its shadow rather than shrinking.
         expect(motion.pressScale).toBe(1);
+      } else if (motion.language === 'broadcast') {
+        // A cut has no curve. It also has no stamp: nothing is being pressed
+        // into paper, the next frame simply replaces this one.
+        expect(motion.pressEasing).toBe('linear');
+        expect(motion.revealKind).toBe('cut');
+        expect(motion.pressScale).toBeLessThan(1);
       } else {
-        expect(motion.pressEasing).not.toBe('snap');
+        expect(motion.pressEasing).toBe('inOut');
         expect(motion.revealKind).toBe('rise');
         expect(motion.pressScale).toBeLessThan(1);
       }

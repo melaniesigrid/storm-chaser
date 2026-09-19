@@ -195,10 +195,12 @@ describe('resolveAutoTheme', () => {
   });
 
   /**
-   * Field Card is a taste choice, not a weather condition. Auto mode picking it
-   * would mean the app deciding the user's aesthetic for them.
+   * Broadcast and Field Card are taste choices, not weather conditions, and
+   * neither draws its background from the sky -- Bricolage is the only face
+   * that does. Auto mode picking one would mean the app deciding the user's
+   * aesthetic for them, and doing it by way of the sun.
    */
-  it('never chooses Field Card, at any hour of any month', () => {
+  it('never chooses a still theme, at any hour of any month', () => {
     const chosen = new Set<string>();
 
     for (let month = 0; month < 12; month++) {
@@ -209,6 +211,7 @@ describe('resolveAutoTheme', () => {
     }
 
     expect(chosen.has('field-card')).toBe(false);
+    expect(chosen.has('broadcast')).toBe(false);
     expect(chosen).toEqual(new Set(['skyward-day', 'skyward-night']));
   });
 

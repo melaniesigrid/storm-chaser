@@ -14,16 +14,37 @@ import type { ChaseLevel } from '@/features/weather/model/types';
  * enforced it and no test did. Worth remembering that a comment asserting a
  * test exists is not a test.)
  *
- * Three themes, one contract. A screen never asks which theme is active; it
- * asks the active theme for a named token. That now includes what the sky does
- * and how a press feels, not only what colour things are.
+ * Three display faces, one contract. A screen never asks which theme is
+ * active; it asks the active theme for a named token. That now includes what
+ * the sky does and how a press feels, not only what colour things are.
+ *
+ * The faces come from the three wordmark boards the brand exploration
+ * produced, and each one brings its whole design with it rather than a palette
+ * swap:
+ *
+ *   Bricolage Grotesque   Skyward Day and Skyward Night. 200 against 800
+ *                         inside one word. THE ONLY FACE WHOSE BACKGROUND IS
+ *                         GENERATED FROM THE WEATHER -- sun shafts by day,
+ *                         rain and lightning by night -- which is also why it
+ *                         is the only one auto mode can resolve to.
+ *   Anton                 Broadcast. One weight, so light and heavy are the
+ *                         same number and the lockup holds itself together on
+ *                         size and colour the way a lower third does. Flat
+ *                         near-black, #FFD400, hard white rules, no sky.
+ *   Big Shoulders         Field Card. Condensed 900 over a real 300, cream
+ *                         paper, ink outlines, hard offset. Also no sky.
+ *
+ * Two themes share Bricolage because they are the same design at two times of
+ * day, which is what the sun switches between. Broadcast and Field Card are
+ * taste, not weather, so they are still and are never chosen for you.
  */
 
-export type ThemeName = 'skyward-day' | 'skyward-night' | 'field-card';
+export type ThemeName = 'skyward-day' | 'skyward-night' | 'broadcast' | 'field-card';
 
 export const THEME_NAMES: readonly ThemeName[] = [
   'skyward-day',
   'skyward-night',
+  'broadcast',
   'field-card',
 ] as const;
 
@@ -211,16 +232,17 @@ export interface MotionSafety {
  *
  * Skyward is atmospheric: things ease, and the weather is ambient. Field Card
  * is mechanical: nothing drifts, and every movement is a thing being pressed or
- * stamped. That difference is what makes them two themes rather than two
- * palettes.
+ * stamped. Broadcast cuts: no easing curve and no stamp, just the next frame,
+ * the way a bulletin takes the next lower third. Those differences are what
+ * make them three themes rather than three palettes.
  */
 export interface ThemeMotion {
-  language: 'atmospheric' | 'mechanical';
+  language: 'atmospheric' | 'mechanical' | 'broadcast';
   /** 1 means this theme does not scale on press; it answers some other way. */
   pressScale: number;
   pressDurationMs: number;
   pressEasing: 'inOut' | 'linear' | 'snap';
-  revealKind: 'rise' | 'stamp';
+  revealKind: 'rise' | 'stamp' | 'cut';
   /**
    * A theme change is a context swap -- faces, borders and radii all change at
    * once -- so it cannot be cross-faded without rendering two full trees. Both
@@ -303,6 +325,24 @@ const FIELD_CARD_MOTION: ThemeMotion = {
   safety: MOTION_SAFETY,
 };
 
+/**
+ * Broadcast cuts. A bulletin does not ease between lower thirds, it takes the
+ * next one, so the press is near-instant and linear and a reveal is the same
+ * hard cut rather than a rise or a stamp. `pressScale` sits just under 1: the
+ * control acknowledges the touch without the bounce Skyward gives it.
+ */
+const BROADCAST_MOTION: ThemeMotion = {
+  language: 'broadcast',
+  pressScale: 0.99,
+  pressDurationMs: 80,
+  pressEasing: 'linear',
+  revealKind: 'cut',
+  manualTransition: 'wipe',
+  autoTransition: 'dissolve',
+  autoTransitionMs: 1200,
+  safety: MOTION_SAFETY,
+};
+
 const SKYWARD_TYPE: ThemeTypography = {
   display: 'BricolageGrotesque_800ExtraBold',
   displayLight: 'BricolageGrotesque_200ExtraLight',
@@ -315,12 +355,27 @@ const SKYWARD_TYPE: ThemeTypography = {
   monoBold: 'IBMPlexMono_600SemiBold',
 };
 
+/**
+ * Anton ships exactly one weight. Rather than fake a light role from a body
+ * face, both display roles resolve to the same font -- which is the point of
+ * the face here: the lockup separates on size and colour, never on weight.
+ */
+const BROADCAST_TYPE: ThemeTypography = {
+  ...SKYWARD_TYPE,
+  display: 'Anton_400Regular',
+  displayLight: 'Anton_400Regular',
+};
+
+/**
+ * Big Shoulders Display carries a real 100-to-900 range, so unlike the Archivo
+ * Black it replaced, its light display role is the same condensed face at 300
+ * rather than a different family standing in. The Field Card lockup can finally
+ * set one word in two weights the way the Bricolage one does.
+ */
 const FIELD_CARD_TYPE: ThemeTypography = {
   ...SKYWARD_TYPE,
-  // Archivo Black ships one weight, so the light display role falls back to the
-  // heaviest body weight rather than pretending a 200 exists.
-  display: 'ArchivoBlack_400Regular',
-  displayLight: 'InstrumentSans_700Bold',
+  display: 'BigShouldersDisplay_900Black',
+  displayLight: 'BigShouldersDisplay_300Light',
 };
 
 const skywardDay: Theme = {
@@ -476,6 +531,92 @@ const skywardNight: Theme = {
   elevation: 'glow',
 };
 
+/**
+ * Broadcast. Anton, #FFD400 and hard white rules on near-black, taken from the
+ * High-Vis board and the first wordmark direction.
+ *
+ * The theme that proves the contract, because it is the one that refuses the
+ * house style twice over. Its gradient is four copies of one value: a bulletin
+ * graphic sits on a flat key, not on a sky, and writing the repeat out loud
+ * says that flatness is the design rather than a stop somebody forgot. Its
+ * atmosphere is `none` for the same reason Field Card's is -- the weather
+ * belongs to Bricolage, and a theme that drew rain here would be borrowing
+ * another face's argument.
+ *
+ * `radius` is zero throughout and `borderWidth` is 4: every panel is a block
+ * with a white rule around it, which is where all of its hierarchy comes from
+ * now that it has neither elevation nor a curve to spend.
+ */
+const broadcast: Theme = {
+  name: 'broadcast',
+  label: 'Broadcast',
+  description: 'High-vis, one voice',
+  isDark: true,
+  colors: {
+    background: '#07090E',
+    // Flat by decision, not by omission. Four stops because the contract says
+    // four; one value because a key is a key.
+    backgroundGradient: ['#07090E', '#07090E', '#07090E', '#07090E'],
+    backgroundGradientLocations: [0, 0.33, 0.66, 1],
+    surface: '#12161D',
+    surfaceSunken: '#05070B',
+    // The rule, not a hairline. Broadcast separates planes with 4px of white.
+    border: '#FFFFFF',
+    text: '#FFFFFF',
+    textMuted: '#C2C7CF',
+    accent: '#FFD400',
+    onAccent: '#07090E',
+    cameraGround: '#000000',
+    onCameraGround: '#FFFFFF',
+    tabBar: '#07090E',
+    tabActive: '#FFD400',
+    tabInactive: '#A8B0BC',
+    tier: {
+      dormant: '#5B6472',
+      unsettled: '#4FD1C5',
+      active: '#F5C242',
+      severe: '#FF5A47',
+      extreme: '#8E7CFF',
+    },
+    tierText: {
+      // Lifted off the fills: on a near-black surface the fill values for
+      // dormant and severe are too dark to read as type.
+      dormant: '#A8B0BC',
+      unsettled: '#4FD1C5',
+      active: '#F5C242',
+      severe: '#FF7A69',
+      extreme: '#A99BFF',
+    },
+  },
+  type: BROADCAST_TYPE,
+  brand: {
+    // The one theme where Volt is dressed for the job rather than for the sky:
+    // safety yellow, the same value as the accent, because on a bulletin the
+    // mascot IS signage.
+    voltShell: ['#FFE04D', '#FFD400', '#C9A600'],
+    voltShade: 'rgba(90, 72, 0, 0.3)',
+    voltEye: '#07090E',
+    voltGlow: 'rgba(255, 212, 0, 0.35)',
+    ray: ['#FFD400', '#FF5A47', '#8E7CFF'],
+    monogramPlate: '#07090E',
+    monogramMark: '#FFD400',
+    // Zero, like every other corner in this theme.
+    monogramRadius: 0,
+  },
+  atmosphere: {
+    kind: 'none',
+    layers: [],
+    layerTint: '#07090E',
+    lightning: { enabled: false, minGapMs: 0, maxGapMs: 0, bloom: '#07090E' },
+    clouds: { count: 0, speed: 0, blur: 0, tint: '#07090E' },
+    shimmer: { enabled: false, amplitude: 0, periodMs: 0 },
+  },
+  motion: BROADCAST_MOTION,
+  radius: { panel: 0, control: 0 },
+  borderWidth: 4,
+  elevation: 'glow',
+};
+
 const fieldCard: Theme = {
   name: 'field-card',
   label: 'Field Card',
@@ -554,6 +695,7 @@ const fieldCard: Theme = {
 export const THEMES: Readonly<Record<ThemeName, Theme>> = {
   'skyward-day': skywardDay,
   'skyward-night': skywardNight,
+  broadcast,
   'field-card': fieldCard,
 };
 
