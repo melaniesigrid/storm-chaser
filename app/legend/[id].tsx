@@ -88,7 +88,7 @@ export default function LegendDetailScreen() {
               {legend.year ? `${legend.place} · ${legend.year}` : legend.place}
             </Text>
           </View>
-          <WeatherIcon name={iconForStormType(legend.stormType)} size={96} />
+          <WeatherIcon name={iconForStormType(legend.stormType)} size={120} />
         </View>
 
         <Text variant="message" style={{ marginTop: 12 }}>

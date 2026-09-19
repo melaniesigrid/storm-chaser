@@ -51,7 +51,7 @@ export default function MapView({ style }: MapViewProps) {
         style,
       ]}
     >
-      <WeatherIcon name="compass" size={64} />
+      <WeatherIcon name="compass" size={80} />
       <Text variant="title" style={{ marginTop: 14, textAlign: 'center' }}>
         The map runs on device
       </Text>

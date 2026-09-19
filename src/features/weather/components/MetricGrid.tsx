@@ -25,7 +25,7 @@ export function MetricGrid({ metrics }: { metrics: Metric[] }) {
       {metrics.map((metric) => (
         <View key={metric.label} style={{ width: '50%', paddingVertical: 12, paddingRight: 8 }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-            {metric.icon ? <WeatherIcon name={metric.icon} size={22} /> : null}
+            {metric.icon ? <WeatherIcon name={metric.icon} size={28} /> : null}
             <Text variant="label">{metric.label}</Text>
           </View>
           <Text

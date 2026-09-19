@@ -85,7 +85,7 @@ export default function MapScreen() {
         {nothingPlotted ? (
           <Panel style={{ marginBottom: 12 }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-              <WeatherIcon name="compass" size={56} />
+              <WeatherIcon name="compass" size={72} />
               <View style={{ flex: 1 }}>
                 <Text variant="title">Nothing to plot</Text>
                 <Text variant="body" tone="muted" style={{ marginTop: 6 }}>

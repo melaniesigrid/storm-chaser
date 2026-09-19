@@ -49,7 +49,7 @@ export function StormLoreCard({ origin, today }: StormLoreCardProps) {
         onPress={() => router.push({ pathname: '/legend/[id]', params: { id: legend.id } })}
       >
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-          <WeatherIcon name={iconForStormType(legend.stormType)} size={56} />
+          <WeatherIcon name={iconForStormType(legend.stormType)} size={70} />
           <View style={{ flex: 1 }}>
             <Text variant="heading">{legend.name}</Text>
             <Text variant="caption" style={{ marginTop: 2 }}>

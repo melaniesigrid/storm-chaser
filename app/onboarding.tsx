@@ -1,7 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import Animated, {
   Easing,
   cancelAnimation,
@@ -229,59 +229,70 @@ function PickTheme({
   const { theme } = useAppTheme();
 
   return (
-    <View style={{ paddingTop: 16 }}>
+    <View style={{ flex: 1, paddingTop: 16 }}>
       <Text variant="display">Make it yours</Text>
       <Text variant="body" tone="muted" style={{ marginTop: 8, marginBottom: 18 }}>
         Change it any time in Settings.
       </Text>
 
-      <View style={{ gap: 12 }}>
-        {THEME_NAMES.map((name) => (
-          <ThemeCard
-            key={name}
-            name={name}
-            selected={active === name}
-            onPress={() => {
-              onPick(name);
-              void Haptics.selectionAsync();
-            }}
-          />
-        ))}
-      </View>
-
       {/*
-        Offered under the three cards rather than as a fourth one: it is not a
-        look, it is handing the look to the sky over wherever you are standing.
+        Scrolls, because each card is a real preview of the Conditions screen
+        rather than a swatch, and four of them are taller than a phone. The
+        footer buttons stay put outside this.
       */}
-      <Button
-        title="Or follow the sky where I am"
-        tone={active === AUTO_PREFERENCE ? 'primary' : 'secondary'}
-        onPress={() => {
-          onPick(AUTO_PREFERENCE);
-          void Haptics.selectionAsync();
-        }}
-        style={{ marginTop: 12 }}
-      />
-
-      {/* Introduces Volt as a character before he shows up celebrating a log. */}
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          gap: 12,
-          marginTop: 16,
-          padding: 12,
-          borderRadius: theme.radius.panel - 4,
-          backgroundColor: theme.colors.surface,
-          borderWidth: theme.borderWidth,
-          borderColor: theme.colors.border,
-        }}
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ paddingBottom: 12 }}
+        showsVerticalScrollIndicator={false}
       >
-        <Volt size={46} mood="logged" />
-        <Text variant="caption" style={{ flex: 1 }}>
-          Volt will cheer every time you log a storm.
-        </Text>
-      </View>
+        <View style={{ gap: 12 }}>
+          {THEME_NAMES.map((name) => (
+            <ThemeCard
+              key={name}
+              name={name}
+              selected={active === name}
+              onPress={() => {
+                onPick(name);
+                void Haptics.selectionAsync();
+              }}
+            />
+          ))}
+        </View>
+
+        {/*
+          Offered under the three cards rather than as a fourth one: it is not a
+          look, it is handing the look to the sky over wherever you are standing.
+        */}
+        <Button
+          title="Or follow the sky where I am"
+          tone={active === AUTO_PREFERENCE ? 'primary' : 'secondary'}
+          onPress={() => {
+            onPick(AUTO_PREFERENCE);
+            void Haptics.selectionAsync();
+          }}
+          style={{ marginTop: 12 }}
+        />
+
+        {/* Introduces Volt as a character before he shows up celebrating a log. */}
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 12,
+            marginTop: 16,
+            padding: 12,
+            borderRadius: theme.radius.panel - 4,
+            backgroundColor: theme.colors.surface,
+            borderWidth: theme.borderWidth,
+            borderColor: theme.colors.border,
+          }}
+        >
+          <Volt size={56} mood="logged" />
+          <Text variant="caption" style={{ flex: 1 }}>
+            Volt will cheer every time you log a storm.
+          </Text>
+        </View>
+      </ScrollView>
     </View>
   );
 }

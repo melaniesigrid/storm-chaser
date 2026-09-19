@@ -58,7 +58,7 @@ export function OutlookList({ days }: { days: DailyPoint[] }) {
           </Text>
 
           {/* Daily rows are always the day variant: a 7 day outlook has no hour. */}
-          <WeatherIcon name={iconForCondition(day.condition, false)} size={30} />
+          <WeatherIcon name={iconForCondition(day.condition, false)} size={38} />
 
           {/* `figure`, not `label`: label uppercases, and a formatted reading
               is "45 km/h", not an instrument name. Widened from 62 to hold a

@@ -68,7 +68,7 @@ export function ForecastStrip({ hours }: { hours: HourlyPoint[] }) {
                 <Text variant="label">{index === 0 ? 'Now' : formatHourLabel(hour.time)}</Text>
 
                 <View style={{ marginVertical: 6 }}>
-                  <WeatherIcon name={iconForCondition(hour.condition, !hour.isDay)} size={36} />
+                  <WeatherIcon name={iconForCondition(hour.condition, !hour.isDay)} size={46} />
                 </View>
 
                 <Text variant="figure">{formatTemperature(hour.temperatureC)}</Text>

@@ -192,7 +192,7 @@ export default function ConditionsScreen() {
 
                 <WeatherIcon
                   name={iconForCondition(snapshot.current.condition, !snapshot.current.isDay)}
-                  size={104}
+                  size={124}
                 />
               </View>
             </Panel>
@@ -210,7 +210,7 @@ export default function ConditionsScreen() {
 
             <Button
               title="Document a storm"
-              icon={<WeatherIcon name="lightning-bolt" size={24} />}
+              icon={<WeatherIcon name="lightning-bolt" size={30} />}
               onPress={() => router.push('/capture')}
               style={{ marginTop: 8 }}
             />

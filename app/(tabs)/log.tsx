@@ -66,7 +66,7 @@ export default function FieldLogScreen() {
         }
         ListEmptyComponent={
           <EmptyState
-            illustration={<WeatherIcon name="thunderstorms-day-rain" size={96} />}
+            illustration={<WeatherIcon name="thunderstorms-day-rain" size={120} />}
             title="No storms logged yet"
             description="Photograph a storm and the app stamps it with your coordinates, the time and the conditions at that moment."
             actionLabel="Document a storm"

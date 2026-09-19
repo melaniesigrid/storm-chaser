@@ -22,7 +22,7 @@ export function WeatherUnavailable({
 }: WeatherUnavailableProps) {
   return (
     <Panel style={{ alignItems: 'center', paddingHorizontal: 20, paddingVertical: 36 }}>
-      <WeatherIcon name="not-available" size={84} />
+      <WeatherIcon name="not-available" size={104} />
 
       <Text variant="title" style={{ marginTop: 18, marginBottom: 8, textAlign: 'center' }}>
         {title}
