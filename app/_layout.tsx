@@ -29,6 +29,7 @@ import { useEffect, useState } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { LaunchMark } from '@/core/brand';
 import { onboardingStore } from '@/core/onboarding/onboardingStore';
 import { ProfileProvider } from '@/core/profile';
 import { ThemeProvider } from '@/core/theme/ThemeProvider';
@@ -96,6 +97,14 @@ function AppStack() {
   const { theme, ready } = useAppTheme();
   const { colors, type } = theme;
   const [checkedOnboarding, setCheckedOnboarding] = useState(false);
+  /**
+   * Every launch, not just the first. The app mounts, resolves its theme and
+   * starts fetching underneath the overlay, so this costs the sub-second the
+   * mark takes and nothing else -- see `LAUNCH_CEILING_MS`. Held until the
+   * theme has loaded so the opening is painted in the sky the app is about to
+   * show, rather than in the default one for a frame.
+   */
+  const [launching, setLaunching] = useState(true);
 
   /**
    * First launch goes through the welcome flow. Waits for the theme to load so
@@ -145,6 +154,8 @@ function AppStack() {
         />
         <Stack.Screen name="onboarding" options={{ headerShown: false }} />
       </Stack>
+
+      {ready && launching ? <LaunchMark onDone={() => setLaunching(false)} /> : null}
     </>
   );
 }

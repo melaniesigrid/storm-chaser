@@ -10,6 +10,11 @@ The `sc` letters that ride the bolt inside the app are dropped here. At 48px on 
 screen they collide with the bolt's own crossbar, and the mark is more recognisable as one
 silhouette than as a monogram nobody can resolve.
 
+`Monogram.tsx` now applies the same rule to itself: under `LETTER_FLOOR` (80px) it draws
+bolt and plate only, so the 26px mark in a tab header and these exports agree without
+anyone having to remember. Change the floor there and these files stay as they are — they
+are already below it at every size they ship at.
+
 ## Not yet wired into `app.json`
 
 Expo needs PNG for `icon`, `android.adaptiveIcon.foregroundImage` and `splash.image`, and

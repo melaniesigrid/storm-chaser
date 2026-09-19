@@ -1,7 +1,8 @@
 import { Tabs, useRouter } from 'expo-router';
-import { Pressable, Text, type ColorValue } from 'react-native';
+import { Pressable, Text, View, type ColorValue } from 'react-native';
 import Svg, { Circle, Path, Rect } from 'react-native-svg';
 
+import { Monogram } from '@/core/brand';
 import { useAppTheme } from '@/core/theme/useAppTheme';
 
 type TabGlyphName = 'conditions' | 'log' | 'map';
@@ -79,6 +80,25 @@ export default function TabsLayout() {
         headerStyle: { backgroundColor: colors.background },
         headerTintColor: colors.text,
         headerTitleStyle: { fontFamily: type.display, fontSize: 20 },
+        /*
+          The mark, small, at the head of every tab. It strikes once as the
+          header mounts -- which is once per tab change, not on a loop -- so
+          the identity from the launch overlay carries into the app rather
+          than being something you only ever see for a second at the door.
+
+          Decorative, and hidden from the screen reader: the header title
+          beside it already says which tab this is, and a mark announcing
+          "Storm Chaser" on every tab change is noise in a linear read.
+        */
+        headerLeft: () => (
+          <View
+            accessibilityElementsHidden
+            importantForAccessibility="no-hide-descendants"
+            style={{ paddingHorizontal: 16, justifyContent: 'center' }}
+          >
+            <Monogram size={26} motion="strike" />
+          </View>
+        ),
         headerRight: () => (
           <Pressable
             accessibilityRole="button"
