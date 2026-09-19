@@ -596,181 +596,266 @@
   .props:last-child { margin-bottom: 0; }
 
   /*
-   * The wordmark boards get a row each.
+   * The wordmark boards, as proportional replicas.
    *
-   * They were drawn at 900x620 with the lockup at 124px, and squeezing three
-   * of them into an auto-fit grid clamped the type to 52px -- which threw away
-   * the one thing a wordmark board exists to show. A display face is an
-   * argument about scale; you cannot make it at a third of the size.
+   * All three were drawn at 900x620 with the lockup at 124px (Anton), 104px
+   * (Bricolage) and 132px (Big Shoulders). Reproducing those as viewport
+   * clamps would be a guess that drifts at every width, so the board is a
+   * container and EVERY value below is the board's own pixel divided by 900,
+   * expressed in vw. At 900px wide this section is pixel-identical to the
+   * boards; at any other width it is the same design, scaled.
+   *
+   * The boards go full-bleed because that is what the board actually is: on
+   * the canvas the artboard IS the screen. Inside a 1120px column the lockup
+   * was rendering at 140px against the 198px the ratio asks for at this
+   * viewport.
    */
-  .props--wordmark { grid-template-columns: 1fr; gap: 40px; }
+  .props--wordmark { grid-template-columns: 1fr; gap: 64px; }
   .props--wordmark .prop { gap: 18px; }
-  .props--wordmark .board {
+
+  .wb {
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    aspect-ratio: 900 / 620;
+    border-radius: 0;
     height: auto;
-    min-height: clamp(380px, 44vw, 560px);
-    padding: clamp(26px, 3.4vw, 48px);
-    gap: 18px;
-  }
-  .props--wordmark .swatches { margin-top: 0; }
-
-  /*
-   * The size proof. The Anton note claims the face "reads at 16px on a tab bar
-   * and at 124px on a splash", and the board above it showed exactly one of
-   * those two sizes. This is the other end of the claim, in the board's own
-   * face, so the sentence can be checked rather than taken on trust.
-   */
-  .proof {
-    display: flex;
-    align-items: baseline;
-    flex-wrap: wrap;
-    gap: clamp(14px, 2vw, 30px);
-    margin-top: auto;
-  }
-  .proof b, .proof s {
-    font-family: var(--board-face);
-    font-weight: var(--board-face-weight);
-    text-transform: var(--board-case, none);
-    letter-spacing: var(--board-tracking, 0);
-    text-decoration: none;
-    line-height: 1;
-  }
-  .proof b { font-size: 30px; }
-  .proof s { font-size: 16px; opacity: 0.72; }
-  .proof em {
-    font-family: 'IBM Plex Mono', monospace;
-    font-style: normal;
-    font-size: 11px;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    opacity: 0.6;
-  }
-
-  .prop { display: flex; flex-direction: column; gap: 14px; }
-
-  /* The board itself: a fixed-ratio stage the proposal is drawn inside. */
-  .board {
-    position: relative;
-    overflow: hidden;
-    border-radius: 18px;
-    padding: 22px;
-    height: 300px;
+    padding: 5.3333vw 6.2222vw;
+    gap: 2.8889vw;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    position: relative;
+    overflow: hidden;
   }
+  /* The commentary under each board stays in the page's own column. */
+  .props--wordmark .verdict,
+  .props--wordmark .prop-note { max-width: var(--measure); }
 
-  .props--ui .board { height: 340px; padding: 16px; gap: 10px; }
-
-  .board-tag {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-  }
-
-  .swatches { display: flex; gap: 6px; margin-top: auto; }
-  .swatches span { width: 26px; height: 26px; border-radius: 7px; }
-
-  .prop-note { margin: 0; font-size: 16px; line-height: 1.55; color: var(--ink-soft); }
-  .prop-note b { color: var(--ink); font-weight: 600; }
-
-  .verdict {
-    display: inline-flex;
+  /* The eyebrow row: index left, direction name right. */
+  .wb-head {
+    display: flex;
     align-items: center;
-    align-self: flex-start;
-    gap: 7px;
+    justify-content: space-between;
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 1.5px;
+    font-size: 1.4444vw;
+    font-weight: 500;
+    letter-spacing: 0.3333vw;
     text-transform: uppercase;
-    padding: 5px 11px;
-    border-radius: var(--radius-pill);
-    border: max(1px, var(--card-border)) solid var(--line);
-    color: var(--ink-soft);
   }
 
-  .verdict--shipped {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: var(--on-accent);
+  .wb-mark { position: relative; }
+  .wb-mark i { display: block; font-style: normal; }
+
+  .wb-desc {
+    font-family: 'Instrument Sans', system-ui, sans-serif;
+    font-size: 1.6667vw;
+    line-height: 2.4444vw;
+    max-width: 52.2222vw;
   }
 
-  /* Direction 01 — Anton, broadcast */
+  /* The bottom row: two app-icon plates, the small lockup pair, the palette. */
+  .wb-foot {
+    display: flex;
+    gap: 1.5556vw;
+    align-items: flex-end;
+    margin-top: auto;
+    position: relative;
+  }
+  .wb-plate {
+    width: 11.5556vw;
+    height: 11.5556vw;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  /* The same polygon the boards clip their plate strikes from. */
+  .wb-bolt {
+    width: 9.1111vw;
+    height: 14.8889vw;
+    clip-path: polygon(56% 0%, 20% 55%, 46% 55%, 33% 100%, 84% 39%, 54% 39%, 73% 0%);
+  }
+  .wb-sc { position: absolute; paint-order: stroke fill; }
+  .wb-lockups {
+    display: flex;
+    flex-direction: column;
+    gap: 1vw;
+    padding-bottom: 0.6667vw;
+  }
+  .wb-swatches {
+    display: flex;
+    gap: 0.7778vw;
+    margin-left: auto;
+    padding-bottom: 0.6667vw;
+  }
+  .wb-swatches span { width: 3.7778vw; height: 3.7778vw; display: block; }
+
+  /* ---- Direction 01, Anton / Broadcast ---- */
   .b-anton {
     background: radial-gradient(120% 90% at 20% 0%, #131A28 0%, #07090E 60%);
     color: #F2F6FA;
-    --board-face: 'Anton', sans-serif;
-    --board-face-weight: 400;
-    --board-case: uppercase;
-    --board-tracking: 0.005em;
+    /* Each board carries its own gap and padding, as drawn: 28/48, 26/48, 24/46. */
+    gap: 3.1111vw;
   }
-  .b-anton .board-tag { color: #FFD400; }
-  .b-anton .mark { font-family: 'Anton', sans-serif; font-size: clamp(62px, 12.5vw, 140px); line-height: 0.84; text-transform: uppercase; }
-  .b-anton .mark i { display: block; font-style: normal; }
-  .b-anton .mark i + i { color: #FFD400; }
+  .b-anton .wb-head { color: #8A94A6; }
+  .b-anton .wb-head b { color: #FFD400; font-weight: 500; }
+  .b-anton .wb-mark {
+    font-family: 'Anton', sans-serif;
+    font-size: 13.7778vw;
+    line-height: 11.7778vw;
+    letter-spacing: 0.1111vw;
+    text-transform: uppercase;
+    padding: 2vw 0;
+  }
+  .b-anton .wb-mark i + i { color: #FFD400; }
+  /* Crosses the lockup, as drawn: 96px down a 900px board, tilted -7deg. */
   .b-anton .rule {
-    height: clamp(7px, 1vw, 13px);
-    width: 72%;
-    margin-top: clamp(10px, 1.4vw, 20px);
-    border-radius: 4px;
+    position: absolute;
+    left: -2.2222vw;
+    top: 10.6667vw;
+    width: 71.1111vw;
+    height: 1.3333vw;
+    margin: 0;
+    border-radius: 0;
     background: linear-gradient(90deg, rgba(255,212,0,0) 0%, #FFD400 22%, #FFFFFF 58%, #FFD400 80%, rgba(255,212,0,0) 100%);
-    transform: rotate(-4deg);
+    transform: rotate(-7deg);
+    box-shadow: 0 0 2.8889vw 0.5556vw rgba(255, 212, 0, 0.6);
   }
+  .b-anton .wb-desc { color: #C4CDDA; }
+  .b-anton .wb-plate { border-radius: 2.6667vw; }
+  .b-anton .wb-plate:first-child { background: #FFD400; }
+  .b-anton .wb-plate:first-child .wb-bolt { background: #07090E; }
+  .b-anton .wb-plate:first-child .wb-sc { color: #FFD400; -webkit-text-stroke: 0.4444vw #07090E; }
+  .b-anton .wb-plate + .wb-plate { background: #07090E; box-shadow: inset 0 0 0 0.2222vw #2A3342; }
+  .b-anton .wb-plate + .wb-plate .wb-bolt { background: #FFD400; }
+  .b-anton .wb-plate + .wb-plate .wb-sc { color: #07090E; -webkit-text-stroke: 0.4444vw #FFD400; }
+  .b-anton .wb-sc { font-family: 'Anton', sans-serif; font-size: 5.3333vw; line-height: 5.3333vw; letter-spacing: -0.1111vw; }
+  .b-anton .wb-lockups b { font-family: 'Anton', sans-serif; font-weight: 400; font-size: 3.3333vw; line-height: 3.3333vw; color: #FFFFFF; text-transform: uppercase; }
+  .b-anton .wb-lockups s { font-family: 'Anton', sans-serif; font-weight: 400; font-size: 1.8889vw; line-height: 1.8889vw; color: #A3ADBC; text-transform: uppercase; text-decoration: none; }
+  .b-anton .wb-swatches span { border-radius: 0.8889vw; }
 
-  /* Direction 02 — Bricolage, atmospheric (the one that shipped) */
+  /* ---- Direction 02, Bricolage / Atmospheric ---- */
   .b-bric {
     background: linear-gradient(165deg, #B9CBE4 0%, #DCD9CE 48%, #F4F1E8 100%);
     color: #14213A;
-    --board-face: 'Bricolage Grotesque', sans-serif;
-    --board-face-weight: 800;
-    --board-tracking: -0.04em;
   }
-  .b-bric .board-tag { color: #96301F; }
-  .b-bric .mark { font-family: 'Bricolage Grotesque', sans-serif; font-size: clamp(62px, 12.5vw, 140px); line-height: 0.88; letter-spacing: -0.04em; }
-  .b-bric .mark i { display: block; font-style: normal; font-weight: 200; }
-  .b-bric .mark i + i { font-weight: 800; }
+  .b-bric .wb-head { color: #4A5670; }
+  .b-bric .wb-head b { color: #C4402E; font-weight: 500; }
+  .b-bric .wb-mark {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 11.5556vw;
+    letter-spacing: -0.4444vw;
+    padding-top: 1.1111vw;
+  }
+  /* Weight as the whole idea: 200 against 800 inside one word. */
+  .b-bric .wb-mark i { font-weight: 200; line-height: 11.1111vw; }
+  .b-bric .wb-mark i + i { font-weight: 800; line-height: 10.6667vw; }
+  .b-bric .wb-drop {
+    display: inline-block;
+    width: 6.8889vw;
+    height: 6.8889vw;
+    margin-left: 0.4444vw;
+    background: linear-gradient(170deg, #FFD066 0%, #FFB400 52%, #FF5A47 100%);
+    clip-path: polygon(56% 0%, 20% 55%, 46% 55%, 33% 100%, 84% 39%, 54% 39%, 73% 0%);
+  }
   .b-bric .rule {
-    height: clamp(8px, 1.1vw, 14px);
-    width: 62%;
-    margin-top: clamp(10px, 1.4vw, 20px);
-    border-radius: 4px;
+    width: 47.7778vw;
+    height: 1.1111vw;
+    margin-top: 1.1111vw;
+    border-radius: 0.5556vw;
     background: linear-gradient(90deg, #FFB400 0%, #FF5A47 62%, #C4402E 100%);
   }
+  .b-bric .wb-desc { color: #3A4761; }
+  .b-bric .wb-plate { border-radius: 2.8889vw; }
+  .b-bric .wb-plate:first-child { background: #14213A; }
+  .b-bric .wb-plate:first-child .wb-bolt { background: linear-gradient(170deg, #FFD066 0%, #FFB400 52%, #FF5A47 100%); }
+  .b-bric .wb-plate:first-child .wb-sc { color: #14213A; -webkit-text-stroke: 0.4444vw #FFE0A3; }
+  .b-bric .wb-plate + .wb-plate { background: #FFFFFF; box-shadow: inset 0 0 0 0.1111vw #C9C4B4; }
+  .b-bric .wb-plate + .wb-plate .wb-bolt { background: #14213A; }
+  .b-bric .wb-plate + .wb-plate .wb-sc { color: #FFB400; -webkit-text-stroke: 0.4444vw #14213A; }
+  .b-bric .wb-sc { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 5.5556vw; line-height: 5.5556vw; letter-spacing: -0.3333vw; }
+  .b-bric .wb-lockups b { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; font-size: 3.3333vw; line-height: 3.3333vw; letter-spacing: -0.1111vw; color: #14213A; }
+  .b-bric .wb-lockups s { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 200; font-size: 2vw; line-height: 2vw; letter-spacing: -0.0556vw; color: #4A5670; text-decoration: none; }
+  .b-bric .wb-swatches span { border-radius: 1.1111vw; }
 
-  /* Direction 03 — Big Shoulders, signage */
+  /* ---- Direction 03, Big Shoulders / Signage ---- */
   .b-shoulders {
     background: #14140F;
     color: #F4F2E8;
-    padding-left: clamp(46px, 5vw, 76px);
-    --board-face: 'Big Shoulders Display', sans-serif;
-    --board-face-weight: 900;
-    --board-case: uppercase;
-    --board-tracking: 0.01em;
+    /*
+     * 23px of gap, not the drawn 24. Board 03 is the only one of the three
+     * carrying a strapline as well as a two-line lockup, and real font metrics
+     * land its plate row 3px past a height the aspect ratio fixes. One pixel
+     * off each of three gaps absorbs it; the alternative is clipping the
+     * plates, which is the element the board exists to show.
+     */
+    gap: 2.5556vw;
+    padding: 5.1111vw 6.2222vw;
   }
-  .b-shoulders .board-tag { color: #4FD1C5; }
+  .b-shoulders .wb-head { color: #9E9C8E; }
+  .b-shoulders .wb-head b { color: #4FD1C5; font-weight: 600; }
+  /* The hazard bar runs beside the lockup, not down the whole board. */
+  .b-shoulders .wb-sign { display: flex; align-items: flex-start; gap: 2.4444vw; padding-top: 0.6667vw; }
   .b-shoulders .hazard {
-    position: absolute;
-    left: clamp(16px, 1.8vw, 26px);
-    top: 16px;
-    bottom: 16px;
-    width: clamp(12px, 1.4vw, 20px);
-    border-radius: 3px;
-    background: repeating-linear-gradient(135deg, #F5C242 0 10px, #14140F 10px 20px);
+    width: 1.5556vw;
+    align-self: stretch;
+    flex-shrink: 0;
+    background: repeating-linear-gradient(135deg, #F5C242 0 1.3333vw, #14140F 1.3333vw 2.6667vw);
   }
-  .b-shoulders .mark { font-family: 'Big Shoulders Display', sans-serif; font-weight: 900; font-size: clamp(66px, 13.5vw, 152px); line-height: 0.8; text-transform: uppercase; }
-  .b-shoulders .mark i { display: block; font-style: normal; }
-  .b-shoulders .mark i + i { color: #F5C242; }
-  .b-shoulders .rule { height: clamp(8px, 1.1vw, 14px); width: 58%; margin-top: clamp(10px, 1.4vw, 20px); background: #FF5A47; transform: rotate(-3deg); }
+  .b-shoulders .wb-mark {
+    font-family: 'Big Shoulders Display', sans-serif;
+    font-weight: 900;
+    font-size: 14.6667vw;
+    letter-spacing: 0.1111vw;
+    text-transform: uppercase;
+  }
+  .b-shoulders .wb-mark i { line-height: 12vw; color: #F4F2E8; }
+  /*
+   * inline-block so the slash can span exactly the width of the word, as drawn.
+   * vertical-align: top is load-bearing: the default baseline alignment adds a
+   * descender's worth of leading under the line box, which pushed the plate row
+   * past the bottom of a board whose height is fixed by its aspect ratio.
+   */
+  .b-shoulders .wb-mark i + i {
+    line-height: 12.8889vw;
+    color: #F5C242;
+    position: relative;
+    display: inline-block;
+    vertical-align: top;
+  }
+  .b-shoulders .rule {
+    position: absolute;
+    left: -0.6667vw;
+    right: -0.6667vw;
+    top: 5.7778vw;
+    width: auto;
+    height: 1.5556vw;
+    margin: 0;
+    background: #FF5A47;
+    transform: rotate(-4deg);
+  }
   .b-shoulders .strap {
     font-family: 'Big Shoulders Display', sans-serif;
     font-weight: 300;
-    font-size: clamp(15px, 1.7vw, 24px);
-    letter-spacing: clamp(5px, 0.7vw, 10px);
+    font-size: 3.3333vw;
+    line-height: 3.5556vw;
+    letter-spacing: 0.7778vw;
     text-transform: uppercase;
     color: #9E9C8E;
+    margin-top: 0.6667vw;
+    display: block;
   }
+  .b-shoulders .wb-desc { color: #C2C0B2; }
+  .b-shoulders .wb-plate:first-child { background: #F5C242; }
+  .b-shoulders .wb-plate:first-child .wb-bolt { background: #14140F; }
+  .b-shoulders .wb-plate:first-child .wb-sc { color: #F5C242; -webkit-text-stroke: 0.4444vw #14140F; }
+  .b-shoulders .wb-plate + .wb-plate { background: #14140F; box-shadow: inset 0 0 0 0.3333vw #4FD1C5; }
+  .b-shoulders .wb-plate + .wb-plate .wb-bolt { background: #4FD1C5; }
+  .b-shoulders .wb-plate + .wb-plate .wb-sc { color: #14140F; -webkit-text-stroke: 0.4444vw #4FD1C5; }
+  .b-shoulders .wb-sc { font-family: 'Big Shoulders Display', sans-serif; font-weight: 900; font-size: 6.8889vw; line-height: 6.8889vw; letter-spacing: 0.1111vw; text-transform: uppercase; }
+  .b-shoulders .wb-lockups b { font-family: 'Big Shoulders Display', sans-serif; font-weight: 900; font-size: 3.7778vw; line-height: 3.5556vw; letter-spacing: 0.1111vw; color: #F4F2E8; text-transform: uppercase; }
+  .b-shoulders .wb-lockups s { font-family: 'Big Shoulders Display', sans-serif; font-weight: 400; font-size: 2.2222vw; line-height: 2.2222vw; letter-spacing: 0.2222vw; color: #B4B2A4; text-transform: uppercase; text-decoration: none; }
 
   /* Screen treatments */
   .mini { display: flex; flex-direction: column; gap: 8px; }
@@ -1431,37 +1516,47 @@
     <div class="props props--wordmark">
 
       <article class="prop">
-        <div class="board b-anton">
-          <span class="board-tag">01 &middot; Anton / Broadcast</span>
-          <div class="mark"><i>Storm</i><i>Chaser</i></div>
-          <div class="rule"></div>
-          <div class="proof" aria-hidden="true">
-            <b>Storm Chaser</b><s>Storm Chaser</s><em>30px &middot; 16px</em>
+        <div class="board wb b-anton">
+          <div class="wb-head"><span>Direction 01</span><b>Anton / Broadcast</b></div>
+          <div class="wb-mark">
+            <i>Storm</i><i>Chaser</i>
+            <div class="rule" aria-hidden="true"></div>
           </div>
-          <div class="swatches" aria-hidden="true">
-            <span style="background:#FFD400"></span><span style="background:#FF5A47"></span>
-            <span style="background:#8E7CFF"></span><span style="background:#F2F6FA"></span>
+          <p class="wb-desc">Ultra-condensed, one weight, no apologies. Reads at 16px on a tab bar and at 124px on a splash screen.</p>
+          <div class="wb-foot">
+            <div class="wb-plate" aria-hidden="true"><div class="wb-bolt"></div><span class="wb-sc">SC</span></div>
+            <div class="wb-plate" aria-hidden="true"><div class="wb-bolt"></div><span class="wb-sc">SC</span></div>
+            <div class="wb-lockups" aria-hidden="true"><b>Storm Chaser</b><s>Storm Chaser</s></div>
+            <div class="wb-swatches" aria-hidden="true">
+              <span style="background:#FFD400"></span><span style="background:#FF5A47"></span>
+              <span style="background:#8E7CFF"></span><span style="background:#F2F6FA"></span>
+            </div>
           </div>
         </div>
         <span class="verdict">Not chosen</span>
         <p class="prop-note">
           Ultra-condensed, one weight, no apologies. It reads at 16px on a tab bar and at
-          124px on a splash. <b>Rejected for having exactly one voice</b> — with a single
+          124px on a splash. <b>Rejected for having exactly one voice</b> &mdash; with a single
           weight there is no hierarchy to build a whole interface out of.
         </p>
       </article>
 
       <article class="prop">
-        <div class="board b-bric">
-          <span class="board-tag">02 &middot; Bricolage / Atmospheric</span>
-          <div class="mark"><i>storm</i><i>chaser</i></div>
-          <div class="rule"></div>
-          <div class="proof" aria-hidden="true">
-            <b>storm chaser</b><s>storm chaser</s><em>30px &middot; 16px</em>
+        <div class="board wb b-bric">
+          <div class="wb-head"><span>Direction 02</span><b>Bricolage / Atmospheric</b></div>
+          <div class="wb-mark">
+            <i>storm<span class="wb-drop" aria-hidden="true"></span></i><i>chaser</i>
+            <div class="rule" aria-hidden="true"></div>
           </div>
-          <div class="swatches" aria-hidden="true">
-            <span style="background:#FFB400"></span><span style="background:#FF5A47"></span>
-            <span style="background:#14213A"></span><span style="background:#F4F1E8"></span>
+          <p class="wb-desc">Weight as the whole idea: hairline against heavy in one word. The optical-size axis keeps it readable when it shrinks to a tab label.</p>
+          <div class="wb-foot">
+            <div class="wb-plate" aria-hidden="true"><div class="wb-bolt"></div><span class="wb-sc">sc</span></div>
+            <div class="wb-plate" aria-hidden="true"><div class="wb-bolt"></div><span class="wb-sc">sc</span></div>
+            <div class="wb-lockups" aria-hidden="true"><b>stormchaser</b><s>stormchaser</s></div>
+            <div class="wb-swatches" aria-hidden="true">
+              <span style="background:#FFB400"></span><span style="background:#FF5A47"></span>
+              <span style="background:#14213A"></span><span style="background:#F4F1E8"></span>
+            </div>
           </div>
         </div>
         <span class="verdict verdict--shipped">Shipped</span>
@@ -1474,30 +1569,39 @@
       </article>
 
       <article class="prop">
-        <div class="board b-shoulders">
-          <div class="hazard" aria-hidden="true"></div>
-          <span class="board-tag">03 &middot; Big Shoulders / Signage</span>
-          <div class="mark"><i>Storm</i><i>Chaser</i></div>
-          <div class="rule"></div>
-          <span class="strap">Field Instrument</span>
-          <div class="proof" aria-hidden="true">
-            <b>Storm Chaser</b><s>Storm Chaser</s><em>30px &middot; 16px</em>
+        <div class="board wb b-shoulders">
+          <div class="wb-head"><span>Direction 03</span><b>Big Shoulders / Signage</b></div>
+          <div class="wb-sign">
+            <div class="hazard" aria-hidden="true"></div>
+            <div>
+              <div class="wb-mark">
+                <i>Storm</i><i>Chaser<span class="rule" aria-hidden="true"></span></i>
+              </div>
+              <span class="strap">Field Instrument</span>
+            </div>
           </div>
-          <div class="swatches" aria-hidden="true">
-            <span style="background:#F5C242"></span><span style="background:#FF5A47"></span>
-            <span style="background:#4FD1C5"></span><span style="background:#F4F2E8"></span>
+          <p class="wb-desc">Condensed enough to set two words at 132px inside a phone splash. Variable weight from 100 to 900 gives the whole hierarchy one voice.</p>
+          <div class="wb-foot">
+            <div class="wb-plate" aria-hidden="true"><div class="wb-bolt"></div><span class="wb-sc">SC</span></div>
+            <div class="wb-plate" aria-hidden="true"><div class="wb-bolt"></div><span class="wb-sc">SC</span></div>
+            <div class="wb-lockups" aria-hidden="true"><b>Storm Chaser</b><s>Storm Chaser</s></div>
+            <div class="wb-swatches" aria-hidden="true">
+              <span style="background:#F5C242"></span><span style="background:#FF5A47"></span>
+              <span style="background:#4FD1C5"></span><span style="background:#F4F2E8"></span>
+            </div>
           </div>
         </div>
         <span class="verdict">Partly kept</span>
         <p class="prop-note">
-          Highway signage: hazard stripe, condensed caps, a 100–900 variable axis. Too
-          severe for the everyday screen, but <b>its language survives</b> — the
-          &ldquo;field instrument&rdquo; strapline is the hero eyebrow, and its amber and
-          teal are the Active and Unsettled rungs of the chase ladder.
+          Highway signage: hazard stripe, condensed caps, a 100&ndash;900 variable axis. Too
+          severe for the everyday screen, but <b>its language survives</b> &mdash; the &ldquo;field
+          instrument&rdquo; strapline is the hero eyebrow, and its amber and teal are the
+          Active and Unsettled rungs of the chase ladder.
         </p>
       </article>
 
     </div>
+
 
     <h3 class="phase">Phase 02 &middot; The conditions screen, four treatments</h3>
     <div class="props props--ui">
