@@ -8,7 +8,7 @@
 <link rel="icon" href="icons/thunderstorms-day-rain.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Archivo+Black&family=Anton&family=Big+Shoulders+Display:wght@300..900&family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Anton&family=Big+Shoulders+Display:wght@300..900&family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   /* ============================================================
      Themes. The site wears the same three the app does, resolved
@@ -70,6 +70,10 @@
 
     --radius: 24px;
     --radius-sm: 14px;
+    /* Controls and pills were 28px and 999px hardcoded, which is how Broadcast
+       kept its rounded CTA while declaring zero radius everywhere else. */
+    --radius-control: 28px;
+    --radius-pill: 999px;
     --card-border: 0px;
     --rule: 1px;
     --section-pad: 112px;
@@ -103,16 +107,21 @@
        an interface out of. That is exactly why it is worth wearing here: the
        constraint is the character. Hierarchy comes from SIZE and COLOUR only,
        which is what a lower third on a weather bulletin actually does. */
-    --bg-1: #131A28;
-    --bg-2: #0D131E;
-    --bg-3: #090D15;
+    /* Flat by decision, not by omission: four copies of one value, because a
+       bulletin graphic sits on a key, not on a sky. The weather belongs to
+       Bricolage, and a gradient here would be borrowing another face's
+       argument. */
+    --bg-1: #07090E;
+    --bg-2: #07090E;
+    --bg-3: #07090E;
     --bg-4: #07090E;
     --page: #07090E;
-    --band: #0B0F16;
-    --surface: #131A28;
-    --ink: #F2F6FA;
-    --ink-soft: #97A2B3;
-    --line: #222C3D;
+    --band: #05070B;
+    --surface: #12161D;
+    --ink: #FFFFFF;
+    --ink-soft: #C2C7CF;
+    /* The rule, not a hairline. Broadcast separates planes with white. */
+    --line: #FFFFFF;
     --accent: #FFD400;
     --on-accent: #07090E;
     --t-dormant: #5B6472;
@@ -138,30 +147,36 @@
     --body-size: 18px;
     --body-leading: 1.6;
 
-    --radius: 8px;
-    --radius-sm: 6px;
-    --card-border: 0px;
-    --rule: 1px;
+    /* Zero throughout, and 4px of rule. With neither elevation nor a curve to
+       spend, every scrap of hierarchy comes from the white block edge. */
+    --radius: 0px;
+    --radius-sm: 0px;
+    --radius-control: 0px;
+    --radius-pill: 0px;
+    --card-border: 4px;
+    --rule: 4px;
     --section-pad: 88px;
 
-    /* Broadcast elevation is a lit edge, not a soft shadow: a graphic keyed
-       over a feed, held off the picture by a hairline of its own yellow. */
-    --lift: 0 0 0 1px rgba(255, 212, 0, 0.16), 0 18px 40px rgba(0, 0, 0, 0.6);
-    --lift-hover: 0 0 0 1px rgba(255, 212, 0, 0.45), 0 24px 52px rgba(0, 0, 0, 0.66);
+    /* No shadow at all. A keyed graphic is not lifted off the picture, it is
+       cut into it; the edge does the whole job. */
+    --lift: none;
+    --lift-hover: none;
     --press: translateY(2px);
 
-    /* Cuts, not eases. Broadcast graphics snap on. */
-    --ease: cubic-bezier(0.3, 0, 0.2, 1);
-    --dur: 160ms;
+    /* A cut has no curve. Linear, and short enough to read as a take. */
+    --ease: linear;
+    --dur: 80ms;
 
     --bolt-core: #FFFFFF;
     --bolt-glow: #FFD400;
     --flash: rgba(255, 212, 0, 0.8);
-    --sky-tint: #FFD400;
-    --sky-density: 0.1;
-    --rain-on: 1;
+    /* No sky. Bricolage is the only face whose background is generated from
+       the weather; this one is switched off out loud rather than left out. */
+    --sky-tint: #07090E;
+    --sky-density: 0;
+    --rain-on: 0;
     --shaft-on: 0;
-    --bloom-on: 1;
+    --bloom-on: 0;
     --ray-image: linear-gradient(90deg, rgba(255, 212, 0, 0) 0%, #FFD400 22%, #FFFFFF 58%, #FFD400 80%, rgba(255, 212, 0, 0) 100%);
     --ray-tilt: rotate(-4deg);
   }
@@ -189,11 +204,14 @@
     --t-extreme: #8E7CFF;
     --t-severe-text: #C4402E;
 
-    --display: 'Archivo Black', sans-serif;
-    /* Archivo Black ships ONE weight, so the light display role falls back to
-       the heaviest body weight rather than pretending a 200 exists. */
-    --display-weight: 400;
-    --display-light: 700;
+    --display: 'Big Shoulders Display', sans-serif;
+    /* Archivo Black stood here and shipped ONE weight, so its light display
+       role had to borrow Instrument Sans. Big Shoulders carries a real
+       100-to-900, so the light role is the SAME condensed face at 300 and the
+       Field Card lockup can set one word in two weights the way the Bricolage
+       one does. */
+    --display-weight: 900;
+    --display-light: 300;
     --display-case: uppercase;
     --display-tracking: -0.015em;
     --display-leading: 0.92;
@@ -208,6 +226,10 @@
 
     --radius: 20px;
     --radius-sm: 14px;
+    /* The printed card's CTA is a rounded capsule with an ink outline, as
+       drawn on the board. Rounded-with-hard-outlines is its character. */
+    --radius-control: 30px;
+    --radius-pill: 999px;
     --card-border: 3px;
     --rule: 3px;
     /* Denser. A printed sheet does not have 112px of air between blocks. */
@@ -223,7 +245,9 @@
     --ease: linear;
     --dur: 60ms;
 
-    --bolt-core: #FFF8EC;
+    /* Ink, like every other line on this theme. The core was cream on a cream
+       page, so the only thing drawing the bolt was its own soft glow. */
+    --bolt-core: #14140F;
     --bolt-glow: #FF5A47;
     --flash: rgba(255, 220, 120, 0.85);
     --sky-tint: #FFF8EC;
@@ -280,7 +304,7 @@
     display: flex;
     gap: 6px;
     padding: 6px;
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     background: var(--surface);
     border: max(1px, var(--card-border)) solid var(--line);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
@@ -290,7 +314,7 @@
     min-height: 44px;
     padding: 0 16px;
     border: 0;
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     background: transparent;
     color: var(--ink-soft);
     font-family: 'IBM Plex Mono', monospace;
@@ -438,6 +462,11 @@
     stroke-linejoin: round;
   }
 
+  /* The two glow opacities below are floors that the draw-channel and draw-fork
+     keyframes immediately override -- those animate opacity across the whole
+     6s cycle. Do not reach for a theme token here expecting it to show: an
+     animation beats a normal declaration, and the theme has to steer the glow
+     through --bolt-glow instead. */
   .channel-glow { stroke: var(--bolt-glow); stroke-width: 15; opacity: 0.55; }
   .channel-core { stroke: var(--bolt-core); stroke-width: 5; }
   .fork-glow    { stroke: var(--bolt-glow); stroke-width: 9; opacity: 0.45; }
@@ -503,7 +532,7 @@
     align-items: center;
     min-height: 56px;
     padding: 0 28px;
-    border-radius: 28px;
+    border-radius: var(--radius-control);
     font-family: var(--display);
     font-weight: var(--display-weight);
     font-size: 18px;
@@ -607,7 +636,7 @@
     letter-spacing: 1.5px;
     text-transform: uppercase;
     padding: 5px 11px;
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     border: max(1px, var(--card-border)) solid var(--line);
     color: var(--ink-soft);
   }
@@ -727,12 +756,12 @@
   /* C — Field Card */
   .b-field { background: #FFF8EC; border: 3px solid #14140F; color: #14140F; }
   .b-field .board-tag { color: #3F3E34; }
-  .b-field .mini-temp, .b-field .mini-score { font-family: 'Archivo Black', sans-serif; letter-spacing: -0.04em; }
+  .b-field .mini-temp, .b-field .mini-score { font-family: 'Big Shoulders Display', sans-serif; font-weight: 900; letter-spacing: -0.04em; }
   .b-field .mini-pnl { background: #FFFFFF; border: 3px solid #14140F; border-radius: 14px; box-shadow: 4px 4px 0 #14140F; }
   .b-field .mini-label { color: #3F3E34; }
   .b-field .mini-bar { background: #FFF8EC; border: 3px solid #14140F; border-radius: 7px; }
   .b-field .mini-bar i { background: #FF5A47; }
-  .b-field .mini-cta { background: #F5C242; color: #14140F; border: 3px solid #14140F; border-radius: 24px; box-shadow: 4px 4px 0 #14140F; font-family: 'Archivo Black', sans-serif; font-weight: 400; }
+  .b-field .mini-cta { background: #F5C242; color: #14140F; border: 3px solid #14140F; border-radius: 24px; box-shadow: 4px 4px 0 #14140F; font-family: 'Big Shoulders Display', sans-serif; font-weight: 900; }
 
   /* D — High-Vis */
   .b-hivis { background: #000000; color: #FFFFFF; }
@@ -783,7 +812,7 @@
 
   .temp { font-size: 58px; line-height: 1; letter-spacing: -0.04em; }
   .phone--day .temp, .phone--night .temp { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; }
-  .phone--card .temp { font-family: 'Archivo Black', sans-serif; }
+  .phone--card .temp { font-family: 'Big Shoulders Display', sans-serif; font-weight: 900; }
 
   .cond { font-size: 19px; font-weight: 600; margin-top: 6px; }
 
@@ -796,7 +825,7 @@
 
   .score { font-size: 44px; line-height: 1; letter-spacing: -0.04em; }
   .phone--day .score, .phone--night .score { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; }
-  .phone--card .score { font-family: 'Archivo Black', sans-serif; }
+  .phone--card .score { font-family: 'Big Shoulders Display', sans-serif; font-weight: 900; }
 
   .ladder { display: flex; gap: 4px; margin-top: 12px; }
   .ladder span { flex: 1; height: 11px; border-radius: 3px; }
@@ -879,7 +908,7 @@
     letter-spacing: 1px;
     text-transform: uppercase;
     padding: 6px 12px;
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     background: var(--t-active);
     color: #14140F;
   }
@@ -1302,7 +1331,7 @@
       <span><b>React Native</b> Expo SDK 57</span>
       <span><b>TypeScript</b> strict</span>
       <span><b>Open-Meteo</b> keyless</span>
-      <span><b>376</b> unit tests</span>
+      <span><b>413</b> unit tests</span>
       <!--
         The switcher belongs here rather than floating in a corner. The site's
         whole claim is that no screen knows which theme is active, and this
@@ -1457,7 +1486,7 @@
         </div>
         <span class="verdict verdict--shipped">Shipped</span>
         <p class="prop-note">
-          Trading-card weight: 3px outlines, hard offset shadows, Archivo Black. It gave
+          Trading-card weight: 3px outlines, hard offset shadows, Big Shoulders Display. It gave
           the token contract its <b>hardest test</b> — a theme with no gradient and a
           non-zero border.
         </p>
@@ -1554,7 +1583,7 @@
         </div>
         <div>
           <div class="temp">24&deg;</div>
-          <div class="cond" style="font-family:'Archivo Black',sans-serif;font-size:16px;">THUNDERSTORMS</div>
+          <div class="cond" style="font-family:'Big Shoulders Display',sans-serif;font-weight:900;font-size:16px;">THUNDERSTORMS</div>
         </div>
         <div class="pnl">
           <div class="pnl-label">Chase index</div>
