@@ -10,9 +10,11 @@ closed them.
 **Priority:** P0
 **Files:** `landing/index.html` (deliverable 4), `docs/` 
 Deliverable 4 in the submission section renders "Link pending" on the live page.
-The recording has to be made on a real device or simulator: this repo has no web
-target (`react-native-web` is not installed), so it cannot be captured headlessly
-from here. Record the flow, host it, replace the placeholder.
+The recording has to be made on a real device or simulator. There IS a web target
+(`react-native-web` is installed, and `npm run screenshots` exports it), but the
+map renders as a device-only stand-in on web (`src/core/maps/react-native-maps.web.tsx`),
+so a headless capture would show a flow with no map in it. Record on a device,
+host it, replace the placeholder.
 
 ### Time log figures need a human check
 **Priority:** P2

@@ -574,7 +574,7 @@ const broadcast: Theme = {
     tier: {
       dormant: '#5B6472',
       unsettled: '#4FD1C5',
-      active: '#F5C242',
+      active: '#FFD400',
       severe: '#FF5A47',
       extreme: '#8E7CFF',
     },

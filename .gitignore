@@ -14,3 +14,6 @@ dist-check/
 dist-android/
 dist-verify/
 landing/.vercel/
+
+# Claude Code local state and worktrees
+.claude/
