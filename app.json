@@ -48,8 +48,17 @@
           "photosPermission": "Storm Chaser can file a storm photo you already have in your library, when the shot was taken on another camera or the moment had already passed."
         }
       ],
+      [
+        "expo-media-library",
+        {
+          "savePhotosPermission": "Storm Chaser saves the seal you stamp onto a storm report to your photo library.",
+          "photosPermission": "Storm Chaser can file a storm photo you already have in your library, when the shot was taken on another camera or the moment had already passed.",
+          "isAccessMediaLocationEnabled": false
+        }
+      ],
       "expo-font",
-      "expo-asset"
+      "expo-asset",
+      "expo-sharing"
     ],
     "experiments": {
       "typedRoutes": true
