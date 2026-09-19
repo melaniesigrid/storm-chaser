@@ -595,6 +595,56 @@
   .props--ui { grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
   .props:last-child { margin-bottom: 0; }
 
+  /*
+   * The wordmark boards get a row each.
+   *
+   * They were drawn at 900x620 with the lockup at 124px, and squeezing three
+   * of them into an auto-fit grid clamped the type to 52px -- which threw away
+   * the one thing a wordmark board exists to show. A display face is an
+   * argument about scale; you cannot make it at a third of the size.
+   */
+  .props--wordmark { grid-template-columns: 1fr; gap: 40px; }
+  .props--wordmark .prop { gap: 18px; }
+  .props--wordmark .board {
+    height: auto;
+    min-height: clamp(380px, 44vw, 560px);
+    padding: clamp(26px, 3.4vw, 48px);
+    gap: 18px;
+  }
+  .props--wordmark .swatches { margin-top: 0; }
+
+  /*
+   * The size proof. The Anton note claims the face "reads at 16px on a tab bar
+   * and at 124px on a splash", and the board above it showed exactly one of
+   * those two sizes. This is the other end of the claim, in the board's own
+   * face, so the sentence can be checked rather than taken on trust.
+   */
+  .proof {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: clamp(14px, 2vw, 30px);
+    margin-top: auto;
+  }
+  .proof b, .proof s {
+    font-family: var(--board-face);
+    font-weight: var(--board-face-weight);
+    text-transform: var(--board-case, none);
+    letter-spacing: var(--board-tracking, 0);
+    text-decoration: none;
+    line-height: 1;
+  }
+  .proof b { font-size: 30px; }
+  .proof s { font-size: 16px; opacity: 0.72; }
+  .proof em {
+    font-family: 'IBM Plex Mono', monospace;
+    font-style: normal;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    opacity: 0.6;
+  }
+
   .prop { display: flex; flex-direction: column; gap: 14px; }
 
   /* The board itself: a fixed-ratio stage the proposal is drawn inside. */
@@ -651,15 +701,19 @@
   .b-anton {
     background: radial-gradient(120% 90% at 20% 0%, #131A28 0%, #07090E 60%);
     color: #F2F6FA;
+    --board-face: 'Anton', sans-serif;
+    --board-face-weight: 400;
+    --board-case: uppercase;
+    --board-tracking: 0.005em;
   }
   .b-anton .board-tag { color: #FFD400; }
-  .b-anton .mark { font-family: 'Anton', sans-serif; font-size: clamp(38px, 6vw, 52px); line-height: 0.86; text-transform: uppercase; }
+  .b-anton .mark { font-family: 'Anton', sans-serif; font-size: clamp(62px, 12.5vw, 140px); line-height: 0.84; text-transform: uppercase; }
   .b-anton .mark i { display: block; font-style: normal; }
   .b-anton .mark i + i { color: #FFD400; }
   .b-anton .rule {
-    height: 7px;
+    height: clamp(7px, 1vw, 13px);
     width: 72%;
-    margin-top: 10px;
+    margin-top: clamp(10px, 1.4vw, 20px);
     border-radius: 4px;
     background: linear-gradient(90deg, rgba(255,212,0,0) 0%, #FFD400 22%, #FFFFFF 58%, #FFD400 80%, rgba(255,212,0,0) 100%);
     transform: rotate(-4deg);
@@ -669,40 +723,51 @@
   .b-bric {
     background: linear-gradient(165deg, #B9CBE4 0%, #DCD9CE 48%, #F4F1E8 100%);
     color: #14213A;
+    --board-face: 'Bricolage Grotesque', sans-serif;
+    --board-face-weight: 800;
+    --board-tracking: -0.04em;
   }
   .b-bric .board-tag { color: #96301F; }
-  .b-bric .mark { font-family: 'Bricolage Grotesque', sans-serif; font-size: clamp(38px, 6vw, 52px); line-height: 0.9; letter-spacing: -0.04em; }
+  .b-bric .mark { font-family: 'Bricolage Grotesque', sans-serif; font-size: clamp(62px, 12.5vw, 140px); line-height: 0.88; letter-spacing: -0.04em; }
   .b-bric .mark i { display: block; font-style: normal; font-weight: 200; }
   .b-bric .mark i + i { font-weight: 800; }
   .b-bric .rule {
-    height: 8px;
+    height: clamp(8px, 1.1vw, 14px);
     width: 62%;
-    margin-top: 10px;
+    margin-top: clamp(10px, 1.4vw, 20px);
     border-radius: 4px;
     background: linear-gradient(90deg, #FFB400 0%, #FF5A47 62%, #C4402E 100%);
   }
 
   /* Direction 03 — Big Shoulders, signage */
-  .b-shoulders { background: #14140F; color: #F4F2E8; padding-left: 40px; }
+  .b-shoulders {
+    background: #14140F;
+    color: #F4F2E8;
+    padding-left: clamp(46px, 5vw, 76px);
+    --board-face: 'Big Shoulders Display', sans-serif;
+    --board-face-weight: 900;
+    --board-case: uppercase;
+    --board-tracking: 0.01em;
+  }
   .b-shoulders .board-tag { color: #4FD1C5; }
   .b-shoulders .hazard {
     position: absolute;
-    left: 16px;
+    left: clamp(16px, 1.8vw, 26px);
     top: 16px;
     bottom: 16px;
-    width: 12px;
+    width: clamp(12px, 1.4vw, 20px);
     border-radius: 3px;
     background: repeating-linear-gradient(135deg, #F5C242 0 10px, #14140F 10px 20px);
   }
-  .b-shoulders .mark { font-family: 'Big Shoulders Display', sans-serif; font-weight: 900; font-size: clamp(40px, 6vw, 54px); line-height: 0.82; text-transform: uppercase; }
+  .b-shoulders .mark { font-family: 'Big Shoulders Display', sans-serif; font-weight: 900; font-size: clamp(66px, 13.5vw, 152px); line-height: 0.8; text-transform: uppercase; }
   .b-shoulders .mark i { display: block; font-style: normal; }
   .b-shoulders .mark i + i { color: #F5C242; }
-  .b-shoulders .rule { height: 8px; width: 58%; margin-top: 10px; background: #FF5A47; transform: rotate(-3deg); }
+  .b-shoulders .rule { height: clamp(8px, 1.1vw, 14px); width: 58%; margin-top: clamp(10px, 1.4vw, 20px); background: #FF5A47; transform: rotate(-3deg); }
   .b-shoulders .strap {
     font-family: 'Big Shoulders Display', sans-serif;
     font-weight: 300;
-    font-size: 15px;
-    letter-spacing: 5px;
+    font-size: clamp(15px, 1.7vw, 24px);
+    letter-spacing: clamp(5px, 0.7vw, 10px);
     text-transform: uppercase;
     color: #9E9C8E;
   }
@@ -1363,13 +1428,16 @@
     </p>
 
     <h3 class="phase">Phase 01 &middot; Wordmark, three display faces</h3>
-    <div class="props">
+    <div class="props props--wordmark">
 
       <article class="prop">
         <div class="board b-anton">
           <span class="board-tag">01 &middot; Anton / Broadcast</span>
           <div class="mark"><i>Storm</i><i>Chaser</i></div>
           <div class="rule"></div>
+          <div class="proof" aria-hidden="true">
+            <b>Storm Chaser</b><s>Storm Chaser</s><em>30px &middot; 16px</em>
+          </div>
           <div class="swatches" aria-hidden="true">
             <span style="background:#FFD400"></span><span style="background:#FF5A47"></span>
             <span style="background:#8E7CFF"></span><span style="background:#F2F6FA"></span>
@@ -1388,6 +1456,9 @@
           <span class="board-tag">02 &middot; Bricolage / Atmospheric</span>
           <div class="mark"><i>storm</i><i>chaser</i></div>
           <div class="rule"></div>
+          <div class="proof" aria-hidden="true">
+            <b>storm chaser</b><s>storm chaser</s><em>30px &middot; 16px</em>
+          </div>
           <div class="swatches" aria-hidden="true">
             <span style="background:#FFB400"></span><span style="background:#FF5A47"></span>
             <span style="background:#14213A"></span><span style="background:#F4F1E8"></span>
@@ -1409,6 +1480,9 @@
           <div class="mark"><i>Storm</i><i>Chaser</i></div>
           <div class="rule"></div>
           <span class="strap">Field Instrument</span>
+          <div class="proof" aria-hidden="true">
+            <b>Storm Chaser</b><s>Storm Chaser</s><em>30px &middot; 16px</em>
+          </div>
           <div class="swatches" aria-hidden="true">
             <span style="background:#F5C242"></span><span style="background:#FF5A47"></span>
             <span style="background:#4FD1C5"></span><span style="background:#F4F2E8"></span>
