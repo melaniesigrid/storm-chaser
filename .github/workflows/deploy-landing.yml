@@ -86,6 +86,7 @@ jobs:
           done
 
           grep -q 'Anton' "$page" || { echo "::error::Anton is not in $page"; exit 1; }
+          grep -q 'Bricolage Grotesque' "$page" || { echo "::error::Bricolage Grotesque is not in $page"; exit 1; }
           grep -q 'Big Shoulders' "$page" || { echo "::error::Big Shoulders is not in $page"; exit 1; }
           echo "three themes ($(printf '%s ' $themes)) and three display faces present"
 

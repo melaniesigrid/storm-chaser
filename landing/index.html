@@ -100,7 +100,10 @@
     --flash: rgba(190, 220, 255, 0.9);
     --sky-tint: #8FA3C8;
     --sky-density: 0.28;
-    --rain-on: 1;
+    /* No rain. The Bricolage board has none -- its weather is a bolt dropping
+       into the word, not a downpour behind it -- and a night sky reads as
+       night from its gradient and its bloom without streaking the copy. */
+    --rain-on: 0;
     --shaft-on: 0;
     --bloom-on: 1;
     --hazard-w: 0px;
@@ -109,6 +112,12 @@
        one word -- so both stay in the ink. Colouring them would be solving a
        problem this face does not have. */
     --lockup-heavy: var(--ink);
+    /* The board underlines at 10px under a 104px lockup: 9.6% of the type
+       size, sitting below the word rather than crossing it. */
+    --flash-on: 0;
+    --ray-weight: 0.096;
+    --ray-pos: static;
+    --ray-y: auto;
     --ray-image: linear-gradient(90deg, var(--t-active) 0%, var(--t-severe) 62%, var(--accent) 100%);
     --ray-tilt: rotate(0deg);
   }
@@ -252,6 +261,11 @@
        weight the way Bricolage does. The board separates them on colour
        instead, and that is the whole reason this direction still reads. */
     --lockup-heavy: #FFD400;
+    /* 12px across a 124px lockup, crossing the first line. */
+    --flash-on: 1;
+    --ray-weight: 0.097;
+    --ray-pos: absolute;
+    --ray-y: 38%;
   }
 
   html[data-theme="signage"] {
@@ -333,6 +347,17 @@
     --ray-tilt: rotate(-4deg);
     /* Amber second line, as the board draws it. */
     --lockup-heavy: #F5C242;
+    /* The widest band of the three: 14px across a 132px lockup, slashing
+       through the second line rather than underlining anything. */
+    /* The board sets ALL of its copy in mono, not just its labels. On a signage
+       board that is the point: every line is an instrument readout. */
+    --body-font: 'IBM Plex Mono', monospace;
+    /* A road sign's slash has no rounded ends. */
+    --ray-radius: 0px;
+    --flash-on: 0;
+    --ray-weight: 0.106;
+    --ray-pos: absolute;
+    --ray-y: 70%;
   }
 
   * { box-sizing: border-box; }
@@ -340,7 +365,7 @@
 
   body {
     margin: 0;
-    font-family: 'Instrument Sans', system-ui, sans-serif;
+    font-family: var(--body-font, 'Instrument Sans', system-ui, sans-serif);
     color: var(--ink);
     background: var(--page);
     -webkit-font-smoothing: antialiased;
@@ -424,28 +449,26 @@
     opacity: 0;
     mix-blend-mode: screen;
     pointer-events: none;
-    animation: skyflash 6s linear infinite;
+    animation: skyflash 2.6s linear infinite;
   }
 
 
   /*
-    Lightning is not a fade in. It is a stepped leader punching down, a return
-    stroke that blows out the exposure, then two restrikes down the same
-    ionised channel before it dies. Capped at three luminance peaks so no
-    one-second window in this 6s loop can exceed the WCAG 2.3.1 general flash
-    threshold (max 3 flashes/sec): peaks land at 43% / 2.58s, 47% / 2.82s and
-    53% / 3.18s of the cycle — all three inside one 0.6s window, then silent
-    for the remaining ~5.4s of the loop, so any rolling one-second window
-    contains at most 3 peaks, never 4+.
+    Broadcast keys its yellow on, twice, and cuts it. Not a fade: a bulletin
+    graphic does not ease.
+
+    The cadence is the board's own 2.6s with two peaks, which is 0.77 flashes
+    per second -- comfortably under the WCAG 2.3.1 general-flash ceiling of 3
+    per second, and the reason this can be full-bleed at all. Every stop is
+    multiplied by --flash-on, so Atmospheric and Signage resolve the whole
+    animation to zero rather than being switched off by a rule that names them.
   */
   @keyframes skyflash {
-    0%, 42%      { opacity: 0; }
-    43%          { opacity: 0.9; }
-    44.5%        { opacity: 0.08; }
-    47%          { opacity: 0.65; }
-    49.5%        { opacity: 0.06; }
-    53%          { opacity: 0.45; }
-    58%, 100%    { opacity: 0; }
+    0%, 46%   { opacity: 0; }
+    50%       { opacity: calc(0.55 * var(--flash-on, 0)); }
+    58%       { opacity: 0; }
+    62%       { opacity: calc(0.28 * var(--flash-on, 0)); }
+    70%, 100% { opacity: 0; }
   }
 
   .hero .wrap { position: relative; z-index: 2; }
@@ -462,6 +485,9 @@
   .lockup { display: flex; align-items: flex-start; gap: clamp(12px, 4vw, 52px); margin-top: 26px; flex-wrap: wrap; }
 
   .wordmark {
+    /* Shrink-to-fit, so the band above can span the word and not the page. */
+    display: inline-block;
+    position: relative;
     margin: 0;
     font-size: inherit;
     font-weight: inherit;
@@ -488,9 +514,22 @@
   .wordmark .heavy { font-weight: var(--display-weight); color: var(--lockup-heavy, inherit); }
 
 
+  /*
+   * The band spans the TITLE, not the column.
+   *
+   * .wordmark is inline-block so it shrinks to the widest line of the lockup,
+   * which is what the boards draw the band across -- it used to be a block and
+   * the band ran the full width of the hero, past the end of the word.
+   * Thickness is a fraction of the lockup size rather than a fixed 11px, so it
+   * stays the band that was drawn at every viewport.
+   */
   .ray {
-    height: 11px;
-    border-radius: 6px;
+    position: var(--ray-pos, static);
+    left: -0.6%;
+    right: -0.6%;
+    top: var(--ray-y, auto);
+    height: calc(var(--wordmark-size) * var(--ray-weight, 0.1));
+    border-radius: var(--ray-radius, 6px);
     margin-top: 16px;
     background: var(--ray-image);
     transform-origin: left center;
@@ -514,8 +553,51 @@
     position: relative;
     width: clamp(120px, 20vw, 200px);
     flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     filter: drop-shadow(0 0 var(--bolt-blur, 0px) var(--bolt-glow));
     animation: bolt-halo 6s linear infinite;
+  }
+
+  .bolt-icon {
+    width: 100%;
+    height: auto;
+    display: block;
+    position: relative;
+    animation: bolt-drop 3s cubic-bezier(0.34, 1.56, 0.64, 1) infinite;
+  }
+
+  /*
+   * The halo is a SIBLING of the icon, never a child: it has to bloom out past
+   * the bolt's silhouette, and anything inside a clipped or masked mark gets
+   * cut to that mark instead.
+   */
+  .bolt-halo {
+    position: absolute;
+    width: 34%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    /* A gradient, not a disc. A flat fill at 0.45 over a dark ground reads as
+       a dull olive coin sitting behind the bolt rather than light coming off
+       it; the falloff is what makes it a bloom. */
+    background: radial-gradient(circle, var(--bolt-glow) 0%, transparent 68%);
+    opacity: 0;
+    animation: bolt-bloom 3s ease-out infinite;
+    pointer-events: none;
+  }
+
+  @keyframes bolt-drop {
+    0%, 30% { transform: translateY(-14%) scale(0.7); opacity: 0; }
+    46%     { transform: translateY(0) scale(1.14); opacity: 1; }
+    56%     { transform: translateY(0) scale(1); opacity: 1; }
+    100%    { transform: translateY(0) scale(1); opacity: 1; }
+  }
+
+  @keyframes bolt-bloom {
+    0%, 40% { opacity: 0; transform: scale(0.5); }
+    50%     { opacity: 0.45; transform: scale(1.5); }
+    72%,100%{ opacity: 0; transform: scale(2.1); }
   }
 
   @keyframes bolt-halo {
@@ -525,73 +607,7 @@
     60%, 100% { --bolt-blur: 0px; }
   }
 
-  .bolt-svg { width: 100%; height: auto; display: block; overflow: visible; }
 
-  /*
-    Channel geometry. The main channel draws top to bottom in 120ms (the
-    stepped leader), the two forks follow a beat later — a branch cannot exist
-    before the channel it grows from.
-  */
-  .channel, .fork {
-    fill: none;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-  }
-
-  /* The two glow opacities below are floors that the draw-channel and draw-fork
-     keyframes immediately override -- those animate opacity across the whole
-     6s cycle. Do not reach for a theme token here expecting it to show: an
-     animation beats a normal declaration, and the theme has to steer the glow
-     through --bolt-glow instead. */
-  .channel-glow { stroke: var(--bolt-glow); stroke-width: 15; opacity: 0.55; }
-  .channel-core { stroke: var(--bolt-core); stroke-width: 5; }
-  .fork-glow    { stroke: var(--bolt-glow); stroke-width: 9; opacity: 0.45; }
-  .fork-core    { stroke: var(--bolt-core); stroke-width: 3; }
-
-  .channel { stroke-dasharray: 420; stroke-dashoffset: 420; animation: draw-channel 6s linear infinite; }
-  .fork    { stroke-dasharray: 150; stroke-dashoffset: 150; animation: draw-fork 6s linear infinite; }
-
-  /*
-   * The strike draws itself once, then never leaves.
-   *
-   * It used to return to opacity 0 for the back half of every cycle, so the
-   * bolt existed for 1.2 seconds out of 6 and the hero carried a 200x367 hole
-   * the rest of the time. Lightning being intermittent is the idea; a gap in
-   * the composition four fifths of the time is not the same thing.
-   *
-   * So the channel keeps a faint afterimage -- what the eye holds onto after a
-   * strike -- and the bright restrikes flicker down the same path over it.
-   */
-  @keyframes draw-channel {
-    0%       { stroke-dashoffset: 420; opacity: 0; }
-    6%       { opacity: 1; }
-    12%      { stroke-dashoffset: 0; opacity: 1; }
-    16%      { opacity: 0.14; }
-    19%      { opacity: 0.95; }
-    23%      { opacity: 0.1; }
-    27%      { opacity: 0.8; }
-    34%      { opacity: 0.22; }
-    /* The long hold: present, quiet, waiting. */
-    44%, 74% { stroke-dashoffset: 0; opacity: 0.16; }
-    78%      { opacity: 0.85; }
-    81%      { opacity: 0.12; }
-    84%      { opacity: 0.6; }
-    100%     { stroke-dashoffset: 0; opacity: 0.16; }
-  }
-
-  @keyframes draw-fork {
-    0%       { stroke-dashoffset: 150; opacity: 0; }
-    7%       { opacity: 1; }
-    13%      { stroke-dashoffset: 0; opacity: 1; }
-    17%      { opacity: 0.12; }
-    20%      { opacity: 0.85; }
-    24%      { opacity: 0.15; }
-    28%      { opacity: 0.7; }
-    44%, 74% { stroke-dashoffset: 0; opacity: 0.12; }
-    78%      { opacity: 0.7; }
-    82%      { opacity: 0.1; }
-    100%     { stroke-dashoffset: 0; opacity: 0.12; }
-  }
 
   .lede {
     margin: 36px 0 0;
@@ -892,8 +908,9 @@
 
   @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
-    .skyflash, .bolt-stage, .channel, .fork, .ray { animation: none; }
-    .channel, .fork { stroke-dashoffset: 0; opacity: 1; }
+    .bolt-stage, .bolt-icon, .bolt-halo, .ray { animation: none; }
+    .bolt-icon { transform: none; opacity: 1; }
+    .bolt-halo { opacity: 0; }
     .ray { transform: var(--ray-tilt) scaleX(1); }
   }
 
@@ -1448,6 +1465,12 @@
     this page is the proof of it.
   -->
   <div class="sky" aria-hidden="true">
+    <!--
+      Broadcast's yellow. The board keys a full-bleed #FFD400 over its ground
+      twice a cycle; this is that, gated by --flash-on so the two directions
+      that do not key stay at zero.
+    -->
+    <div class="skyflash"></div>
     <div class="sky-band">
       <div class="rain rain--near" style="--ang:14deg; --col:22px; --tile:88px; --o:0.9;  --d:760ms"></div>
       <div class="rain rain--mid"  style="--ang:12deg; --col:34px; --tile:72px; --o:0.55; --d:1180ms"></div>
@@ -1476,15 +1499,14 @@
         <div class="ray"></div>
       </h1>
 
+      <!--
+        The bolt the boards actually use: Meteocons' lightning-bolt, the same
+        file the app registers. It replaces a hand-drawn stepped-leader SVG
+        that was a different mark from the one the brand work settled on.
+      -->
       <div class="bolt-stage" aria-hidden="true">
-        <svg class="bolt-svg" viewBox="0 0 120 220" role="img">
-          <path class="channel channel-glow" d="M62 2 L46 68 L70 62 L48 134 L74 124 L40 218" />
-          <path class="fork fork-glow" d="M48 134 L20 180" />
-          <path class="fork fork-glow" d="M70 62 L96 104" />
-          <path class="channel channel-core" d="M62 2 L46 68 L70 62 L48 134 L74 124 L40 218" />
-          <path class="fork fork-core" d="M48 134 L20 180" />
-          <path class="fork fork-core" d="M70 62 L96 104" />
-        </svg>
+        <span class="bolt-halo"></span>
+        <img class="bolt-icon" src="icons/lightning-bolt.svg" alt="">
       </div>
     </div>
 

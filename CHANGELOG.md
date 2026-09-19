@@ -2,6 +2,18 @@
 
 All notable changes to this project are documented here. Dates are YYYY-MM-DD.
 
+## [Unreleased]
+
+### Fixed
+
+- **The Map tab no longer white-screens on web.** `react-native-maps` is native
+  only: its layer specs call `codegenNativeComponent`, which `react-native-web`
+  does not export, so the import threw while the module was still evaluating and
+  took the whole screen down. Metro now aliases the package to a stand-in for
+  `platform === 'web'`, which draws a "the map runs on device" surface. The
+  legend, the counts, the lore toggle and the "Document a storm" call to action
+  all keep working in the browser. iOS and Android are untouched.
+
 ## [1.2.0] — 2026-09-18
 
 ### Added
