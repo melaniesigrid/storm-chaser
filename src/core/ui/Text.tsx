@@ -34,6 +34,66 @@ export const TEXT_VARIANTS: TextVariant[] = [
 ];
 
 /**
+ * How tall each face's ink actually is, as a multiple of its font size.
+ *
+ * Read straight out of the shipped TTFs: `hhea.ascender - hhea.descender +
+ * hhea.lineGap`, over `head.unitsPerEm`. Not one of these faces declares a
+ * lineGap, so the number is exactly ascent plus descent -- the box the glyphs
+ * are drawn in, and the line height the platform picks when nothing sets one.
+ *
+ * These are measurements, not preferences. Do not round them down to make a
+ * layout fit; a face needs what it needs, and the whole point of the floor
+ * below is that the scale cannot quietly ask for less. If a theme brings a new
+ * face, add it here with its real number -- `leadingFor` throws on a family it
+ * has never measured rather than guessing a ratio and cropping it in
+ * production, which is the failure this table exists to end.
+ */
+const FACE_INK: Readonly<Record<string, number>> = {
+  Anton_400Regular: 1.505,
+  BigShouldersDisplay_900Black: 1.197,
+  BigShouldersDisplay_300Light: 1.197,
+  BricolageGrotesque_800ExtraBold: 1.2,
+  BricolageGrotesque_200ExtraLight: 1.2,
+  IBMPlexMono_400Regular: 1.3,
+  IBMPlexMono_500Medium: 1.3,
+  IBMPlexMono_600SemiBold: 1.3,
+  InstrumentSans_400Regular: 1.22,
+  InstrumentSans_500Medium: 1.22,
+  InstrumentSans_600SemiBold: 1.22,
+  InstrumentSans_700Bold: 1.22,
+};
+
+/**
+ * The line height a variant actually gets: its designed value, or the face's
+ * own ink, whichever is taller.
+ *
+ * The scale used to set leading as the font size plus a small constant, which
+ * put twenty-one of the forty-four variant-and-theme combinations under the
+ * ink of the face they were setting. React Native clips a glyph to its line
+ * box, so every one of those cropped -- ascenders off the top, descenders off
+ * the bottom. It was worst where the face is tallest and the constant was
+ * smallest: Anton at `score` wanted 84.3px and was given 62, and `hero` in IBM
+ * Plex Mono wanted 83.2 and was given 70.
+ *
+ * `max` rather than a replacement, because the designed value is right
+ * wherever it is already generous -- body copy at 17/24 is a deliberate
+ * reading rhythm, well clear of Instrument Sans' 1.22, and nothing here should
+ * pull it back to the floor. This only ever adds room.
+ */
+export function leadingFor(fontFamily: string, fontSize: number, designed: number): number {
+  const ink = FACE_INK[fontFamily];
+
+  if (ink === undefined) {
+    throw new Error(
+      `No measured ink height for "${fontFamily}". Add it to FACE_INK in Text.tsx, ` +
+        'measured from the font file, or its glyphs will be cropped at every size.',
+    );
+  }
+
+  return Math.max(designed, Math.ceil(fontSize * ink));
+}
+
+/**
  * The type scale.
  *
  * Every size moved up from the previous scale, which topped out at 34px and
@@ -47,8 +107,27 @@ export const TEXT_VARIANTS: TextVariant[] = [
  * `score` exists because a headline number is not a column: the Chase Index is
  * one figure with nothing to align to, and setting it in the display face is
  * what makes it read as the app's own number rather than as instrument output.
+ *
+ * The `lineHeight` written into each case below is a REQUEST, not the final
+ * answer. It passes through `leadingFor`, which raises it to the face's own
+ * ink where the request is too tight -- so a number here can be read as the
+ * rhythm this variant wants, and never as a promise that the glyphs fit in it.
  */
 export function variantStyle(variant: TextVariant, theme: Theme): TextStyle {
+  const style = designedStyle(variant, theme);
+
+  return {
+    ...style,
+    lineHeight: leadingFor(
+      style.fontFamily as string,
+      style.fontSize as number,
+      style.lineHeight as number,
+    ),
+  };
+}
+
+/** The scale as designed, before the ink floor is applied. */
+function designedStyle(variant: TextVariant, theme: Theme): TextStyle {
   const { type, colors } = theme;
 
   // Display tracking is a theme's to refuse: a face as tight as Anton clips
@@ -59,9 +138,11 @@ export function variantStyle(variant: TextVariant, theme: Theme): TextStyle {
     case 'hero':
       return { fontFamily: type.monoBold, fontSize: 64, lineHeight: 70, letterSpacing: -2, color: colors.text };
     case 'score':
-      // lineHeight was 54 under a 56px face, which cropped every descender and
-      // the top of the caps in Anton. No line box may be shorter than its own
-      // font size; see `assertLineHeights` in the theme test.
+      // This is the case that kept losing glyphs. It shipped at 54 under a
+      // 56px face, was raised to 62 against a rule that only required the line
+      // box to clear the font SIZE, and still cropped: Anton's ink is 1.505em,
+      // so at 56px it needs 85. Requesting 62 here is now safe because
+      // `leadingFor` raises it per face rather than per guess.
       return { fontFamily: type.display, fontSize: 56, lineHeight: 62, letterSpacing: track(-2), color: colors.text };
     case 'display':
       return { fontFamily: type.display, fontSize: 40, lineHeight: 44, letterSpacing: track(-1), color: colors.text };
