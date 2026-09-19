@@ -1,4 +1,4 @@
-/* eslint-env jest */
+/* global jest */
 
 // The suite targets pure domain logic and the repository layer, both of which
 // take their dependencies by injection. Native modules are only stubbed here so
