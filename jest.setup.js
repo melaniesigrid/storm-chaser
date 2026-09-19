@@ -3,11 +3,18 @@
 // The suite targets pure domain logic and the repository layer, both of which
 // take their dependencies by injection. Native modules are only stubbed here so
 // that importing a barrel file never drags a native binding into the test run.
-// Date formatting is asserted in outlook.test.ts. Without a pinned zone,
-// '2026-09-19' (parsed as UTC midnight) and '2026-09-19T00:00' (local midnight)
-// land on different weekdays in any negative-offset zone, and the assertions
-// pass or fail by machine.
-process.env.TZ = 'UTC';
+//
+// The zone is pinned so date assertions do not pass or fail by machine. UTC is
+// the default, but it is deliberately overridable: a bug class this project has
+// already shipped once (a date-only string parsed as UTC midnight, shifting
+// every outlook row back a day west of UTC) is INVISIBLE under UTC. Running the
+// suite under a negative offset is what catches it:
+//
+//     npm run test:tz     (SC_TEST_TZ=America/Toronto)
+//
+// Set SC_TEST_TZ rather than TZ, so an unrelated TZ already in the environment
+// cannot silently unpin the default.
+process.env.TZ = process.env.SC_TEST_TZ || 'UTC';
 
 jest.mock('expo-file-system', () => {
   class Directory {

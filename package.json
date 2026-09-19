@@ -12,7 +12,8 @@
     "typecheck": "tsc --noEmit",
     "lint": "expo lint",
     "screenshots": "node scripts/capture-app-screenshots.mjs",
-    "screenshots:site": "node scripts/capture-screenshots.mjs"
+    "screenshots:site": "node scripts/capture-screenshots.mjs",
+    "test:tz": "SC_TEST_TZ=America/Toronto jest"
   },
   "dependencies": {
     "@expo-google-fonts/archivo-black": "^0.4.1",
