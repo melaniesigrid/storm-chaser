@@ -132,7 +132,7 @@ export default function MapScreen() {
                   backgroundColor: theme.colors.surface,
                 }}
               />
-              <Text variant="label" style={{ flex: 1 }}>
+              <Text variant="caption" style={{ flex: 1 }}>
                 {demo
                   ? `${others.length} community · demo data`
                   : `${others.length} from other chasers`}
@@ -151,7 +151,7 @@ export default function MapScreen() {
                 transform: [{ rotate: '45deg' }],
               }}
             />
-            <Text variant="label" style={{ flex: 1 }}>
+            <Text variant="caption" style={{ flex: 1 }}>
               {showLore
                 ? `${STORM_LEGENDS.length} storm legends · tap a pin`
                 : 'Storm legends hidden'}

@@ -1,6 +1,6 @@
 import { resolveAutoTheme, sunTimes } from '@/core/theme/resolveAutoTheme';
 import { THEME_NAMES } from '@/core/theme/themes';
-import type { Coordinates } from '@/features/weather/model/types';
+import type { Coordinates, WeatherConditionGroup } from '@/features/weather/model/types';
 
 /**
  * Auto theme resolution.
@@ -195,10 +195,12 @@ describe('resolveAutoTheme', () => {
   });
 
   /**
-   * Field Card is a taste choice, not a weather condition. Auto mode picking it
-   * would mean the app deciding the user's aesthetic for them.
+   * Broadcast and Field Card are taste choices, not weather conditions, and
+   * neither draws its background from the sky -- Bricolage is the only face
+   * that does. Auto mode picking one would mean the app deciding the user's
+   * aesthetic for them, and doing it by way of the sun.
    */
-  it('never chooses Field Card, at any hour of any month', () => {
+  it('never chooses a still theme, at any hour of any month', () => {
     const chosen = new Set<string>();
 
     for (let month = 0; month < 12; month++) {
@@ -209,6 +211,7 @@ describe('resolveAutoTheme', () => {
     }
 
     expect(chosen.has('field-card')).toBe(false);
+    expect(chosen.has('broadcast')).toBe(false);
     expect(chosen).toEqual(new Set(['skyward-day', 'skyward-night']));
   });
 
@@ -235,5 +238,124 @@ describe('resolveAutoTheme', () => {
     process.env.TZ = original;
 
     expect(new Set(answers).size).toBe(1);
+  });
+});
+
+/**
+ * The edges of the accepted domain, and the edges of the day.
+ *
+ * The validity check uses `>` rather than `>=`, so the poles and the
+ * antimeridian are inside the domain -- the McMurdo and Fiji cases. And the
+ * daylight window is closed at both ends, so the sunrise instant itself is
+ * already day. Both are one character away from being wrong, and neither shows
+ * up in a test that only visits the middle of the range.
+ */
+describe('resolveAutoTheme at the edges', () => {
+  const MIDSUMMER = new Date('2026-06-21T12:00:00Z');
+
+  it('accepts the poles and the antimeridian, which are real places', () => {
+    const extremes: Coordinates[] = [
+      { latitude: 90, longitude: 0 },
+      { latitude: -90, longitude: 0 },
+      { latitude: 0, longitude: 180 },
+      { latitude: 0, longitude: -180 },
+    ];
+
+    for (const coordinates of extremes) {
+      expect(resolveAutoTheme(MIDSUMMER, coordinates)).not.toBeNull();
+    }
+  });
+
+  it('declines a coordinate off the west and south edges too', () => {
+    const nonsense: Coordinates[] = [
+      { latitude: 0, longitude: -181 },
+      { latitude: -90.0001, longitude: 0 },
+      { latitude: 0, longitude: Number.NEGATIVE_INFINITY },
+    ];
+
+    for (const coordinates of nonsense) {
+      expect(resolveAutoTheme(MIDSUMMER, coordinates)).toBeNull();
+    }
+  });
+
+  /**
+   * The theme flips within a minute of the sun, on the correct side, at both
+   * ends of the day. A minute rather than the instant itself: `sunTimes` is
+   * recomputed from whatever instant it is handed, so the boundary it reports
+   * moves by a second or two depending on which side of it you ask from, and an
+   * assertion pinned to the exact millisecond would be testing that jitter
+   * rather than the behaviour. The behaviour is that a minute after sunrise is
+   * day and a minute before it is night.
+   */
+  it('flips with the sun at both ends of the day', () => {
+    const { sunriseMs, sunsetMs } = normal(new Date('2026-06-21T12:00:00Z'), TORONTO);
+    const MINUTE = 60_000;
+
+    expect(resolveAutoTheme(new Date(sunriseMs + MINUTE), TORONTO)).toBe('skyward-day');
+    expect(resolveAutoTheme(new Date(sunriseMs - MINUTE), TORONTO)).toBe('skyward-night');
+    expect(resolveAutoTheme(new Date(sunsetMs - MINUTE), TORONTO)).toBe('skyward-day');
+    expect(resolveAutoTheme(new Date(sunsetMs + MINUTE), TORONTO)).toBe('skyward-night');
+  });
+
+  /**
+   * Weather is enrichment, never the input. At night every condition is already
+   * night, so none of them may change the answer -- including the two that
+   * darken a daytime sky.
+   */
+  it('lets no condition change the answer once it is already night', () => {
+    const { sunsetMs } = normal(new Date('2026-06-21T12:00:00Z'), TORONTO);
+    const afterDark = new Date(sunsetMs + 60 * 60 * 1000);
+
+    const groups: WeatherConditionGroup[] = [
+      'clear',
+      'cloud',
+      'fog',
+      'drizzle',
+      'rain',
+      'snow',
+      'shower',
+      'thunderstorm',
+      'hail',
+      'unknown',
+    ];
+
+    for (const group of groups) {
+      expect(resolveAutoTheme(afterDark, TORONTO, group)).toBe('skyward-night');
+    }
+  });
+
+  /**
+   * Only thunderstorm and hail darken a daytime sky. An overcast afternoon is
+   * still an afternoon, so every other group has to leave the day alone --
+   * otherwise a drizzle in Vancouver turns the lights off.
+   */
+  it('keeps every non-storm daytime sky in the day theme', () => {
+    const noon = new Date('2026-06-21T16:00:00Z');
+    const calm: WeatherConditionGroup[] = [
+      'clear',
+      'cloud',
+      'fog',
+      'drizzle',
+      'rain',
+      'snow',
+      'shower',
+      'unknown',
+    ];
+
+    for (const group of calm) {
+      expect(resolveAutoTheme(noon, TORONTO, group)).toBe('skyward-day');
+    }
+  });
+
+  it('reads the sun at the equator, where the day barely moves all year', () => {
+    const quito: Coordinates = { latitude: -0.1807, longitude: -78.4678 };
+
+    for (const month of [0, 3, 6, 9]) {
+      const { sunriseMs, sunsetMs } = normal(new Date(Date.UTC(2026, month, 15, 12)), quito);
+      const dayLengthHours = (sunsetMs - sunriseMs) / 3_600_000;
+
+      expect(dayLengthHours).toBeGreaterThan(11.5);
+      expect(dayLengthHours).toBeLessThan(12.5);
+    }
   });
 });

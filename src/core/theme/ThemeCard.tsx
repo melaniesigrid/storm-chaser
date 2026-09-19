@@ -10,6 +10,8 @@ import { getTheme, type ThemeName } from './themes';
 const PREVIEW_ICON: Record<ThemeName, WeatherIconName> = {
   'skyward-day': 'clear-day',
   'skyward-night': 'starry-night',
+  // The warning glyph, not a sky: Broadcast previews an alert, not weather.
+  broadcast: 'code-yellow',
   'field-card': 'thunderstorms-day-rain',
 };
 
@@ -64,7 +66,7 @@ export function ThemeCard({ name, selected, onPress }: ThemeCardProps) {
             alignItems: 'center',
             gap: 14,
             padding: 14,
-            borderRadius: preview.radius.panel - 6,
+            borderRadius: Math.max(0, preview.radius.panel - 6),
             backgroundColor: colors.surface,
             borderWidth: preview.borderWidth,
             borderColor: colors.border,

@@ -135,8 +135,10 @@ export function sunTimes(date: Date, coordinates: Coordinates): SunTimes {
  * device that has never had a location fix gets the OS light/dark setting,
  * which is a better answer than pretending to know where the sun is.
  *
- * Field Card is never returned. It is a taste choice, not a weather condition,
- * and auto mode has no business picking it.
+ * Only the two Bricolage variants are ever returned. Broadcast and Field Card
+ * are taste choices rather than weather conditions, and they are also the two
+ * themes whose backgrounds are not generated from the sky at all -- there is
+ * nothing for the sun to resolve. Auto mode has no business picking either.
  */
 export function resolveAutoTheme(
   date: Date,

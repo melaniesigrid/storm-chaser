@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="day">
+<html lang="en" data-theme="atmospheric">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -8,7 +8,7 @@
 <link rel="icon" href="icons/thunderstorms-day-rain.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Archivo+Black&family=Anton&family=Big+Shoulders+Display:wght@300..900&family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&family=Anton&family=Big+Shoulders+Display:wght@300..900&family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   /* ============================================================
      Themes. The site wears the same three the app does, resolved
@@ -16,45 +16,33 @@
      change here exactly as it is in the app.
      ============================================================ */
 
-  :root,
-  html[data-theme="day"] {
-    --bg-1: #6E9AD4;
-    --bg-2: #A9C3E4;
-    --bg-3: #E8E4DA;
-    --bg-4: #F7F4EC;
-    --page: #F2F0E8;
-    --band: #ECE8DC;
-    --surface: #FFFFFF;
-    --ink: #14213A;
-    --ink-soft: #3A4761;
-    --line: #D6D2C6;
-    --accent: #C4402E;
-    --on-accent: #FFFFFF;
-    --t-dormant: #5B6472;
-    --t-unsettled: #4FD1C5;
-    --t-active: #F5C242;
-    --t-severe: #FF5A47;
-    --t-extreme: #8E7CFF;
-    --t-severe-text: #C4402E;
-    --display: 'Bricolage Grotesque', sans-serif;
-    --display-weight: 800;
-    --radius: 24px;
-    --card-border: 0px;
-    --bolt-core: #FFFFFF;
-    --bolt-glow: #FFD86B;
-    --flash: rgba(255, 255, 255, 0.85);
-  }
+  /* ============================================================
+     A theme is not a colour scheme.
 
-  html[data-theme="night"] {
+     Three themes that differ only in hex values are one design
+     painted three ways. These three disagree about the typeface,
+     the weight range, the case, the tracking, the reading measure,
+     the corner radius, the border weight, what elevation MEANS,
+     how dense a section is, and whether anything is allowed to
+     move at all. Colour is the least of it.
+
+     Everything below is a token. No rule further down this file
+     asks which theme is active.
+     ============================================================ */
+
+  html[data-theme="atmospheric"] {
+    /* ---- Skyward Night: the storm you are driving into ---- */
     --bg-1: #0B1026;
     --bg-2: #1B2347;
-    --bg-3: #2A2140;
-    --bg-4: #0B1026;
+    /* The haze band where sky meets ground. Dropping it is what makes a
+       four-stop sky read as a flat two-colour wash; the site had lost it. */
+    --bg-3: #241F42;
+    --bg-4: #2A2140;
     --page: #0B1026;
     --band: #0E1430;
     --surface: #141B33;
     --ink: #EDF1FA;
-    --ink-soft: #98A3C0;
+    --ink-soft: #AEB8D2;
     --line: #2B3558;
     --accent: #FFB84D;
     --on-accent: #0B1026;
@@ -64,16 +52,139 @@
     --t-severe: #FF6B57;
     --t-extreme: #A78BFF;
     --t-severe-text: #FF6B57;
+
     --display: 'Bricolage Grotesque', sans-serif;
     --display-weight: 800;
+    /* Weight as the whole idea: hairline against heavy inside one word. */
+    --display-light: 200;
+    --display-case: none;
+    --display-tracking: -0.04em;
+    --display-leading: 0.98;
+    --display-size: clamp(38px, 5.6vw, 64px);
+    --wordmark-size: clamp(54px, 10.5vw, 112px);
+    --wordmark-leading: 0.92;
+    --label-tracking: 2px;
+    --measure: 62ch;
+    --body-size: 19px;
+    --body-leading: 1.65;
+
     --radius: 24px;
+    --radius-sm: 14px;
+    /* Controls and pills were 28px and 999px hardcoded, which is how Broadcast
+       kept its rounded CTA while declaring zero radius everywhere else. */
+    --radius-control: 28px;
+    --radius-pill: 999px;
     --card-border: 0px;
+    --rule: 1px;
+    --section-pad: 112px;
+
+    /* Elevation with a DIRECTION. Lit from the storm overhead: the top edge
+       catches, the shadow falls below. A zero-offset coloured halo is the
+       dark-mode cliche, and it is decoration pretending to be depth. */
+    --lift: 0 -1px 0 rgba(190, 220, 255, 0.16) inset, 0 20px 44px rgba(0, 0, 0, 0.55);
+    --lift-hover: 0 -1px 0 rgba(190, 220, 255, 0.3) inset, 0 28px 60px rgba(0, 0, 0, 0.62);
+    --press: translateY(1px);
+
+    --ease: cubic-bezier(0.22, 1, 0.36, 1);
+    --dur: 420ms;
+
     --bolt-core: #FFFFFF;
     --bolt-glow: #9FD4FF;
     --flash: rgba(190, 220, 255, 0.9);
+    --sky-tint: #8FA3C8;
+    --sky-density: 0.28;
+    --rain-on: 1;
+    --shaft-on: 0;
+    --bloom-on: 1;
+    --ray-image: linear-gradient(90deg, var(--t-active) 0%, var(--t-severe) 62%, var(--accent) 100%);
+    --ray-tilt: rotate(0deg);
   }
 
-  html[data-theme="card"] {
+  :root,
+  html[data-theme="broadcast"] {
+    /* ---- 01 Broadcast: Anton, from the first wordmark board ----
+       Rejected for the app because one weight gives you no hierarchy to build
+       an interface out of. That is exactly why it is worth wearing here: the
+       constraint is the character. Hierarchy comes from SIZE and COLOUR only,
+       which is what a lower third on a weather bulletin actually does. */
+    /* Flat by decision, not by omission: four copies of one value, because a
+       bulletin graphic sits on a key, not on a sky. The weather belongs to
+       Bricolage, and a gradient here would be borrowing another face's
+       argument. */
+    --bg-1: #07090E;
+    --bg-2: #07090E;
+    --bg-3: #07090E;
+    --bg-4: #07090E;
+    --page: #07090E;
+    --band: #05070B;
+    --surface: #12161D;
+    --ink: #FFFFFF;
+    --ink-soft: #C2C7CF;
+    /* The rule, not a hairline. Broadcast separates planes with white. */
+    --line: #FFFFFF;
+    --accent: #FFD400;
+    --on-accent: #07090E;
+    --t-dormant: #5B6472;
+    --t-unsettled: #4FD1C5;
+    --t-active: #FFD400;
+    --t-severe: #FF5A47;
+    --t-extreme: #8E7CFF;
+    --t-severe-text: #FF7A69;
+
+    --display: 'Anton', sans-serif;
+    /* Anton ships exactly one weight, so light and heavy are the same number.
+       Writing it out rather than faking a 200 the family does not have. */
+    --display-weight: 400;
+    --display-light: 400;
+    --display-case: uppercase;
+    --display-tracking: 0.005em;
+    --display-leading: 0.86;
+    --display-size: clamp(36px, 5.4vw, 60px);
+    --wordmark-size: clamp(52px, 10.5vw, 118px);
+    --wordmark-leading: 0.84;
+    --label-tracking: 2.5px;
+    --measure: 58ch;
+    --body-size: 18px;
+    --body-leading: 1.6;
+
+    /* Zero throughout, and 4px of rule. With neither elevation nor a curve to
+       spend, every scrap of hierarchy comes from the white block edge. */
+    --radius: 0px;
+    --radius-sm: 0px;
+    --radius-control: 0px;
+    --radius-pill: 0px;
+    --card-border: 4px;
+    --rule: 4px;
+    --section-pad: 88px;
+
+    /* No shadow at all. A keyed graphic is not lifted off the picture, it is
+       cut into it; the edge does the whole job. */
+    --lift: none;
+    --lift-hover: none;
+    --press: translateY(2px);
+
+    /* A cut has no curve. Linear, and short enough to read as a take. */
+    --ease: linear;
+    --dur: 80ms;
+
+    --bolt-core: #FFFFFF;
+    --bolt-glow: #FFD400;
+    --flash: rgba(255, 212, 0, 0.8);
+    /* No sky. Bricolage is the only face whose background is generated from
+       the weather; this one is switched off out loud rather than left out. */
+    --sky-tint: #07090E;
+    --sky-density: 0;
+    --rain-on: 0;
+    --shaft-on: 0;
+    --bloom-on: 0;
+    --ray-image: linear-gradient(90deg, rgba(255, 212, 0, 0) 0%, #FFD400 22%, #FFFFFF 58%, #FFD400 80%, rgba(255, 212, 0, 0) 100%);
+    --ray-tilt: rotate(-4deg);
+  }
+
+  html[data-theme="fieldcard"] {
+    /* ---- Field Card: print, not software ----
+       Flat by design: one background value repeated, because a gradient
+       would be a screen pretending to be weather. Nothing here moves. */
     --bg-1: #FFF8EC;
     --bg-2: #FFF8EC;
     --bg-3: #FFF8EC;
@@ -92,13 +203,60 @@
     --t-severe: #FF5A47;
     --t-extreme: #8E7CFF;
     --t-severe-text: #C4402E;
-    --display: 'Archivo Black', sans-serif;
-    --display-weight: 400;
+
+    --display: 'Big Shoulders Display', sans-serif;
+    /* Archivo Black stood here and shipped ONE weight, so its light display
+       role had to borrow Instrument Sans. Big Shoulders carries a real
+       100-to-900, so the light role is the SAME condensed face at 300 and the
+       Field Card lockup can set one word in two weights the way the Bricolage
+       one does. */
+    --display-weight: 900;
+    --display-light: 300;
+    --display-case: uppercase;
+    --display-tracking: -0.015em;
+    --display-leading: 0.92;
+    --display-size: clamp(30px, 4.2vw, 46px);
+    --wordmark-size: clamp(44px, 8.4vw, 92px);
+    --wordmark-leading: 0.88;
+    --label-tracking: 3px;
+    /* A shorter measure: print columns are narrower than screen columns. */
+    --measure: 52ch;
+    --body-size: 17px;
+    --body-leading: 1.5;
+
     --radius: 20px;
+    --radius-sm: 14px;
+    /* The printed card's CTA is a rounded capsule with an ink outline, as
+       drawn on the board. Rounded-with-hard-outlines is its character. */
+    --radius-control: 30px;
+    --radius-pill: 999px;
     --card-border: 3px;
-    --bolt-core: #FFF8EC;
+    --rule: 3px;
+    /* Denser. A printed sheet does not have 112px of air between blocks. */
+    --section-pad: 72px;
+
+    /* Ink on paper. The shadow is an offset block, not a blur. */
+    --lift: 4px 4px 0 var(--line);
+    --lift-hover: 6px 6px 0 var(--line);
+    /* Pressing a card sits it DOWN on its own shadow. */
+    --press: translate(4px, 4px);
+
+    /* No easing. Mechanical things do not accelerate. */
+    --ease: linear;
+    --dur: 60ms;
+
+    /* Ink, like every other line on this theme. The core was cream on a cream
+       page, so the only thing drawing the bolt was its own soft glow. */
+    --bolt-core: #14140F;
     --bolt-glow: #FF5A47;
     --flash: rgba(255, 220, 120, 0.85);
+    --sky-tint: #FFF8EC;
+    --sky-density: 0;
+    --rain-on: 0;
+    --shaft-on: 0;
+    --bloom-on: 0;
+    --ray-image: linear-gradient(90deg, var(--t-active) 0%, var(--t-severe) 62%, var(--accent) 100%);
+    --ray-tilt: rotate(0deg);
   }
 
   * { box-sizing: border-box; }
@@ -146,7 +304,7 @@
     display: flex;
     gap: 6px;
     padding: 6px;
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     background: var(--surface);
     border: max(1px, var(--card-border)) solid var(--line);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
@@ -156,7 +314,7 @@
     min-height: 44px;
     padding: 0 16px;
     border: 0;
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     background: transparent;
     color: var(--ink-soft);
     font-family: 'IBM Plex Mono', monospace;
@@ -193,7 +351,6 @@
     animation: skyflash 6s linear infinite;
   }
 
-  html[data-theme="card"] .skyflash { mix-blend-mode: multiply; }
 
   /*
     Lightning is not a fade in. It is a stepped leader punching down, a return
@@ -238,31 +395,41 @@
   .wordmark .heavy {
     display: block;
     font-family: var(--display);
-    font-size: clamp(54px, 10.5vw, 112px);
-    line-height: 0.92;
-    letter-spacing: -0.04em;
+    font-size: var(--wordmark-size);
+    line-height: var(--wordmark-leading);
+    letter-spacing: var(--display-tracking);
+    text-transform: var(--display-case);
     color: var(--ink);
   }
 
-  .wordmark .light { font-weight: 200; }
+  /*
+   * On Anton these two weights are the SAME number, and that is the point of
+   * wearing it: the board was rejected for having one voice, so the lockup has
+   * to hold itself together on size and colour instead of on contrast between
+   * a hairline and a heavy.
+   */
+  .wordmark .light { font-weight: var(--display-light); }
   .wordmark .heavy { font-weight: var(--display-weight); }
 
-  html[data-theme="card"] .wordmark .light,
-  html[data-theme="card"] .wordmark .heavy { text-transform: uppercase; }
 
   .ray {
     height: 11px;
     border-radius: 6px;
     margin-top: 16px;
-    background: linear-gradient(90deg, var(--t-active) 0%, var(--t-severe) 62%, var(--accent) 100%);
+    background: var(--ray-image);
     transform-origin: left center;
     animation: ray-draw 6s cubic-bezier(0.22, 1, 0.36, 1) infinite;
   }
 
+  /*
+   * The ray is a brand element, not an event. It used to spend the first 42%
+   * of every cycle at scaleX(0) -- a wordmark with its underline missing for
+   * two and a half seconds out of six. It draws once, early, and stays.
+   */
   @keyframes ray-draw {
-    0%, 42% { transform: scaleX(0); }
-    52%     { transform: scaleX(1); }
-    100%    { transform: scaleX(1); }
+    0%   { transform: var(--ray-tilt) scaleX(0); }
+    14%  { transform: var(--ray-tilt) scaleX(1); }
+    100% { transform: var(--ray-tilt) scaleX(1); }
   }
 
   /* ---------- the bolt ---------- */
@@ -295,6 +462,11 @@
     stroke-linejoin: round;
   }
 
+  /* The two glow opacities below are floors that the draw-channel and draw-fork
+     keyframes immediately override -- those animate opacity across the whole
+     6s cycle. Do not reach for a theme token here expecting it to show: an
+     animation beats a normal declaration, and the theme has to steer the glow
+     through --bolt-glow instead. */
   .channel-glow { stroke: var(--bolt-glow); stroke-width: 15; opacity: 0.55; }
   .channel-core { stroke: var(--bolt-core); stroke-width: 5; }
   .fork-glow    { stroke: var(--bolt-glow); stroke-width: 9; opacity: 0.45; }
@@ -303,31 +475,46 @@
   .channel { stroke-dasharray: 420; stroke-dashoffset: 420; animation: draw-channel 6s linear infinite; }
   .fork    { stroke-dasharray: 150; stroke-dashoffset: 150; animation: draw-fork 6s linear infinite; }
 
+  /*
+   * The strike draws itself once, then never leaves.
+   *
+   * It used to return to opacity 0 for the back half of every cycle, so the
+   * bolt existed for 1.2 seconds out of 6 and the hero carried a 200x367 hole
+   * the rest of the time. Lightning being intermittent is the idea; a gap in
+   * the composition four fifths of the time is not the same thing.
+   *
+   * So the channel keeps a faint afterimage -- what the eye holds onto after a
+   * strike -- and the bright restrikes flicker down the same path over it.
+   */
   @keyframes draw-channel {
-    0%, 42%   { stroke-dashoffset: 420; opacity: 0; }
-    42.2%     { opacity: 1; }
-    44%       { stroke-dashoffset: 0; opacity: 1; }
-    /* Restrikes: the channel stays drawn and flickers down the same path. */
-    45%       { opacity: 0.15; }
-    46%       { opacity: 1; }
-    47.5%     { opacity: 0.1; }
-    49%       { opacity: 0.9; }
-    52%       { opacity: 0.35; }
-    56%       { opacity: 0.5; }
-    62%       { opacity: 0; stroke-dashoffset: 0; }
-    100%      { opacity: 0; stroke-dashoffset: 420; }
+    0%       { stroke-dashoffset: 420; opacity: 0; }
+    6%       { opacity: 1; }
+    12%      { stroke-dashoffset: 0; opacity: 1; }
+    16%      { opacity: 0.14; }
+    19%      { opacity: 0.95; }
+    23%      { opacity: 0.1; }
+    27%      { opacity: 0.8; }
+    34%      { opacity: 0.22; }
+    /* The long hold: present, quiet, waiting. */
+    44%, 74% { stroke-dashoffset: 0; opacity: 0.16; }
+    78%      { opacity: 0.85; }
+    81%      { opacity: 0.12; }
+    84%      { opacity: 0.6; }
+    100%     { stroke-dashoffset: 0; opacity: 0.16; }
   }
 
   @keyframes draw-fork {
-    0%, 43.5% { stroke-dashoffset: 150; opacity: 0; }
-    43.7%     { opacity: 1; }
-    45%       { stroke-dashoffset: 0; opacity: 1; }
-    46%       { opacity: 0.12; }
-    47%       { opacity: 0.85; }
-    49%       { opacity: 0.2; }
-    51%       { opacity: 0.6; }
-    60%       { opacity: 0; stroke-dashoffset: 0; }
-    100%      { opacity: 0; stroke-dashoffset: 150; }
+    0%       { stroke-dashoffset: 150; opacity: 0; }
+    7%       { opacity: 1; }
+    13%      { stroke-dashoffset: 0; opacity: 1; }
+    17%      { opacity: 0.12; }
+    20%      { opacity: 0.85; }
+    24%      { opacity: 0.15; }
+    28%      { opacity: 0.7; }
+    44%, 74% { stroke-dashoffset: 0; opacity: 0.12; }
+    78%      { opacity: 0.7; }
+    82%      { opacity: 0.1; }
+    100%     { stroke-dashoffset: 0; opacity: 0.12; }
   }
 
   .lede {
@@ -345,7 +532,7 @@
     align-items: center;
     min-height: 56px;
     padding: 0 28px;
-    border-radius: 28px;
+    border-radius: var(--radius-control);
     font-family: var(--display);
     font-weight: var(--display-weight);
     font-size: 18px;
@@ -449,7 +636,7 @@
     letter-spacing: 1.5px;
     text-transform: uppercase;
     padding: 5px 11px;
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     border: max(1px, var(--card-border)) solid var(--line);
     color: var(--ink-soft);
   }
@@ -556,7 +743,7 @@
   .b-radar .mini-cta { background: #FF5A47; color: #05070B; border-radius: 22px; }
 
   /* B — Skyward */
-  .b-sky { background: linear-gradient(175deg, #6E9AD4 0%, #A9C3E4 42%, #E8E4DA 78%, #F7F4EC 100%); color: #14213A; }
+  .b-sky { background: linear-gradient(175deg, #8DB0DF 0%, #A9C3E4 42%, #E8E4DA 78%, #F7F4EC 100%); color: #14213A; }
   .b-sky .board-tag { color: #14213A; }
   .b-sky .mini-temp, .b-sky .mini-score { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; letter-spacing: -0.04em; }
   .b-sky .mini-score { color: #FF5A47; }
@@ -569,12 +756,12 @@
   /* C — Field Card */
   .b-field { background: #FFF8EC; border: 3px solid #14140F; color: #14140F; }
   .b-field .board-tag { color: #3F3E34; }
-  .b-field .mini-temp, .b-field .mini-score { font-family: 'Archivo Black', sans-serif; letter-spacing: -0.04em; }
+  .b-field .mini-temp, .b-field .mini-score { font-family: 'Big Shoulders Display', sans-serif; font-weight: 900; letter-spacing: -0.04em; }
   .b-field .mini-pnl { background: #FFFFFF; border: 3px solid #14140F; border-radius: 14px; box-shadow: 4px 4px 0 #14140F; }
   .b-field .mini-label { color: #3F3E34; }
   .b-field .mini-bar { background: #FFF8EC; border: 3px solid #14140F; border-radius: 7px; }
   .b-field .mini-bar i { background: #FF5A47; }
-  .b-field .mini-cta { background: #F5C242; color: #14140F; border: 3px solid #14140F; border-radius: 24px; box-shadow: 4px 4px 0 #14140F; font-family: 'Archivo Black', sans-serif; font-weight: 400; }
+  .b-field .mini-cta { background: #F5C242; color: #14140F; border: 3px solid #14140F; border-radius: 24px; box-shadow: 4px 4px 0 #14140F; font-family: 'Big Shoulders Display', sans-serif; font-weight: 900; }
 
   /* D — High-Vis */
   .b-hivis { background: #000000; color: #FFFFFF; }
@@ -616,7 +803,7 @@
     box-shadow: 0 22px 50px rgba(20, 33, 58, 0.22);
   }
 
-  .phone--day   { background: linear-gradient(170deg, #6E9AD4, #A9C3E4 42%, #E8E4DA 80%, #F7F4EC); color: #14213A; }
+  .phone--day   { background: linear-gradient(170deg, #8DB0DF, #A9C3E4 42%, #E8E4DA 80%, #F7F4EC); color: #14213A; }
   .phone--night { background: linear-gradient(170deg, #0B1026, #1B2347 55%, #2A2140); color: #EDF1FA; }
   .phone--card  { background: #FFF8EC; border: 3px solid #14140F; color: #14140F; }
 
@@ -625,7 +812,7 @@
 
   .temp { font-size: 58px; line-height: 1; letter-spacing: -0.04em; }
   .phone--day .temp, .phone--night .temp { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; }
-  .phone--card .temp { font-family: 'Archivo Black', sans-serif; }
+  .phone--card .temp { font-family: 'Big Shoulders Display', sans-serif; font-weight: 900; }
 
   .cond { font-size: 19px; font-weight: 600; margin-top: 6px; }
 
@@ -638,7 +825,7 @@
 
   .score { font-size: 44px; line-height: 1; letter-spacing: -0.04em; }
   .phone--day .score, .phone--night .score { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; }
-  .phone--card .score { font-family: 'Archivo Black', sans-serif; }
+  .phone--card .score { font-family: 'Big Shoulders Display', sans-serif; font-weight: 900; }
 
   .ladder { display: flex; gap: 4px; margin-top: 12px; }
   .ladder span { flex: 1; height: 11px; border-radius: 3px; }
@@ -658,7 +845,6 @@
     box-shadow: 0 10px 28px rgba(20, 33, 58, 0.09);
   }
 
-  html[data-theme="card"] .feature { box-shadow: 5px 5px 0 var(--line); }
 
   .feature img { width: 56px; height: 56px; }
 
@@ -684,7 +870,6 @@
     border: var(--card-border) solid var(--line);
   }
 
-  html[data-theme="card"] .tier { box-shadow: 4px 4px 0 var(--line); }
 
   .tier .bar { height: 10px; border-radius: 5px; margin-bottom: 16px; }
   .tier .range { font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 1px; color: var(--ink-soft); }
@@ -723,7 +908,7 @@
     letter-spacing: 1px;
     text-transform: uppercase;
     padding: 6px 12px;
-    border-radius: 999px;
+    border-radius: var(--radius-pill);
     background: var(--t-active);
     color: #14140F;
   }
@@ -742,27 +927,373 @@
     html { scroll-behavior: auto; }
     .skyflash, .bolt-stage, .channel, .fork, .ray { animation: none; }
     .channel, .fork { stroke-dashoffset: 0; opacity: 1; }
-    .ray { transform: scaleX(1); }
+    .ray { transform: var(--ray-tilt) scaleX(1); }
   }
 
   @media (max-width: 620px) {
     .wrap { width: calc(100% - 32px); }
     section { padding: 68px 0; }
-    .switch { top: auto; bottom: 14px; right: 14px; }
     .hero { padding-top: 84px; }
+  }
+
+  /* ============================================================
+     THE DESIGN LAYER
+
+     Everything above this point was one design wearing three
+     palettes. Everything below resolves through the tokens, so
+     the three themes disagree about type, rhythm, elevation and
+     motion -- not only colour. No rule here names a theme.
+     ============================================================ */
+
+  /* ---------- type ---------- */
+
+  h2 {
+    font-family: var(--display);
+    font-weight: var(--display-weight);
+    font-size: var(--display-size);
+    line-height: var(--display-leading);
+    letter-spacing: var(--display-tracking);
+    text-transform: var(--display-case);
+    margin: 0 0 18px;
+  }
+
+  .section-lede,
+  .lede {
+    max-width: var(--measure);
+    font-size: var(--body-size);
+    line-height: var(--body-leading);
+  }
+
+  .eyebrow,
+  .theme-name,
+  .board-tag,
+  .mini-label,
+  .pnl-label,
+  .phone-loc,
+  .sub-item .k,
+  .tier .range {
+    letter-spacing: var(--label-tracking);
+  }
+
+  .feature h3,
+  .tier .name {
+    font-family: var(--display);
+    font-weight: var(--display-weight);
+    letter-spacing: var(--display-tracking);
+    text-transform: var(--display-case);
+    line-height: var(--display-leading);
+  }
+
+  /* ---------- rhythm ---------- */
+
+  section { padding: var(--section-pad) 0; }
+
+  /* ---------- elevation means something different in each theme ---------- */
+
+  .feature,
+  .tier,
+  .sub-item,
+  .phone,
+  .board {
+    border-width: var(--card-border);
+    border-style: solid;
+    border-color: var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--lift);
+    transition:
+      box-shadow var(--dur) var(--ease),
+      transform var(--dur) var(--ease);
+  }
+
+  .feature:hover,
+  .tier:hover { box-shadow: var(--lift-hover); }
+
+  /* ---------- press is a motion language, not an effect ---------- */
+
+  .btn,
+  .switch button {
+    transition:
+      transform var(--dur) var(--ease),
+      box-shadow var(--dur) var(--ease),
+      background-color var(--dur) var(--ease),
+      color var(--dur) var(--ease);
+  }
+
+  .btn {
+    /* max() is the guard, not decoration: Skyward sets --card-border to 0px,
+       and a ghost button with no border is a CTA with no edge. */
+    border-width: max(2px, var(--card-border));
+    border-style: solid;
+    border-color: var(--ink);
+    box-shadow: var(--lift);
+  }
+
+  .btn:hover { box-shadow: var(--lift-hover); }
+  .btn:active,
+  .switch button:active { transform: var(--press); box-shadow: none; }
+
+  /* ---------- rules ---------- */
+
+  hr,
+  .prop-rule { border-top-width: var(--rule); }
+
+  /* ============================================================
+     THE SKY
+
+     Three translating bands rather than a particle system: a
+     tiled gradient moved by background-position is one composited
+     layer the GPU already knows how to draw, where four hundred
+     nodes is four hundred things to lay out every frame.
+
+     It never crosses the reading column. Moving imagery under
+     body text is unreadable for a moment at a time and there is
+     no way to test "unreadable for a moment", so the storm frames
+     the text instead: the band above it, the rails beside it.
+     ============================================================ */
+
+  .sky {
+    /* Absolute inside the hero rather than fixed to the viewport. The storm is
+       the hero's weather, not the page's wallpaper, and this way it cannot end
+       up behind the hero's own opaque sky gradient or in front of a section
+       further down that has a ground of its own. */
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+    /* Field Card resolves to zero density. Opacity alone only makes the layer
+       invisible -- its eight infinite animations keep the main thread painting
+       every frame -- so the theme that switches it off takes it out of the
+       render tree entirely, the same way the reduced-motion block does. */
+    opacity: var(--sky-density);
+    transition: opacity var(--dur) var(--ease);
+  }
+
+
+  .sky-band {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 46vh;
+    overflow: hidden;
+    /* The rain thins out before it reaches the reading column rather than
+       stopping at a line. A hard edge would read as a box of weather; this
+       reads as the far side of a squall. Either way nothing meaningful is
+       moving behind the body copy. */
+    -webkit-mask-image: linear-gradient(to bottom, #000 0 48%, transparent 100%);
+    mask-image: linear-gradient(to bottom, #000 0 48%, transparent 100%);
+  }
+
+  .sky-rail {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    overflow: hidden;
+    /* Exactly the gutter outside the reading column. On a phone there is no
+       gutter, so the rails vanish on their own rather than by breakpoint. */
+    width: max(0px, calc((100vw - min(1120px, 100vw - 48px)) / 2));
+  }
+
+  .sky-rail--l { left: 0; }
+  .sky-rail--r { right: 0; }
+
+  .rain,
+  .shaft {
+    position: absolute;
+    inset: -30%;
+  }
+
+  /*
+   * A streak needs to be thin in one axis and long in the other, and a single
+   * linear-gradient can only vary along one. The gradient makes the DASH down
+   * the tile; the mask cuts it to a hairline across it. Without the mask the
+   * "rain" is the full tile width -- slabs, not weather.
+   */
+  .rain {
+    transform: rotate(var(--ang, 14deg));
+    background-image: linear-gradient(
+      to bottom,
+      transparent 0 58%,
+      var(--sky-tint) 58% 93%,
+      transparent 93% 100%
+    );
+    background-size: var(--col, 26px) var(--tile, 88px);
+    -webkit-mask-image: repeating-linear-gradient(
+      to right,
+      #000 0 1.4px,
+      transparent 1.4px var(--col, 26px)
+    );
+    mask-image: repeating-linear-gradient(
+      to right,
+      #000 0 1.4px,
+      transparent 1.4px var(--col, 26px)
+    );
+    opacity: calc(var(--o, 0.5) * var(--rain-on, 0));
+    will-change: transform;
+    animation: rain-fall var(--d, 900ms) linear infinite;
+  }
+
+  /*
+   * Translating by exactly one tile is seamless; by anything else it jumps.
+   *
+   * It moves on `transform`, not `background-position`. Background position is
+   * not a property the compositor can take, so seven full-bleed rain layers
+   * animating it repaint on the main thread every frame, for as long as the
+   * page is open. A transform on the same element is handed to the compositor
+   * and costs the main thread nothing. The rotation has to be repeated in the
+   * keyframe because it is the same property; `inset: -30%` is the overscan
+   * that keeps a one-tile slide from exposing an edge.
+   */
+  @keyframes rain-fall {
+    from { transform: rotate(var(--ang, 14deg)) translate3d(0, 0, 0); }
+    to { transform: rotate(var(--ang, 14deg)) translate3d(0, var(--tile, 88px), 0); }
+  }
+
+  .shaft {
+    transform: rotate(var(--ang, 24deg));
+    background-image: linear-gradient(to bottom, transparent 0 40%, var(--sky-tint) 55%, transparent 70% 100%);
+    background-size: 100% var(--tile, 1400px);
+    opacity: calc(var(--o, 0.55) * var(--shaft-on, 0));
+    animation: shaft-sweep var(--d, 42s) linear infinite;
+  }
+
+  @keyframes shaft-sweep {
+    to { background-position-y: var(--tile, 1400px); }
+  }
+
+  /*
+   * Sheet lightning. Not a strobe: a bloom that lifts over ~200ms and falls
+   * over ~700ms, once per eleven seconds. That is 0.09 flashes a second
+   * against the 3/s the spec permits, in the top 22% of the viewport against
+   * the 25% it permits, so it fails the general-flash test on every axis --
+   * which is the way you want to fail it.
+   */
+  .bloom {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    /* Sized independently of the band it sits in, because this is the element
+       WCAG 2.3.1 cares about: a bright change covering more than a quarter of
+       the viewport is a general flash. The rain above it may reach further
+       down; the bright thing may not. */
+    height: 22vh;
+    background: radial-gradient(120% 90% at 50% 0%, var(--flash) 0%, transparent 62%);
+    opacity: 0;
+    animation: sheet-bloom 11s var(--ease) infinite;
+  }
+
+  @keyframes sheet-bloom {
+    0%, 90% { opacity: 0; }
+    92% { opacity: calc(0.42 * var(--bloom-on, 0)); }
+    100% { opacity: 0; }
+  }
+
+  /* Content sits above the weather, always. */
+  .hero .wrap { position: relative; z-index: 2; }
+
+  /*
+   * Stillness is a design decision here, so it is switched off by a token
+   * rather than by naming the theme -- and the reduced-motion path and the
+   * Field Card path are the same path, which is how it should be.
+   */
+  @media (prefers-reduced-motion: reduce) {
+    .sky { display: none; }
+    .rain, .shaft, .bloom { animation: none; }
+    .btn, .feature, .tier, .switch button { transition: none; }
+  }
+
+  /* ---------- the switcher, now part of the hero's own evidence ---------- */
+
+  .spec-theme {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .switch {
+    /* It used to float in a corner, fixed to the viewport. It belongs in the
+       spec row with the other things this page asserts about itself. */
+    position: static;
+    display: inline-flex;
+    gap: 4px;
+    padding: 0;
+    background: none;
+    border: 0;
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+
+  .switch button {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: var(--label-tracking);
+    text-transform: uppercase;
+    padding: 7px 11px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    color: var(--ink-soft);
+    background: transparent;
+    border: var(--card-border) solid transparent;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+  }
+
+  .switch button:hover { color: var(--ink); }
+
+  .switch button[aria-pressed="true"] {
+    color: var(--on-accent);
+    background: var(--accent);
+    border-color: var(--line);
+  }
+
+  /* ---------- the sky is cheaper on a phone ---------- */
+
+  @media (max-width: 767px) {
+    .rain--far { display: none; }
+    .sky-band { height: 18vh; }
+  }
+
+  @media (max-width: 620px) {
+    .spec-theme { flex-wrap: wrap; }
   }
 </style>
 </head>
 <body>
 
-<div class="switch" role="group" aria-label="Theme">
-  <button type="button" data-set="day" aria-pressed="true">Day</button>
-  <button type="button" data-set="night" aria-pressed="false">Night</button>
-  <button type="button" data-set="card" aria-pressed="false">Card</button>
-</div>
+
 
 <header class="hero">
-  <div class="skyflash"></div>
+  <!--
+    The weather. Decorative in full: it carries no information, so it is hidden
+    from assistive technology rather than described to it.
+
+    Three rain bands, a sun shaft and a bloom all exist in the markup at once and
+    every one of them resolves its own opacity from a token. Nothing here knows
+    which theme is active, which is the same claim the app makes and the reason
+    this page is the proof of it.
+  -->
+  <div class="sky" aria-hidden="true">
+    <div class="sky-band">
+      <div class="rain rain--near" style="--ang:14deg; --col:22px; --tile:88px; --o:0.9;  --d:760ms"></div>
+      <div class="rain rain--mid"  style="--ang:12deg; --col:34px; --tile:72px; --o:0.55; --d:1180ms"></div>
+      <div class="rain rain--far"  style="--ang:10deg; --col:52px; --tile:56px; --o:0.3;  --d:1720ms"></div>
+      <div class="shaft" style="--ang:24deg; --tile:1600px; --o:0.7; --d:44s"></div>
+      <div class="bloom"></div>
+    </div>
+
+    <div class="sky-rail sky-rail--l">
+      <div class="rain rain--near" style="--ang:14deg; --col:26px; --tile:88px; --o:0.7; --d:900ms"></div>
+      <div class="rain rain--far"  style="--ang:10deg; --col:48px; --tile:56px; --o:0.3; --d:1720ms"></div>
+    </div>
+
+    <div class="sky-rail sky-rail--r">
+      <div class="rain rain--near" style="--ang:14deg; --col:26px; --tile:88px; --o:0.7; --d:840ms"></div>
+      <div class="rain rain--far"  style="--ang:10deg; --col:48px; --tile:56px; --o:0.3; --d:1640ms"></div>
+    </div>
+  </div>
   <div class="wrap">
     <p class="eyebrow">Field instrument · iOS and Android</p>
 
@@ -800,7 +1331,21 @@
       <span><b>React Native</b> Expo SDK 57</span>
       <span><b>TypeScript</b> strict</span>
       <span><b>Open-Meteo</b> keyless</span>
-      <span><b>291</b> unit tests</span>
+      <span><b>413</b> unit tests</span>
+      <!--
+        The switcher belongs here rather than floating in a corner. The site's
+        whole claim is that no screen knows which theme is active, and this
+        control is the proof: clicking it repaints every rule on the page.
+        A claim and its evidence should be in the same glance.
+      -->
+      <span class="spec-theme">
+        <b>Theme</b>
+        <span class="switch" role="group" aria-label="Theme">
+          <button type="button" data-set="atmospheric" aria-pressed="true">Atmospheric</button>
+          <button type="button" data-set="broadcast" aria-pressed="false">Broadcast</button>
+          <button type="button" data-set="fieldcard" aria-pressed="false">Field Card</button>
+        </span>
+      </span>
     </div>
   </div>
 </header>
@@ -941,7 +1486,7 @@
         </div>
         <span class="verdict verdict--shipped">Shipped</span>
         <p class="prop-note">
-          Trading-card weight: 3px outlines, hard offset shadows, Archivo Black. It gave
+          Trading-card weight: 3px outlines, hard offset shadows, Big Shoulders Display. It gave
           the token contract its <b>hardest test</b> — a theme with no gradient and a
           non-zero border.
         </p>
@@ -1038,7 +1583,7 @@
         </div>
         <div>
           <div class="temp">24&deg;</div>
-          <div class="cond" style="font-family:'Archivo Black',sans-serif;font-size:16px;">THUNDERSTORMS</div>
+          <div class="cond" style="font-family:'Big Shoulders Display',sans-serif;font-weight:900;font-size:16px;">THUNDERSTORMS</div>
         </div>
         <div class="pnl">
           <div class="pnl-label">Chase index</div>
@@ -1241,16 +1786,14 @@
       try { localStorage.setItem('sc-theme', name); } catch (error) { /* private mode */ }
     }
 
-    var saved = null;
-    try { saved = localStorage.getItem('sc-theme'); } catch (error) { /* private mode */ }
-
-    if (saved === 'day' || saved === 'night' || saved === 'card') {
-      apply(saved);
-    } else {
-      try {
-        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) apply('night');
-      } catch (error) { /* no matchMedia */ }
-    }
+    // Everyone arrives in the storm.
+    //
+    // Night is the default for every visitor on every load -- not restored from
+    // a previous visit, and not inherited from the OS light/dark setting. A
+    // storm app that opens on a bright clear page is arguing against itself,
+    // and this is the theme the work is meant to be judged in. The switcher
+    // still does everything it ever did; it just starts from the sky.
+    apply('atmospheric');
 
     buttons.forEach(function (button) {
       button.addEventListener('click', function () { apply(button.dataset.set); });

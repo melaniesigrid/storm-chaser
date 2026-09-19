@@ -2,7 +2,12 @@ import {
   AA_LARGE_TEXT,
   AA_NON_TEXT,
   AA_TEXT,
+  WCAG_GENERAL_FLASH_AREA_FRACTION,
+  WCAG_GENERAL_FLASH_LUMINANCE_DELTA,
+  WCAG_MAX_FLASHES_PER_SECOND,
+  compositeHex,
   contrastRatio,
+  meetsAA,
   parseHex,
   relativeLuminance,
 } from '@/core/theme/contrast';
@@ -14,7 +19,11 @@ import {
   isThemeName,
   themeForColorScheme,
 } from '@/core/theme/themes';
-import { createThemeStore, THEME_STORAGE_KEY } from '@/core/theme/themeStore';
+import {
+  createThemeStore,
+  isThemePreference,
+  THEME_STORAGE_KEY,
+} from '@/core/theme/themeStore';
 import { createMemoryStore, type KeyValueStore } from '@/core/storage/KeyValueStore';
 import type { ChaseLevel } from '@/features/weather/model/types';
 
@@ -61,8 +70,17 @@ describe('contrast', () => {
 });
 
 describe('theme registry', () => {
-  it('exposes exactly the three declared themes', () => {
-    expect(THEME_NAMES).toHaveLength(3);
+  /**
+   * Four themes, three display faces: the two Skyward variants share Bricolage
+   * because they are one design at two times of day, which is the pair the sun
+   * switches between.
+   */
+  it('exposes exactly the four declared themes, in three display faces', () => {
+    expect(THEME_NAMES).toHaveLength(4);
+
+    const faces = new Set(THEME_NAMES.map((name) => getTheme(name).type.display));
+    expect(faces.size).toBe(3);
+
     expect(Object.keys(THEMES).sort()).toEqual([...THEME_NAMES].sort());
   });
 
@@ -140,6 +158,24 @@ describe('theme store', () => {
     const backing = createMemoryStore({ [THEME_STORAGE_KEY]: 'solarized-dark' });
 
     expect(await createThemeStore(backing).load()).toEqual({ ok: true, value: null });
+  });
+
+  /**
+   * `'auto'` is a preference, not a theme name, so it has to survive a round
+   * trip through the same key without being mistaken for the unrecognised
+   * value above. If it degrades to null, auto silently becomes "follow the
+   * phone" on the next cold start and the user never learns it stopped.
+   */
+  it('round-trips the auto preference, which is not a theme name', async () => {
+    const backing = createMemoryStore();
+    const store = createThemeStore(backing);
+
+    await store.save('auto');
+
+    expect(await store.load()).toEqual({ ok: true, value: 'auto' });
+    expect(isThemeName('auto')).toBe(false);
+    expect(isThemePreference('auto')).toBe(true);
+    expect(isThemePreference('solarized-dark')).toBe(false);
   });
 
   it('clearing returns to following system appearance', async () => {
@@ -292,6 +328,21 @@ describe.each(THEME_NAMES)('%s', (name) => {
     const [top] = theme.colors.backgroundGradient;
     expect(contrastRatio(theme.colors.text, top)).toBeGreaterThanOrEqual(AA_LARGE_TEXT);
   });
+
+  /**
+   * `Screen` paints the gradient behind every screen, so muted copy is drawn on
+   * a stop, not on `surface`. It is body and caption text at 15px and 17px --
+   * never large text -- so the bar is AA_TEXT on EVERY stop, not the large-text
+   * bar on the top one.
+   *
+   * This is the assertion that was missing when Skyward Day's muted token sat
+   * at 3.21:1 against its own top stop, with onboarding's lede drawn in it.
+   */
+  it('keeps muted copy readable on every stop of its own gradient', () => {
+    for (const stop of theme.colors.backgroundGradient) {
+      expect(contrastRatio(theme.colors.textMuted, stop)).toBeGreaterThanOrEqual(AA_TEXT);
+    }
+  });
   /**
    * The rest of the brand contract. `voltShell` and `ray` are checked above;
    * these are the four tokens Volt and the Monogram read that nothing else
@@ -383,5 +434,344 @@ describe.each(THEME_NAMES)('%s', (name) => {
     const pupil = theme.isDark ? theme.brand.voltEye : '#14140F';
 
     expect(contrastRatio(pupil, theme.brand.voltShell[1])).toBeGreaterThanOrEqual(AA_NON_TEXT);
+  });
+
+  /**
+   * The camera screen used to hardcode its three colours and was the one screen
+   * the token contract did not reach. Now that it resolves them, they need the
+   * same floor every other text-on-surface pair in this system has.
+   */
+  it('keeps the viewfinder readout legible on the camera ground', () => {
+    expect(theme.colors.cameraGround).toMatch(/^#[0-9A-Fa-f]{6}$/);
+    expect(theme.colors.onCameraGround).toMatch(/^#[0-9A-Fa-f]{6}$/);
+    expect(
+      contrastRatio(theme.colors.onCameraGround, theme.colors.cameraGround),
+    ).toBeGreaterThanOrEqual(AA_TEXT);
+  });
+
+  /**
+   * The capture screen puts its failures on the viewfinder in the severe tier
+   * colour. A capture error the user cannot read is a photo they think they
+   * took.
+   */
+  it('keeps a capture failure readable on the camera ground', () => {
+    expect(
+      contrastRatio(theme.colors.tier.severe, theme.colors.cameraGround),
+    ).toBeGreaterThanOrEqual(AA_TEXT);
+  });
+
+  /**
+   * Token TOTALITY.
+   *
+   * This assertion did not exist before the atmosphere and motion groups were
+   * added, which was worth discovering: the contract was enforced only by the
+   * TypeScript interface, and every claim that "a test proves every theme
+   * defines every token" was wrong. It is true now.
+   *
+   * The point is not that the fields are present -- the compiler covers that --
+   * but that they carry REAL values. A theme that switched something off by
+   * leaving a hole would pass a type check and fail here.
+   */
+  it('defines every atmosphere token, switched off or not', () => {
+    const { atmosphere } = theme;
+    const colour = /^#[0-9A-Fa-f]{6}$/;
+
+    expect(['rain', 'sun', 'none']).toContain(atmosphere.kind);
+    expect(Array.isArray(atmosphere.layers)).toBe(true);
+    // A real colour in every theme, including the one with no layers to tint:
+    // the composite check below skips a themeless sky, so without this line
+    // Field Card's layerTint is never looked at by any test.
+    expect(atmosphere.layerTint).toMatch(colour);
+
+    for (const layer of atmosphere.layers) {
+      for (const value of [layer.speed, layer.angle, layer.opacity, layer.scale]) {
+        expect(Number.isFinite(value)).toBe(true);
+      }
+      expect(layer.opacity).toBeGreaterThan(0);
+      expect(layer.opacity).toBeLessThanOrEqual(1);
+    }
+
+    expect(typeof atmosphere.lightning.enabled).toBe('boolean');
+    expect(Number.isFinite(atmosphere.lightning.minGapMs)).toBe(true);
+    expect(Number.isFinite(atmosphere.lightning.maxGapMs)).toBe(true);
+    // A real colour even when disabled, so nothing downstream has to handle a
+    // missing or transparent value.
+    expect(atmosphere.lightning.bloom).toMatch(colour);
+
+    expect(Number.isFinite(atmosphere.clouds.count)).toBe(true);
+    expect(Number.isFinite(atmosphere.clouds.speed)).toBe(true);
+    expect(Number.isFinite(atmosphere.clouds.blur)).toBe(true);
+    expect(atmosphere.clouds.tint).toMatch(colour);
+
+    expect(typeof atmosphere.shimmer.enabled).toBe('boolean');
+    expect(Number.isFinite(atmosphere.shimmer.amplitude)).toBe(true);
+    expect(Number.isFinite(atmosphere.shimmer.periodMs)).toBe(true);
+  });
+
+  it('defines every motion token', () => {
+    const { motion } = theme;
+
+    expect(['atmospheric', 'mechanical', 'broadcast']).toContain(motion.language);
+    expect(motion.pressScale).toBeGreaterThan(0);
+    expect(motion.pressScale).toBeLessThanOrEqual(1);
+    expect(motion.pressDurationMs).toBeGreaterThan(0);
+    expect(['inOut', 'linear', 'snap']).toContain(motion.pressEasing);
+    expect(['rise', 'stamp', 'cut']).toContain(motion.revealKind);
+    expect(['wipe', 'registration']).toContain(motion.manualTransition);
+    expect(motion.autoTransition).toBe('dissolve');
+    expect(motion.autoTransitionMs).toBeGreaterThan(0);
+  });
+
+  /**
+   * WCAG 2.3.1, Three Flashes or Below Threshold. Level A, which is a LOWER bar
+   * than the AA this project clears everywhere else -- and the one an ambient
+   * lightning effect is in danger of breaking.
+   *
+   * A bright change is a general flash when it is faster than three per second
+   * AND changes relative luminance by 0.10 or more AND covers more than a
+   * quarter of the viewport. Clearing any one would be enough. Every theme
+   * clears all three, because the cost of being wrong is somebody's seizure.
+   */
+  it('keeps the lightning bloom under every WCAG 2.3.1 flash threshold', () => {
+    const { safety } = theme.motion;
+
+    expect(safety.flashMaxPerSecond).toBeLessThan(WCAG_MAX_FLASHES_PER_SECOND);
+    expect(safety.flashLuminanceDelta).toBeLessThan(WCAG_GENERAL_FLASH_LUMINANCE_DELTA);
+    expect(safety.flashAreaFraction).toBeLessThan(WCAG_GENERAL_FLASH_AREA_FRACTION);
+  });
+
+  /**
+   * The rate ceiling and the cadence have to agree. `minGapMs` is the floor the
+   * cadence tightens toward as the chase level rises, so if it were shorter
+   * than the rate ceiling allows, a severe storm would flash its way past the
+   * safety limit and the limit would be decoration.
+   */
+  it('never lets the bloom cadence outrun its own rate ceiling', () => {
+    const { lightning } = theme.atmosphere;
+    if (!lightning.enabled) return;
+
+    const shortestGapMs = 1000 / theme.motion.safety.flashMaxPerSecond;
+
+    expect(lightning.minGapMs).toBeGreaterThanOrEqual(shortestGapMs);
+    expect(lightning.maxGapMs).toBeGreaterThanOrEqual(lightning.minGapMs);
+  });
+
+  it('turns off haptics and hides the layer from the screen reader by default', () => {
+    expect(theme.motion.safety.hapticsDefault).toBe(false);
+    expect(theme.motion.safety.ariaHidden).toBe(true);
+    expect(theme.motion.safety.reducedMotionVariant).toBe('static-gradient');
+  });
+
+  /**
+   * Every existing contrast assertion in this file measures text against a
+   * STATIC token. The atmosphere layer puts something translucent between text
+   * and its ground, so the ground the text is really on is the tint composited
+   * over the gradient -- and none of those assertions would notice it going
+   * wrong.
+   *
+   * The realistic worst case for a glyph is the densest single band crossing
+   * it. Stacking all three as a full-area wash is not the worst case, it is an
+   * impossible one: the bands are sparse streaks, not sheets, so any given
+   * pixel is under one of them at a time.
+   */
+  it('keeps text readable through the densest band of its own weather', () => {
+    const { layers, layerTint } = theme.atmosphere;
+    if (layers.length === 0) return;
+
+    const densest = Math.max(...layers.map((layer) => layer.opacity));
+
+    for (const stop of theme.colors.backgroundGradient) {
+      const ground = compositeHex(layerTint, stop, densest);
+
+      expect(contrastRatio(theme.colors.text, ground)).toBeGreaterThanOrEqual(AA_LARGE_TEXT);
+      // `textMuted` is the token `tone="muted"` and the whole caption variant
+      // resolve to, at 15px and 17px. Checking only `text` here left the muted
+      // token free to wash out behind the very band this test exists to police.
+      expect(contrastRatio(theme.colors.textMuted, ground)).toBeGreaterThanOrEqual(AA_TEXT);
+    }
+  });
+
+  /**
+   * And the sky must not become a wash. Three bands at high opacity would sum
+   * to a translucent sheet over the whole gradient, which is both ugly and the
+   * thing that would break the assertion above by a different route.
+   */
+  it('keeps the combined weather well short of a full wash', () => {
+    const { layers } = theme.atmosphere;
+
+    const combined = layers.reduce((acc, layer) => acc + (1 - acc) * layer.opacity, 0);
+
+    expect(combined).toBeLessThan(0.5);
+  });
+});
+
+/**
+ * Cross-theme claims. These are about the SYSTEM rather than any one theme, so
+ * they sit outside the per-theme block.
+ */
+describe('the motion contract across themes', () => {
+  /**
+   * Field Card's argument is that a theme is not a colour scheme. If it drifted
+   * like Skyward, it would only be a palette. Its stillness is written out --
+   * `kind: 'none'`, no bands, nothing enabled -- rather than left as an absence
+   * nobody got round to filling in.
+   */
+  it('makes Field Card completely still, on purpose', () => {
+    const { atmosphere, motion } = getTheme('field-card');
+
+    expect(atmosphere.kind).toBe('none');
+    expect(atmosphere.layers).toHaveLength(0);
+    expect(atmosphere.lightning.enabled).toBe(false);
+    expect(atmosphere.clouds.count).toBe(0);
+    expect(atmosphere.shimmer.enabled).toBe(false);
+    expect(motion.language).toBe('mechanical');
+  });
+
+  it('gives both Skyward variants weather and an atmospheric language', () => {
+    for (const name of ['skyward-day', 'skyward-night'] as const) {
+      const theme = getTheme(name);
+
+      expect(theme.atmosphere.kind).not.toBe('none');
+      expect(theme.motion.language).toBe('atmospheric');
+    }
+  });
+
+  /**
+   * Only the night sky has lightning. Day gets a storm through the theme
+   * resolver switching to night, not through the day theme growing a bloom.
+   */
+  it('puts lightning in the night sky and nowhere else', () => {
+    const withLightning = THEME_NAMES.filter((name) => getTheme(name).atmosphere.lightning.enabled);
+
+    expect(withLightning).toEqual(['skyward-night']);
+  });
+
+  /**
+   * A mechanical theme that eased, or an atmospheric one that snapped, would
+   * read as a bug rather than as a decision.
+   */
+  it('keeps each motion language coherent with how it presses', () => {
+    for (const name of THEME_NAMES) {
+      const { motion } = getTheme(name);
+
+      if (motion.language === 'mechanical') {
+        expect(motion.pressEasing).toBe('snap');
+        expect(motion.revealKind).toBe('stamp');
+        // It sits down on its shadow rather than shrinking.
+        expect(motion.pressScale).toBe(1);
+      } else if (motion.language === 'broadcast') {
+        // A cut has no curve. It also has no stamp: nothing is being pressed
+        // into paper, the next frame simply replaces this one.
+        expect(motion.pressEasing).toBe('linear');
+        expect(motion.revealKind).toBe('cut');
+        expect(motion.pressScale).toBeLessThan(1);
+      } else {
+        expect(motion.pressEasing).toBe('inOut');
+        expect(motion.revealKind).toBe('rise');
+        expect(motion.pressScale).toBeLessThan(1);
+      }
+    }
+  });
+
+  /**
+   * Safety is a floor, not a style. A theme may be calmer; none may be louder.
+   */
+  it('holds every theme to the same safety floor', () => {
+    const safeties = THEME_NAMES.map((name) => JSON.stringify(getTheme(name).motion.safety));
+
+    expect(new Set(safeties).size).toBe(1);
+  });
+});
+
+/**
+ * `compositeHex` is the ground truth every atmosphere contrast assertion above
+ * rests on: if it mixes wrong, those assertions pass while the real screen
+ * fails. It is asserted here directly rather than only through them.
+ */
+describe('compositeHex', () => {
+  it('returns the ground untouched at zero alpha, and the overlay at full', () => {
+    expect(compositeHex('#FFFFFF', '#000000', 0)).toBe('#000000');
+    expect(compositeHex('#FFFFFF', '#000000', 1)).toBe('#ffffff');
+  });
+
+  it('lands halfway between the two at half alpha', () => {
+    expect(parseHex(compositeHex('#FFFFFF', '#000000', 0.5))).toEqual({
+      r: 128,
+      g: 128,
+      b: 128,
+    });
+  });
+
+  /**
+   * Alpha arrives from accumulated layer opacities, which can drift outside the
+   * unit range. Clamping rather than producing a channel outside 0-255 is what
+   * keeps a malformed colour from reaching a native view.
+   */
+  it('clamps an alpha outside the unit range instead of overshooting', () => {
+    expect(compositeHex('#FFFFFF', '#000000', 4)).toBe(compositeHex('#FFFFFF', '#000000', 1));
+    expect(compositeHex('#FFFFFF', '#000000', -2)).toBe(compositeHex('#FFFFFF', '#000000', 0));
+  });
+
+  /**
+   * A non-finite alpha is the clamp's blind spot: NaN passes straight through
+   * Math.min/Math.max, and the result is '#NaNNaNNaN' rather than a colour.
+   * Alpha arrives from accumulated layer opacities, so a division by zero
+   * upstream is all it takes.
+   */
+  it('returns a real colour for a non-finite alpha', () => {
+    expect(compositeHex('#FFFFFF', '#000000', Number.NaN)).toMatch(/^#[0-9a-f]{6}$/);
+    expect(compositeHex('#FFFFFF', '#000000', Number.NaN)).toBe(
+      compositeHex('#FFFFFF', '#000000', 0),
+    );
+    expect(compositeHex('#FFFFFF', '#000000', Number.POSITIVE_INFINITY)).toBe(
+      compositeHex('#FFFFFF', '#000000', 1),
+    );
+  });
+
+  /**
+   * A channel below 16 is one hex digit unless it is padded, and an unpadded
+   * channel silently shortens the string into an invalid colour.
+   */
+  it('pads a single-digit channel, so the result is always seven characters', () => {
+    const composited = compositeHex('#0A0B0C', '#000000', 1);
+
+    expect(composited).toHaveLength(7);
+    expect(composited).toBe('#0a0b0c');
+  });
+
+  it('returns something the rest of this module can read back', () => {
+    const composited = compositeHex('#9FD4FF', '#0B1026', 0.28);
+
+    expect(() => parseHex(composited)).not.toThrow();
+    expect(relativeLuminance(composited)).toBeGreaterThan(relativeLuminance('#0B1026'));
+  });
+
+  it('takes the short hex form on either side', () => {
+    expect(compositeHex('#FFF', '#000', 1)).toBe('#ffffff');
+    expect(compositeHex('#FFF', '#000', 0)).toBe('#000000');
+  });
+
+  it('rejects a colour it cannot parse rather than mixing nonsense', () => {
+    expect(() => compositeHex('rebeccapurple', '#000000', 0.5)).toThrow(/Not a hex colour/);
+    expect(() => compositeHex('#000000', '#12345', 0.5)).toThrow(/Not a hex colour/);
+  });
+});
+
+describe('the AA helper and the WCAG thresholds', () => {
+  it('reads meetsAA off the same ratio the assertions use', () => {
+    expect(meetsAA('#000000', '#FFFFFF')).toBe(true);
+    expect(meetsAA('#777777', '#808080')).toBe(false);
+    // Large text clears at a lower bar than body text, on the same pair.
+    expect(meetsAA('#767676', '#FFFFFF', AA_LARGE_TEXT)).toBe(true);
+  });
+
+  /**
+   * These are quoted from WCAG 2.3.1, not chosen. A theme is allowed to move;
+   * the line it is held to is not, so it is pinned separately from any theme.
+   */
+  it('pins the flash thresholds to the values the spec states', () => {
+    expect(WCAG_MAX_FLASHES_PER_SECOND).toBe(3);
+    expect(WCAG_GENERAL_FLASH_LUMINANCE_DELTA).toBeCloseTo(0.1, 5);
+    expect(WCAG_GENERAL_FLASH_AREA_FRACTION).toBeCloseTo(0.25, 5);
   });
 });

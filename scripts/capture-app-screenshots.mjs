@@ -28,7 +28,7 @@ import { chromium } from 'playwright';
 import { createServer } from 'node:http';
 import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, rmSync, statSync } from 'node:fs';
-import { dirname, extname, join, resolve } from 'node:path';
+import { dirname, extname, join, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = process.env.CAPTURE_ROOT ?? resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -82,16 +82,27 @@ function exportWeb() {
   });
 }
 
-/** Single page output: unknown paths fall through to index.html so the router can take them. */
+/**
+ * Single page output: unknown paths fall through to index.html so the router
+ * can take them.
+ *
+ * Two containment rules, because this serves a real directory off a real port
+ * while the capture runs. `join` resolves `..` segments, so without the prefix
+ * check `GET /../../../.ssh/id_rsa` reads straight out of the export root; and
+ * binding to loopback keeps the port off every other interface on the network.
+ */
 function serve(dir) {
+  const rootDir = resolve(dir);
   const server = createServer((req, res) => {
     const url = decodeURIComponent(req.url.split('?')[0]);
-    let file = join(dir, url);
-    if (!existsSync(file) || statSync(file).isDirectory()) file = join(dir, 'index.html');
+    const index = join(rootDir, 'index.html');
+    let file = resolve(rootDir, `.${url}`);
+    if (file !== rootDir && !file.startsWith(rootDir + sep)) file = index;
+    if (!existsSync(file) || statSync(file).isDirectory()) file = index;
     res.writeHead(200, { 'Content-Type': MIME[extname(file)] ?? 'application/octet-stream' });
     res.end(readFileSync(file));
   });
-  return new Promise((done) => server.listen(PORT, () => done(server)));
+  return new Promise((done) => server.listen(PORT, '127.0.0.1', () => done(server)));
 }
 
 /** Shrinks the 2x captures to a size a README can load. Skipped if sharp is absent. */

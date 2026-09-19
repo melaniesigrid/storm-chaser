@@ -16,7 +16,8 @@
     "test:tz": "SC_TEST_TZ=America/Toronto jest"
   },
   "dependencies": {
-    "@expo-google-fonts/archivo-black": "^0.4.1",
+    "@expo-google-fonts/anton": "^0.4.2",
+    "@expo-google-fonts/big-shoulders-display": "^0.2.3",
     "@expo-google-fonts/bricolage-grotesque": "^0.4.1",
     "@expo-google-fonts/ibm-plex-mono": "^0.4.0",
     "@expo-google-fonts/instrument-sans": "^0.4.0",
@@ -61,6 +62,8 @@
     "@types/jest": "^29.5.14",
     "@types/react": "~19.2.0",
     "babel-preset-expo": "~57.0.12",
+    "eslint": "^9.39.5",
+    "eslint-config-expo": "^57.0.2",
     "jest-expo": "~57.0.5",
     "playwright": "^1.63.0",
     "react-native-svg-transformer": "^1.5.3",

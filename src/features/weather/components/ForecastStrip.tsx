@@ -13,6 +13,14 @@ import type { HourlyPoint } from '../model/types';
 
 const COLUMN = 56;
 const GAP = 14;
+// Bar heights appear twice each — once as the track, once as the fill
+// multiplier — so they have to move together or the fill over/underruns.
+const RAIN_BAR_HEIGHT = 34;
+const CAPE_BAR_HEIGHT = 22;
+/** Below this the CAPE bar reads `active`; at or above it, `severe`. */
+const CAPE_SEVERE_JKG = 1500;
+/** Floor for the shared CAPE domain, so a calm day does not scale up to look busy. */
+const CAPE_MIN_DOMAIN = 1000;
 
 export function ForecastStrip({ hours }: { hours: HourlyPoint[] }) {
   const { theme } = useAppTheme();
@@ -32,7 +40,7 @@ export function ForecastStrip({ hours }: { hours: HourlyPoint[] }) {
   // instability rather than just the tallest value in this particular window.
   const capeMax = useMemo(() => {
     const capes = compact(hours.map((hour) => hour.capeJkg));
-    return capes.length ? Math.max(1000, Math.max(...capes)) : 0;
+    return capes.length ? Math.max(CAPE_MIN_DOMAIN, Math.max(...capes)) : 0;
   }, [hours]);
 
   if (!hours.length) return null;
@@ -69,7 +77,7 @@ export function ForecastStrip({ hours }: { hours: HourlyPoint[] }) {
                 <View
                   style={{
                     width: 26,
-                    height: 34,
+                    height: RAIN_BAR_HEIGHT,
                     marginTop: 8,
                     borderRadius: 4,
                     backgroundColor: theme.colors.surfaceSunken,
@@ -81,7 +89,7 @@ export function ForecastStrip({ hours }: { hours: HourlyPoint[] }) {
                     style={{
                       height: Math.max(
                         2,
-                        normalise(hour.precipitationProbabilityPct, 0, 100) * 34,
+                        normalise(hour.precipitationProbabilityPct, 0, 100) * RAIN_BAR_HEIGHT,
                       ),
                       backgroundColor: theme.colors.tier.unsettled,
                     }}
@@ -97,7 +105,7 @@ export function ForecastStrip({ hours }: { hours: HourlyPoint[] }) {
                   <View
                     style={{
                       width: 26,
-                      height: 22,
+                      height: CAPE_BAR_HEIGHT,
                       marginTop: 8,
                       borderRadius: 4,
                       backgroundColor: theme.colors.surfaceSunken,
@@ -107,9 +115,9 @@ export function ForecastStrip({ hours }: { hours: HourlyPoint[] }) {
                   >
                     <View
                       style={{
-                        height: Math.max(2, normalise(hour.capeJkg, 0, capeMax) * 22),
+                        height: Math.max(2, normalise(hour.capeJkg, 0, capeMax) * CAPE_BAR_HEIGHT),
                         backgroundColor:
-                          hour.capeJkg >= 1500
+                          hour.capeJkg >= CAPE_SEVERE_JKG
                             ? theme.colors.tier.severe
                             : theme.colors.tier.active,
                       }}

@@ -1,6 +1,10 @@
 import '../global.css';
 
-import { ArchivoBlack_400Regular } from '@expo-google-fonts/archivo-black';
+import { Anton_400Regular } from '@expo-google-fonts/anton';
+import {
+  BigShouldersDisplay_300Light,
+  BigShouldersDisplay_900Black,
+} from '@expo-google-fonts/big-shoulders-display';
 import {
   BricolageGrotesque_200ExtraLight,
   BricolageGrotesque_800ExtraBold,
@@ -45,11 +49,15 @@ export default function RootLayout() {
     IBMPlexMono_400Regular,
     IBMPlexMono_500Medium,
     IBMPlexMono_600SemiBold,
-    // Display faces. Which one is used is a theme decision, so both load up
-    // front: switching theme must not wait on a font.
+    // The three display faces. Which one is used is a theme decision, so all
+    // three load up front: switching theme must not wait on a font. Anton is
+    // one weight by design and so appears once; the other two carry a real
+    // light and a real heavy.
     BricolageGrotesque_200ExtraLight,
     BricolageGrotesque_800ExtraBold,
-    ArchivoBlack_400Regular,
+    Anton_400Regular,
+    BigShouldersDisplay_300Light,
+    BigShouldersDisplay_900Black,
   });
 
   // A font failure should degrade to system faces, never block the app.

@@ -1,6 +1,15 @@
 import { createContext, useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useColorScheme } from 'react-native';
 
+import { useLastKnownPosition } from '@/features/location/lastKnownPosition';
+
+import { resolveAutoTheme } from './resolveAutoTheme';
+import {
+  AUTO_PREFERENCE,
+  themeStore as defaultStore,
+  type ThemePreference,
+  type ThemeStore,
+} from './themeStore';
 import {
   DEFAULT_THEME,
   getTheme,
@@ -8,7 +17,16 @@ import {
   type Theme,
   type ThemeName,
 } from './themes';
-import { themeStore as defaultStore, type ThemeStore } from './themeStore';
+
+/**
+ * How often the auto preference re-asks the sky.
+ *
+ * A minute is far finer than sunset needs and still costs nothing: the
+ * resolution is arithmetic on a date and a coordinate, with no I/O. It exists
+ * so the theme actually turns over while the app is open, rather than only on
+ * the next cold start.
+ */
+const AUTO_TICK_MS = 60_000;
 
 export interface ThemeContextValue {
   theme: Theme;
@@ -17,7 +35,14 @@ export interface ThemeContextValue {
   ready: boolean;
   /** True once the user has chosen explicitly; system appearance stops applying. */
   isExplicit: boolean;
-  setTheme: (name: ThemeName) => void;
+  /**
+   * What the user chose, which is not always which theme is showing. Under
+   * `'auto'` the active `themeName` moves with the sun while this stays put.
+   */
+  preference: ThemePreference | null;
+  /** True when `'auto'` is chosen but no position fix has arrived yet. */
+  isAwaitingPosition: boolean;
+  setTheme: (preference: ThemePreference) => void;
   /** Drops the stored choice and returns to following system appearance. */
   followSystem: () => void;
 }
@@ -44,8 +69,13 @@ export interface ThemeProviderProps {
  */
 export function ThemeProvider({ children, store = defaultStore }: ThemeProviderProps) {
   const systemScheme = useColorScheme();
-  const [stored, setStored] = useState<ThemeName | null>(null);
+  const [stored, setStored] = useState<ThemePreference | null>(null);
   const [ready, setReady] = useState(false);
+  const [now, setNow] = useState(() => new Date());
+
+  // Module state, not a query: this provider is mounted ABOVE the query client,
+  // so anything it reads has to come from somewhere that does not need one.
+  const coordinates = useLastKnownPosition();
 
   useEffect(() => {
     let cancelled = false;
@@ -64,12 +94,29 @@ export function ThemeProvider({ children, store = defaultStore }: ThemeProviderP
     };
   }, [store]);
 
-  const themeName: ThemeName = stored ?? themeForColorScheme(systemScheme) ?? DEFAULT_THEME;
+  const isAuto = stored === AUTO_PREFERENCE;
+
+  useEffect(() => {
+    if (!isAuto) return;
+
+    const id = setInterval(() => setNow(new Date()), AUTO_TICK_MS);
+    return () => clearInterval(id);
+  }, [isAuto]);
+
+  // Auto falls back to system appearance rather than to a fixed theme: with no
+  // fix yet, the phone's own light/dark setting is the better guess at the sky
+  // than an assumption of daylight.
+  const fromSystem = themeForColorScheme(systemScheme) ?? DEFAULT_THEME;
+  const fromSky = isAuto ? resolveAutoTheme(now, coordinates) : null;
+  const themeName: ThemeName = isAuto ? (fromSky ?? fromSystem) : (stored ?? fromSystem);
 
   const setTheme = useCallback(
-    (name: ThemeName) => {
-      setStored(name);
-      void store.save(name);
+    (preference: ThemePreference) => {
+      setStored(preference);
+      // Resolve from the current instant the moment auto is chosen, rather than
+      // waiting up to a minute for the first tick.
+      if (preference === AUTO_PREFERENCE) setNow(new Date());
+      void store.save(preference);
     },
     [store],
   );
@@ -85,10 +132,12 @@ export function ThemeProvider({ children, store = defaultStore }: ThemeProviderP
       themeName,
       ready,
       isExplicit: stored !== null,
+      preference: stored,
+      isAwaitingPosition: isAuto && fromSky === null,
       setTheme,
       followSystem,
     }),
-    [themeName, ready, stored, setTheme, followSystem],
+    [themeName, ready, stored, isAuto, fromSky, setTheme, followSystem],
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;

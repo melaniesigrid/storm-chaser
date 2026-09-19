@@ -56,6 +56,48 @@ export const AA_LARGE_TEXT = 3;
 /** AA: 3:1 for UI component boundaries and meaningful graphics. */
 export const AA_NON_TEXT = 3;
 
+/**
+ * WCAG 2.3.1 "Three Flashes or Below Threshold". Level A -- a LOWER bar than
+ * the AA this project clears everywhere else, and the one an ambient lightning
+ * effect is in danger of breaking.
+ *
+ * A bright change counts as a general flash when it is faster than three per
+ * second, changes relative luminance by 0.10 or more, AND covers more than a
+ * quarter of the viewport. Failing any one of the three is enough to be safe;
+ * the theme tokens stay under all three, because the cost of a wrong call here
+ * is somebody's seizure.
+ */
+export const WCAG_MAX_FLASHES_PER_SECOND = 3;
+export const WCAG_GENERAL_FLASH_LUMINANCE_DELTA = 0.1;
+export const WCAG_GENERAL_FLASH_AREA_FRACTION = 0.25;
+
 export function meetsAA(foreground: string, background: string, threshold = AA_TEXT): boolean {
   return contrastRatio(foreground, background) >= threshold;
+}
+
+/**
+ * The colour actually reaching the eye when `top` is drawn over `bottom` at
+ * `alpha`.
+ *
+ * Contrast is a property of what is seen, not of what a token says. The moment
+ * anything translucent sits between text and its ground -- a rain band, a
+ * scrim, a bloom -- the ground the text is really on is this composite, and
+ * that is what the AA check has to run against. Without it the atmosphere layer
+ * could quietly wash out a palette that every existing test still calls
+ * compliant.
+ */
+export function compositeHex(top: string, bottom: string, alpha: number): string {
+  const over = parseHex(top);
+  const under = parseHex(bottom);
+  // Math.min/Math.max already fold both infinities into the unit range; NaN is
+  // the one value that survives them, and `NaN.toString(16).padStart(2, '0')`
+  // is the string 'NaN', so an unguarded NaN returns the malformed
+  // '#NaNNaNNaN' -- exactly the value this function exists to keep away from a
+  // native view. Treat it as fully transparent: the ground, unchanged.
+  const a = Number.isNaN(alpha) ? 0 : Math.min(1, Math.max(0, alpha));
+
+  const mix = (x: number, y: number) => Math.round(x * a + y * (1 - a));
+  const pair = (n: number) => n.toString(16).padStart(2, '0');
+
+  return `#${pair(mix(over.r, under.r))}${pair(mix(over.g, under.g))}${pair(mix(over.b, under.b))}`;
 }
