@@ -4,13 +4,19 @@ import type { ChaseLevel } from '@/features/weather/model/types';
  * The theme system.
  *
  * Pure data and pure types: no React, no I/O, no native modules, so the whole
- * contract is unit testable. `themes.test.ts` asserts that every theme defines
- * every token and that every text colour clears WCAG AA against the surface it
- * is drawn on. That test is the reason the old `chrome.dark.muted` bug (2.0:1)
- * cannot come back.
+ * contract is unit testable. `theme.test.ts` asserts that every theme defines
+ * every token, that every text colour clears WCAG AA against the surface it is
+ * drawn on, and that no theme's weather can flash past WCAG 2.3.1. Those tests
+ * are the reason the old `chrome.dark.muted` bug (2.0:1) cannot come back.
+ *
+ * (The totality half of that claim was written here long before it was true --
+ * until the atmosphere and motion groups landed, only the TypeScript interface
+ * enforced it and no test did. Worth remembering that a comment asserting a
+ * test exists is not a test.)
  *
  * Three themes, one contract. A screen never asks which theme is active; it
- * asks the active theme for a named token.
+ * asks the active theme for a named token. That now includes what the sky does
+ * and how a press feels, not only what colour things are.
  */
 
 export type ThemeName = 'skyward-day' | 'skyward-night' | 'field-card';
@@ -41,6 +47,15 @@ export interface ThemeColors {
   /** Primary action fill, and the text colour that sits on top of it. */
   accent: string;
   onAccent: string;
+  /**
+   * The camera screen's ground, and the text drawn on it. A viewfinder wants
+   * near-black in every theme, but not the SAME near-black: Skyward's is blue,
+   * Field Card's is its own ink. These exist because `capture.tsx` used to
+   * hardcode three hex values and was the one screen the token contract did not
+   * reach.
+   */
+  cameraGround: string;
+  onCameraGround: string;
   tabBar: string;
   tabActive: string;
   tabInactive: string;
@@ -103,6 +118,121 @@ export interface ThemeBrand {
   monogramRadius: number;
 }
 
+/**
+ * One drifting parallax band.
+ *
+ * `scale` is the band's principal dimension in dp: streak length for rain, beam
+ * width for a sun shaft. One field rather than two named ones, because the
+ * renderer already knows which it is drawing from `atmosphere.kind`.
+ */
+export interface AtmosphereLayer {
+  /** Relative speed. 1 is the nearest, fastest band. */
+  speed: number;
+  /** Degrees from vertical, before the real wind bearing is applied. */
+  angle: number;
+  opacity: number;
+  scale: number;
+}
+
+export interface AtmosphereLightning {
+  enabled: boolean;
+  /**
+   * The floor between two blooms. This is a SAFETY value, not a style one: it
+   * is what keeps the flash rate under the WCAG 2.3.1 threshold no matter how
+   * severe the chase level gets.
+   */
+  minGapMs: number;
+  maxGapMs: number;
+  bloom: string;
+}
+
+export interface AtmosphereClouds {
+  count: number;
+  speed: number;
+  /** Gaussian blur radius. Android implements this one; it is not free. */
+  blur: number;
+  tint: string;
+}
+
+export interface AtmosphereShimmer {
+  enabled: boolean;
+  /** Peak displacement in dp. */
+  amplitude: number;
+  periodMs: number;
+}
+
+/**
+ * What the sky does. Data, exactly like colour is data, so a screen never asks
+ * which theme is active -- it asks the active theme what its sky does.
+ *
+ * Every member is defined by every theme. Field Card says `kind: 'none'` and
+ * writes its zeros out loud rather than omitting the fields, so stillness reads
+ * as a decision rather than as something nobody got round to.
+ */
+export interface ThemeAtmosphere {
+  kind: 'rain' | 'sun' | 'none';
+  layers: readonly AtmosphereLayer[];
+  /**
+   * The colour the bands are drawn in. Separate from their opacity, because
+   * contrast is a property of what reaches the eye: text sitting on the
+   * gradient is really sitting on this tint composited over it, and
+   * `theme.test.ts` checks it at the densest band.
+   */
+  layerTint: string;
+  lightning: AtmosphereLightning;
+  clouds: AtmosphereClouds;
+  shimmer: AtmosphereShimmer;
+}
+
+/**
+ * The limits that keep the atmosphere layer from hurting anyone.
+ *
+ * These live in the token layer rather than in a branch inside the renderer for
+ * one reason: a token can be asserted by a test, and a branch can be forgotten.
+ * `theme.test.ts` checks every theme against the WCAG 2.3.1 thresholds.
+ */
+export interface MotionSafety {
+  /** Bloom rate ceiling. WCAG 2.3.1 allows 3/s; this sits far under it. */
+  flashMaxPerSecond: number;
+  /** Peak relative-luminance change, 0 to 1. The general-flash line is 0.10. */
+  flashLuminanceDelta: number;
+  /** Fraction of the viewport the bloom may cover. Above 0.25 it is a flash. */
+  flashAreaFraction: number;
+  /** What the sky becomes when the OS asks for reduced motion. */
+  reducedMotionVariant: 'static-gradient';
+  /** Storm haptics are opt-in, never opt-out. */
+  hapticsDefault: boolean;
+  /** The layer is decoration; it must not reach the screen reader. */
+  ariaHidden: boolean;
+}
+
+/**
+ * How this theme moves.
+ *
+ * Skyward is atmospheric: things ease, and the weather is ambient. Field Card
+ * is mechanical: nothing drifts, and every movement is a thing being pressed or
+ * stamped. That difference is what makes them two themes rather than two
+ * palettes.
+ */
+export interface ThemeMotion {
+  language: 'atmospheric' | 'mechanical';
+  /** 1 means this theme does not scale on press; it answers some other way. */
+  pressScale: number;
+  pressDurationMs: number;
+  pressEasing: 'inOut' | 'linear' | 'snap';
+  revealKind: 'rise' | 'stamp';
+  /**
+   * A theme change is a context swap -- faces, borders and radii all change at
+   * once -- so it cannot be cross-faded without rendering two full trees. Both
+   * transitions are therefore overlay-covered: something opaque passes over the
+   * swap. `wipe` travels; `dissolve` does not.
+   */
+  manualTransition: 'wipe' | 'registration';
+  autoTransition: 'dissolve';
+  autoTransitionMs: number;
+  safety: MotionSafety;
+}
+
 export interface Theme {
   name: ThemeName;
   label: string;
@@ -111,12 +241,67 @@ export interface Theme {
   colors: ThemeColors;
   type: ThemeTypography;
   brand: ThemeBrand;
+  atmosphere: ThemeAtmosphere;
+  motion: ThemeMotion;
   radius: { panel: number; control: number };
   /** Field Card draws hard 3px outlines; Skyward draws hairlines or none. */
   borderWidth: number;
   /** How a raised surface separates itself from the background. */
   elevation: 'soft' | 'hard' | 'glow';
 }
+
+/**
+ * The safety floor, shared by all three themes.
+ *
+ * A theme may be calmer than this; none may be louder. Kept as one object so
+ * there is a single place to tighten it, and so a theme that disagreed would be
+ * visibly disagreeing rather than quietly drifting.
+ */
+const MOTION_SAFETY: MotionSafety = {
+  // At most one bloom every three and a bit seconds. WCAG 2.3.1 permits three
+  // per second, so this sits an order of magnitude inside the line. The night
+  // theme's `minGapMs` is held to the period this implies, and a test checks
+  // the two agree: a rate ceiling the cadence can outrun is decoration.
+  flashMaxPerSecond: 0.3,
+  // The general-flash threshold is a 0.10 relative-luminance change.
+  flashLuminanceDelta: 0.08,
+  // Above a quarter of the viewport a bright change counts as a flash, so the
+  // bloom is confined to the top band of the sky.
+  flashAreaFraction: 0.22,
+  reducedMotionVariant: 'static-gradient',
+  hapticsDefault: false,
+  ariaHidden: true,
+};
+
+const SKYWARD_MOTION: ThemeMotion = {
+  language: 'atmospheric',
+  pressScale: 0.97,
+  pressDurationMs: 140,
+  pressEasing: 'inOut',
+  revealKind: 'rise',
+  manualTransition: 'wipe',
+  autoTransition: 'dissolve',
+  autoTransitionMs: 1200,
+  safety: MOTION_SAFETY,
+};
+
+/**
+ * Field Card does not ease and does not drift. A press drops the hard offset
+ * shadow to nothing in one frame-ish snap, which is the card physically sitting
+ * down on the page; it does not shrink. Its theme change is a print
+ * registration slip rather than a weather front.
+ */
+const FIELD_CARD_MOTION: ThemeMotion = {
+  language: 'mechanical',
+  pressScale: 1,
+  pressDurationMs: 60,
+  pressEasing: 'snap',
+  revealKind: 'stamp',
+  manualTransition: 'registration',
+  autoTransition: 'dissolve',
+  autoTransitionMs: 1200,
+  safety: MOTION_SAFETY,
+};
 
 const SKYWARD_TYPE: ThemeTypography = {
   display: 'BricolageGrotesque_800ExtraBold',
@@ -154,6 +339,8 @@ const skywardDay: Theme = {
     textMuted: '#3A4761',
     accent: '#C4402E',
     onAccent: '#FFFFFF',
+    cameraGround: '#05070B',
+    onCameraGround: '#F2F6FA',
     tabBar: '#FFFFFF',
     tabActive: '#14213A',
     tabInactive: '#5B6472',
@@ -183,6 +370,25 @@ const skywardDay: Theme = {
     monogramMark: '#FFB400',
     monogramRadius: 0.23,
   },
+  /**
+   * The calm before. One slow raking shaft whose angle comes from the actual
+   * hour, a cumulus bank drifting at a fraction of its speed, and a shimmer
+   * confined to the haze band -- the third gradient stop, which is the horizon.
+   *
+   * The shimmer is an opacity-and-translate oscillation rather than a real
+   * turbulence filter: `react-native-svg` ships seven filter primitives on
+   * Android and neither FeTurbulence nor FeDisplacementMap is among them, so a
+   * filter-based shimmer would render nothing on half the devices.
+   */
+  atmosphere: {
+    kind: 'sun',
+    layers: [{ speed: 0.06, angle: 28, opacity: 0.12, scale: 160 }],
+    layerTint: '#FFF4D6',
+    lightning: { enabled: false, minGapMs: 0, maxGapMs: 0, bloom: '#FFFFFF' },
+    clouds: { count: 2, speed: 0.04, blur: 28, tint: '#FFFFFF' },
+    shimmer: { enabled: true, amplitude: 3, periodMs: 5200 },
+  },
+  motion: SKYWARD_MOTION,
   radius: { panel: 24, control: 29 },
   borderWidth: 0,
   elevation: 'soft',
@@ -204,6 +410,8 @@ const skywardNight: Theme = {
     textMuted: '#98A3C0',
     accent: '#FFB84D',
     onAccent: '#0B1026',
+    cameraGround: '#05070B',
+    onCameraGround: '#F2F6FA',
     tabBar: '#0B1026',
     tabActive: '#FFB84D',
     tabInactive: '#98A3C0',
@@ -237,6 +445,31 @@ const skywardNight: Theme = {
     monogramMark: '#FFB84D',
     monogramRadius: 0.23,
   },
+  /**
+   * Driving into it. Three rain bands at different speeds and opacities, which
+   * is what gives the sky depth: one band reads as a screensaver, three read as
+   * weather with distance in it. The angle here is a resting value -- the
+   * renderer leans it to the real wind bearing.
+   *
+   * `minGapMs` is not a style choice. It is the safety floor that keeps the
+   * bloom under the WCAG 2.3.1 flash rate however severe the storm gets: the
+   * cadence tightens toward it as the chase level rises and never past it. Its
+   * value is the period implied by `safety.flashMaxPerSecond`, and a test holds
+   * the two together so neither can drift away from the other.
+   */
+  atmosphere: {
+    kind: 'rain',
+    layers: [
+      { speed: 1, angle: 14, opacity: 0.28, scale: 64 },
+      { speed: 0.62, angle: 12, opacity: 0.18, scale: 42 },
+      { speed: 0.34, angle: 10, opacity: 0.1, scale: 26 },
+    ],
+    layerTint: '#C3D4F0',
+    lightning: { enabled: true, minGapMs: 3400, maxGapMs: 14000, bloom: '#9FD4FF' },
+    clouds: { count: 2, speed: 0.05, blur: 36, tint: '#2A2140' },
+    shimmer: { enabled: false, amplitude: 0, periodMs: 0 },
+  },
+  motion: SKYWARD_MOTION,
   radius: { panel: 24, control: 29 },
   borderWidth: 1,
   elevation: 'glow',
@@ -258,6 +491,9 @@ const fieldCard: Theme = {
     textMuted: '#3F3E34',
     accent: '#F5C242',
     onAccent: '#14140F',
+    // Field Card's viewfinder is its own ink, not Skyward's blue-black.
+    cameraGround: '#14140F',
+    onCameraGround: '#FFF8EC',
     tabBar: '#FFF8EC',
     tabActive: '#14140F',
     tabInactive: '#5A584A',
@@ -289,6 +525,26 @@ const fieldCard: Theme = {
     // Signage, not software: the Field Card mark keeps its corners.
     monogramRadius: 0,
   },
+  /**
+   * Nothing moves. This is the theme's whole argument, so it is written out
+   * rather than left as an absence: `kind: 'none'`, no bands, no lightning, no
+   * cloud, no shimmer. Field Card is print, and print does not drift.
+   *
+   * Every field still carries a real colour even where it is switched off, so
+   * nothing downstream has to special-case a missing or transparent value.
+   *
+   * Its motion budget goes entirely into `motion`, where a press drops the hard
+   * offset shadow in one snap and a reveal stamps rather than rises.
+   */
+  atmosphere: {
+    kind: 'none',
+    layers: [],
+    layerTint: '#FFF8EC',
+    lightning: { enabled: false, minGapMs: 0, maxGapMs: 0, bloom: '#FFF8EC' },
+    clouds: { count: 0, speed: 0, blur: 0, tint: '#FFF8EC' },
+    shimmer: { enabled: false, amplitude: 0, periodMs: 0 },
+  },
+  motion: FIELD_CARD_MOTION,
   radius: { panel: 20, control: 28 },
   borderWidth: 3,
   elevation: 'hard',
