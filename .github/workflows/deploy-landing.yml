@@ -208,14 +208,31 @@ jobs:
         run: |
           set -euo pipefail
           url="https://$SITE_DOMAIN"
-          if ! body=$(curl -fsS --retry 5 --retry-delay 3 --retry-all-errors --max-time 30 "$url"); then
-            echo "::error::$url did not serve a page after the deploy"
-            exit 1
-          fi
-          for theme in $(grep -o 'data-set="[a-z-]*"' landing/index.html | sed 's/.*="//;s/"//' | sort -u); do
-            printf '%s' "$body" | grep -q "data-set=\"$theme\"" || {
-              echo "::error::$url does not offer the $theme theme -- production is not this build"
-              exit 1
-            }
+          themes=$(grep -o 'data-set="[a-z-]*"' landing/index.html | sed 's/.*="//;s/"//' | sort -u)
+
+          # Retry the WHOLE check, not just the fetch.
+          #
+          # The first run of this step failed 400ms after `vercel alias set`
+          # reported success, and it was right to: the edge was still handing
+          # out the previous build. Curl's own --retry never fired, because a
+          # stale page is a perfectly healthy 200. Propagation is the thing
+          # being waited on, so the assertion is what has to be retried.
+          for attempt in $(seq 1 12); do
+            body=$(curl -fsS --max-time 30 "$url" || true)
+            missing=""
+            for theme in $themes; do
+              case "$body" in
+                *"data-set=\"$theme\""*) ;;
+                *) missing="$missing $theme" ;;
+              esac
+            done
+            if [ -z "$missing" ]; then
+              echo "$url is serving this build (after ${attempt} attempt(s))"
+              exit 0
+            fi
+            echo "attempt $attempt:$url is missing$missing -- waiting for the edge"
+            sleep 5
           done
-          echo "$url is serving this build"
+
+          echo "::error::$url never served this build -- still missing$missing after 12 attempts"
+          exit 1
