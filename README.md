@@ -14,7 +14,7 @@
   <img src="https://img.shields.io/badge/Expo_SDK-57-000020?style=flat-square&logo=expo&logoColor=white" alt="Expo SDK 57" />
   <img src="https://img.shields.io/badge/React_Native-0.86-61DAFB?style=flat-square&logo=react&logoColor=black" alt="React Native 0.86" />
   <img src="https://img.shields.io/badge/TypeScript-strict-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript strict" />
-  <img src="https://img.shields.io/badge/tests-291_passing-4FD1C5?style=flat-square" alt="291 tests passing" />
+  <img src="https://img.shields.io/badge/tests-304_passing-4FD1C5?style=flat-square" alt="304 tests passing" />
   <img src="https://img.shields.io/badge/API_keys-none_required-F5C242?style=flat-square" alt="No API keys required" />
   <img src="https://img.shields.io/badge/platforms-iOS_%7C_Android-14213A?style=flat-square" alt="iOS and Android" />
 </p>
@@ -79,33 +79,69 @@ It is a judgement aid, not a forecast product, and it says so in the UI.
 ### :camera: Screenshots
 
 <!--
-Regenerate with:
-  npm i -D playwright && npx playwright install chromium
-  node scripts/capture-screenshots.mjs
-Captures landing/index.html at 1440x900, 820x1180 and 390x844, device scale factor 2.
-Set CAPTURE_URL to point the script at the deployed site instead of the local file.
+Regenerate everything below with:
+  npm run screenshots        the app itself, from source (scripts/capture-app-screenshots.mjs)
+  npm run screenshots:site   the showcase site (scripts/capture-screenshots.mjs)
+Prerequisite: npx playwright install chromium
+App captures at 390x844, 820x1180 and 1440x900, device scale factor 2.
+CAPTURE_LAT / CAPTURE_LON move the capture position; the weather is live.
 -->
 
-> **Note** — Storm Chaser is a native app: the camera, the location fix and the map are
-> native modules with no web equivalent, so these are captures of the project's showcase
-> site rather than a simulator. The three device mockups below are rendered from the real
-> theme tokens in [`src/core/theme/themes.ts`](src/core/theme/themes.ts). **Device
-> captures still to take:** Conditions, Field log, Map, Capture and Onboarding, on an iOS
-> simulator at 1170 × 2532 and an Android emulator at 1080 × 2400.
+These are the real app, not mockups. `npm run screenshots` re-exports `app/` and `src/`
+with `expo export --platform web` on every run and drives the result in a browser, so the
+images below cannot drift from the code — change a screen, run the script, the README
+updates. The weather is live too: the Chase Index you see is whatever the atmosphere over
+the capture position was doing at the time.
+
+**Conditions** — 43.653° N, 79.383° W
+
+| Mobile — 390 × 844 | Tablet — 820 × 1180 |
+| :---: | :---: |
+| <img src="docs/screenshots/app-conditions-mobile.png" alt="Conditions tab on a phone: 17 degrees and overcast over a sky gradient, a Chase Index of 3 reading Nothing to chase, and the instruments grid" width="300" /> | <img src="docs/screenshots/app-conditions-tablet.png" alt="Conditions tab at tablet width, the same panels on a wider column with the instruments grid in two columns" width="380" /> |
 
 <div align="center">
-  <img src="docs/screenshots/desktop-landing.png" alt="Storm Chaser showcase site at desktop width, showing the wordmark over a sky gradient and the product summary" width="100%" />
+  <img src="docs/screenshots/app-conditions-desktop.png" alt="Conditions tab at 1440 by 900, panels stretched full width with the tab bar along the bottom" width="100%" />
 </div>
 
-<br />
+<details>
+  <summary><b>More screens</b> — onboarding, the field log empty state, the theme picker</summary>
+  <br />
+
+| Onboarding | Field log | Appearance |
+| :---: | :---: | :---: |
+| <img src="docs/screenshots/app-onboarding-mobile.png" alt="Onboarding welcome screen: Volt the mascot above the storm chaser wordmark and a Get started button" width="240" /> | <img src="docs/screenshots/app-log-mobile.png" alt="Field log with no reports yet, explaining that a photograph gets stamped with coordinates, time and conditions" width="240" /> | <img src="docs/screenshots/app-settings-mobile.png" alt="Appearance screen showing the monogram and wordmark above the three theme choices" width="240" /> |
+
+</details>
+
+> **Two honest gaps.** The **Map** tab is missing from this set because
+> `react-native-maps` is native only — it calls `codegenNativeComponent`, which has no web
+> implementation — so it has to be captured from a device. The **capture flow** is missing
+> for the same class of reason: photographing a storm needs a camera and a real photo, and
+> a fake webcam feed would put a test pattern in the field log rather than a storm.
+>
+> The tab bar labels clip slightly in the phone capture. That is not a rendering artefact
+> of this pipeline: the bar has no bottom safe-area inset on web, which is also true of an
+> Android device on three-button navigation, so it is worth a look.
+
+#### The design system, and the showcase site
 
 <div align="center">
   <img src="docs/screenshots/themes.png" alt="The three themes side by side: Skyward Day, Skyward Night and Field Card, each rendering the same Chase Index panel" width="100%" />
 </div>
 
+<details>
+  <summary><b>Showcase site</b> — <a href="https://stormchaser-field.vercel.app">stormchaser-field.vercel.app</a>, at three widths</summary>
+  <br />
+
+<div align="center">
+  <img src="docs/screenshots/desktop-landing.png" alt="Showcase site at desktop width, the wordmark over a sky gradient with the product summary" width="100%" />
+</div>
+
 | Mobile — 390 × 844 | Tablet — 820 × 1180 |
 | :---: | :---: |
 | <img src="docs/screenshots/mobile-landing.png" alt="Showcase site at mobile width, wordmark and summary stacked in a single column" width="280" /> | <img src="docs/screenshots/tablet-landing.png" alt="Showcase site at tablet width, wordmark and summary with the sky gradient filling the upper half" width="380" /> |
+
+</details>
 
 <!-- TechStack -->
 ### :space_invader: Tech Stack
@@ -146,9 +182,9 @@ Set CAPTURE_URL to point the script at the deployed site instead of the local fi
 <details>
   <summary>Tooling</summary>
   <ul>
-    <li><a href="https://jestjs.io/">Jest</a> via <a href="https://www.npmjs.com/package/jest-expo">jest-expo</a> — 291 tests, no renderer, no mocking framework</li>
+    <li><a href="https://jestjs.io/">Jest</a> via <a href="https://www.npmjs.com/package/jest-expo">jest-expo</a> — 304 tests, no renderer, no mocking framework</li>
     <li><a href="https://github.com/kristerkari/react-native-svg-transformer">react-native-svg-transformer</a> so Meteocons import as components</li>
-    <li><a href="https://playwright.dev/">Playwright</a> for the screenshot script (dev-only, not a dependency)</li>
+    <li><a href="https://playwright.dev/">Playwright</a> + <a href="https://necolas.github.io/react-native-web/">react-native-web</a> — the screenshot pipeline renders the real app in a browser</li>
     <li><a href="https://vercel.com/">Vercel</a> for the static showcase site in <code>landing/</code></li>
   </ul>
 </details>
@@ -483,7 +519,7 @@ npx expo install --fix
 npm test
 ```
 
-291 tests across formatting, severity, mapping, the repository, the theme contract, the
+304 tests across formatting, severity, mapping, the repository, the theme contract, the
 icon mapping, the community layer and the storm legends. No renderer, no device, no
 mocking framework.
 
@@ -592,9 +628,9 @@ src/features/<feature>/
     components/            Feature specific presentation.
 src/services/              Cross cutting: query client, network probe, cloud sync.
 landing/                   The static showcase site. One HTML file, no build step.
-scripts/                   Screenshot capture for this README.
+scripts/                   Screenshot capture: the app itself, and the showcase site.
 docs/                      Architecture notes, AI disclosure, time log, screenshots.
-__tests__/                 291 tests. Domain, data and theme layers.
+__tests__/                 304 tests. Domain, data and theme layers.
 ```
 
 `model/` never imports from `hooks/` or `components/`. That is what makes the interesting
@@ -641,7 +677,7 @@ The snapshot is copied onto the record at capture time rather than referenced.
 | Skeleton screens | Layout matched skeletons on both data screens |
 | Pull to refresh | Conditions and field log |
 | Cloud integration | Upload client plus a community feed; no keys, sample-backed unless configured |
-| Unit tests | 291, across formatting, severity, mapping, the repository, the theme contract, the icon mapping, the community layer and the storm legends |
+| Unit tests | 304, across formatting, severity, mapping, the repository, the theme contract, the icon mapping, the community layer and the storm legends |
 
 ### Known limits
 
@@ -675,7 +711,7 @@ The snapshot is copied onto the record at capture time rather than referenced.
 - [ ] Component rendering tests
 - [ ] NetInfo and `onlineManager` in place of the 15 second poll
 - [ ] SQLite or MMKV behind `KeyValueStore` once the log outgrows one envelope
-- [ ] Device screenshots for this README, from a simulator and an emulator
+- [ ] Map and capture-flow screenshots from a device, the two screens the web pipeline cannot reach
 
 <!-- Contributing -->
 ## :wave: Contributing
@@ -690,8 +726,9 @@ system.
 To regenerate the screenshots in this file after a UI change:
 
 ```bash
-npm i -D playwright && npx playwright install chromium
-node scripts/capture-screenshots.mjs
+npx playwright install chromium   # once
+npm run screenshots               # the app, re-exported from source
+npm run screenshots:site          # the showcase site
 ```
 
 <!-- License -->

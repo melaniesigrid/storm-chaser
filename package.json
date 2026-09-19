@@ -10,13 +10,17 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "typecheck": "tsc --noEmit",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "screenshots": "node scripts/capture-app-screenshots.mjs",
+    "screenshots:site": "node scripts/capture-screenshots.mjs",
+    "test:tz": "SC_TEST_TZ=America/Toronto jest"
   },
   "dependencies": {
     "@expo-google-fonts/archivo-black": "^0.4.1",
     "@expo-google-fonts/bricolage-grotesque": "^0.4.1",
     "@expo-google-fonts/ibm-plex-mono": "^0.4.0",
     "@expo-google-fonts/instrument-sans": "^0.4.0",
+    "@expo/metro-runtime": "~57.0.16",
     "@meteocons/lottie": "^0.1.0",
     "@meteocons/svg-static": "^0.1.0",
     "@react-native-async-storage/async-storage": "2.2.0",
@@ -48,6 +52,7 @@
     "react-native-safe-area-context": "~5.7.0",
     "react-native-screens": "~4.26.0",
     "react-native-svg": "15.15.4",
+    "react-native-web": "^0.21.2",
     "react-native-worklets": "0.10.1",
     "tailwindcss": "^3.4.17"
   },
@@ -57,8 +62,10 @@
     "@types/react": "~19.2.0",
     "babel-preset-expo": "~57.0.12",
     "jest-expo": "~57.0.5",
+    "playwright": "^1.63.0",
     "react-native-svg-transformer": "^1.5.3",
     "react-test-renderer": "19.2.3",
+    "sharp": "^0.35.4",
     "typescript": "~5.9.2"
   }
 }
