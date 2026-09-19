@@ -314,6 +314,26 @@ export interface ThemeGlass {
   shade: string;
 }
 
+/**
+ * Where the conditions hero is drawn.
+ *
+ * `card` puts it on a Panel like every other block on the screen. `sky` drops
+ * the card and sets the place, the condition icon and the reading straight
+ * onto the background.
+ *
+ * This is here rather than in the screen because it is a material decision,
+ * not a layout one. Meteocons draw weather in white and pale blue, which is
+ * most of a cloud's ink; on Skyward Day the frosted pane composites to roughly
+ * #E1EAF7, so a 150px overcast icon was white on near-white and the hero
+ * effectively had no picture in it. The themes whose background IS weather can
+ * simply not put a pane between the two, and the same icon lands on blue.
+ *
+ * Broadcast and Field Card keep the card: their grounds are flat near-black
+ * and cream, the icon reads on both, and a hero with no card is a different
+ * design from the lower third and the printed stock they are each modelled on.
+ */
+export type ThemeHeroSurface = 'card' | 'sky';
+
 export interface Theme {
   name: ThemeName;
   label: string;
@@ -324,6 +344,7 @@ export interface Theme {
   brand: ThemeBrand;
   atmosphere: ThemeAtmosphere;
   glass: ThemeGlass;
+  heroSurface: ThemeHeroSurface;
   motion: ThemeMotion;
   radius: { panel: number; control: number };
   /** Field Card draws hard 3px outlines; Skyward draws hairlines or none. */
@@ -522,6 +543,7 @@ const skywardDay: Theme = {
     rim: 'rgba(255, 255, 255, 0.92)',
     shade: 'rgba(20, 33, 58, 0.10)',
   },
+  heroSurface: 'sky',
   motion: SKYWARD_MOTION,
   radius: { panel: 24, control: 29 },
   borderWidth: 0,
@@ -621,6 +643,7 @@ const skywardNight: Theme = {
     rim: 'rgba(186, 209, 255, 0.34)',
     shade: 'rgba(5, 7, 14, 0.42)',
   },
+  heroSurface: 'sky',
   motion: SKYWARD_MOTION,
   radius: { panel: 24, control: 29 },
   borderWidth: 1,
@@ -716,6 +739,7 @@ const broadcast: Theme = {
     rim: '#FFFFFF',
     shade: '#000000',
   },
+  heroSurface: 'card',
   motion: BROADCAST_MOTION,
   radius: { panel: 0, control: 0 },
   borderWidth: 4,
@@ -827,6 +851,7 @@ const fieldCard: Theme = {
     rim: '#14140F',
     shade: '#14140F',
   },
+  heroSurface: 'card',
   motion: FIELD_CARD_MOTION,
   radius: { panel: 20, control: 28 },
   borderWidth: 3,

@@ -14,7 +14,7 @@
   <img src="https://img.shields.io/badge/Expo_SDK-57-000020?style=flat-square&logo=expo&logoColor=white" alt="Expo SDK 57" />
   <img src="https://img.shields.io/badge/React_Native-0.86-61DAFB?style=flat-square&logo=react&logoColor=black" alt="React Native 0.86" />
   <img src="https://img.shields.io/badge/TypeScript-strict-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript strict" />
-  <img src="https://img.shields.io/badge/tests-509_passing-4FD1C5?style=flat-square" alt="509 tests passing" />
+  <img src="https://img.shields.io/badge/tests-534_passing-4FD1C5?style=flat-square" alt="534 tests passing" />
   <img src="https://img.shields.io/badge/API_keys-none_required-F5C242?style=flat-square" alt="No API keys required" />
   <img src="https://img.shields.io/badge/platforms-iOS_%7C_Android-14213A?style=flat-square" alt="iOS and Android" />
 </p>
@@ -182,7 +182,7 @@ the capture position was doing at the time.
 <details>
   <summary>Tooling</summary>
   <ul>
-    <li><a href="https://jestjs.io/">Jest</a> via <a href="https://www.npmjs.com/package/jest-expo">jest-expo</a> — 509 tests, no renderer, no mocking framework</li>
+    <li><a href="https://jestjs.io/">Jest</a> via <a href="https://www.npmjs.com/package/jest-expo">jest-expo</a> — 534 tests, no renderer, no mocking framework</li>
     <li><a href="https://github.com/kristerkari/react-native-svg-transformer">react-native-svg-transformer</a> so Meteocons import as components</li>
     <li><a href="https://playwright.dev/">Playwright</a> + <a href="https://necolas.github.io/react-native-web/">react-native-web</a> — the screenshot pipeline renders the real app in a browser</li>
     <li><a href="https://vercel.com/">Vercel</a> for the static showcase site in <code>landing/</code></li>
@@ -538,7 +538,7 @@ npx expo install --fix
 npm test
 ```
 
-509 tests across formatting, severity, mapping, the repository, the theme contract, the
+534 tests across formatting, severity, mapping, the repository, the theme contract, the
 icon mapping, the community layer and the storm legends. No renderer, no device, no
 mocking framework.
 
@@ -650,7 +650,7 @@ src/services/              Cross cutting: query client, network probe, cloud syn
 landing/                   The static showcase site. One HTML file, no build step.
 scripts/                   Screenshot capture: the app itself, and the showcase site.
 docs/                      Architecture notes, AI disclosure, time log, screenshots.
-__tests__/                 509 tests. Domain, data and theme layers.
+__tests__/                 534 tests. Domain, data and theme layers.
 ```
 
 `model/` never imports from `hooks/` or `components/`. That is what makes the interesting
@@ -700,7 +700,7 @@ The snapshot is copied onto the record at capture time rather than referenced.
 | Skeleton screens | Layout matched skeletons on both data screens |
 | Pull to refresh | Conditions and field log |
 | Cloud integration | Upload client plus a community feed; no keys, sample-backed unless configured |
-| Unit tests | 509, across formatting, severity, mapping, the repository, the theme contract, the icon mapping, the community layer, the storm legends and EXIF date resolution |
+| Unit tests | 534, across formatting, severity, mapping, the repository, the theme contract, the icon mapping, the community layer, the storm legends and EXIF date resolution |
 
 ### Known limits
 
@@ -787,3 +787,11 @@ See [`docs/AI_DISCLOSURE.md`](docs/AI_DISCLOSURE.md) for AI tool usage,
 [`docs/TIME_LOG.md`](docs/TIME_LOG.md) for the time breakdown,
 [`CHANGELOG.md`](CHANGELOG.md) for what changed in each version, and
 [`TODOS.md`](TODOS.md) for the open work that did not make this cut.
+
+---
+
+## Author
+
+Built by **Melanie Baratto** as a mobile assessment for Speer Technologies.
+
+[melaniesigrid.com](https://melaniesigrid.com) · [melaniesigrid@protonmail.com](mailto:melaniesigrid@protonmail.com)

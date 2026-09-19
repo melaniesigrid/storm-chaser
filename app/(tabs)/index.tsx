@@ -5,16 +5,14 @@ import { RefreshControl, ScrollView } from 'react-native';
 import { WeatherIcon } from '@/core/icons/WeatherIcon';
 import { useAppTheme } from '@/core/theme/useAppTheme';
 import { useNow } from '@/core/utils/useNow';
-import { Button, Panel, Screen, StatusBanner, Text } from '@/core/ui';
+import { Button, Panel, Screen, StatusBanner } from '@/core/ui';
 import {
   formatBearing,
-  formatCoordinates,
   formatPercent,
   formatPrecipitation,
   formatPressure,
   formatRelativeTime,
   formatSpeed,
-  formatTemperature,
 } from '@/core/utils/format';
 import { usePublishLastKnownPosition } from '@/features/location/lastKnownPosition';
 import { useDeviceLocation } from '@/features/location/useDeviceLocation';
@@ -22,14 +20,13 @@ import { usePlaceName } from '@/features/location/usePlaceName';
 import { StormLoreCard } from '@/features/storms/components/StormLoreCard';
 import { mockSnapshot } from '@/features/weather/api/weatherClient';
 import { ChaseIndexPanel } from '@/features/weather/components/ChaseIndexPanel';
+import { ConditionsHero } from '@/features/weather/components/ConditionsHero';
 import { ForecastStrip } from '@/features/weather/components/ForecastStrip';
 import { MetricGrid, type Metric } from '@/features/weather/components/MetricGrid';
 import { OutlookList } from '@/features/weather/components/OutlookList';
-import { VoltPerch } from '@/features/weather/components/VoltPerch';
 import { WeatherSkeleton } from '@/features/weather/components/WeatherSkeleton';
 import { WeatherUnavailable } from '@/features/weather/components/WeatherUnavailable';
 import { useWeatherSnapshot } from '@/features/weather/hooks/useWeather';
-import { iconForCondition } from '@/features/weather/model/weatherIcons';
 import { useNetworkStatus } from '@/services/net/useNetworkStatus';
 
 const STALE_AFTER_MS = 10 * 60 * 1000;
@@ -184,54 +181,11 @@ export default function ConditionsScreen() {
 
         {snapshot ? (
           <>
-            {/*
-              The hero runs down the card rather than across it. Side by side,
-              the icon and the temperature were two columns fighting for the
-              same width, and the icon had to stay small to let the reading
-              fit. Stacked, the condition gets to be 150px of weather with the
-              place name over it and the reading under it, which is the shape
-              the marketing page uses and the reason it looks like a poster
-              rather than a table.
-            */}
-            <Panel style={{ marginBottom: 12, alignItems: 'center' }}>
-              {place ? (
-                <Text variant="title" style={{ textAlign: 'center' }}>
-                  {place}
-                </Text>
-              ) : null}
-
-              <Text variant="label" style={{ marginTop: place ? 4 : 0 }}>
-                {location.coordinates
-                  ? formatCoordinates(
-                      location.coordinates.latitude,
-                      location.coordinates.longitude,
-                      3,
-                    )
-                  : 'Position unknown'}
-              </Text>
-
-              <WeatherIcon
-                name={iconForCondition(snapshot.current.condition, !snapshot.current.isDay)}
-                size={150}
-              />
-
-              <Text variant="hero">{formatTemperature(snapshot.current.temperatureC)}</Text>
-
-              <Text variant="title" style={{ marginTop: 8, textAlign: 'center' }}>
-                {snapshot.current.condition.label}
-              </Text>
-              <Text variant="caption" style={{ marginTop: 6, textAlign: 'center' }}>
-                {`Feels like ${formatTemperature(snapshot.current.apparentTemperatureC)} · updated ${formatRelativeTime(snapshot.fetchedAt)}`}
-              </Text>
-
-              {/*
-                Last child, and absolutely positioned: he lands on the empty
-                right shoulder the centred hero leaves behind, and paints over
-                everything above him rather than under it. Nothing in the card
-                moves to make room for him, before or after he speaks.
-              */}
-              <VoltPerch group={snapshot.current.condition.group} />
-            </Panel>
+            <ConditionsHero
+              snapshot={snapshot}
+              place={place}
+              coordinates={location.coordinates}
+            />
 
             <ChaseIndexPanel chase={snapshot.current.chase} />
 

@@ -113,14 +113,27 @@ export function variantStyle(variant: TextVariant, theme: Theme): TextStyle {
  * box gets wider, the layout box does not move, and alignment (including the
  * right-aligned readouts) is unchanged. Sized off the font rather than fixed,
  * so it holds for any typeface a future theme brings with it.
+ *
+ * `tracking` is the variant's own letterSpacing, and it is added to the
+ * allowance rather than ignored. Negative tracking is not a visual effect the
+ * platform applies after measuring -- it shortens the advance of EVERY glyph,
+ * the last one included, so the measured box comes up short by the full amount
+ * while the final letter still paints its own ink. That is the difference
+ * between a display face that merely looks tight and one whose last character
+ * arrives with a slice taken off it, and it is worst exactly where the scale
+ * tightens hardest: the 64px reading and the 56px score.
  */
-export function bleedFor(variant: TextVariant, fontSize: number): TextStyle | null {
+export function bleedFor(
+  variant: TextVariant,
+  fontSize: number,
+  tracking = 0,
+): TextStyle | null {
   switch (variant) {
     case 'hero':
     case 'score':
     case 'display':
     case 'title': {
-      const bleed = Math.ceil(fontSize * 0.08);
+      const bleed = Math.ceil(fontSize * 0.08) + Math.ceil(Math.abs(tracking));
       return { paddingHorizontal: bleed, marginHorizontal: -bleed };
     }
     // Tracked uppercase mono: letterSpacing adds a trailing gap after the last
@@ -167,7 +180,7 @@ export function Text({
     <RNText
       style={[
         base,
-        bleedFor(variant, base.fontSize ?? 17),
+        bleedFor(variant, base.fontSize ?? 17, base.letterSpacing ?? 0),
         override ? { color: override } : null,
         style,
       ]}

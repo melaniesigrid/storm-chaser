@@ -279,6 +279,19 @@ describe.each(THEME_NAMES)('%s', (name) => {
     expect(contrastRatio(theme.colors.surface, theme.colors.background)).toBeGreaterThan(1);
   });
 
+  /**
+   * The conditions hero drops its card only where there is a sky to drop it
+   * onto. The two are one decision -- a hero with no card over Broadcast's flat
+   * near-black is not a poster, it is a heading that lost its panel -- so they
+   * are pinned to each other rather than each set by hand and trusted to agree.
+   */
+  it('puts the hero on the sky only where the theme generates one', () => {
+    expect({ name, sky: theme.heroSurface === 'sky' }).toEqual({
+      name,
+      sky: theme.atmosphere.kind !== 'none',
+    });
+  });
+
   it('runs the sky gradient through four ascending stops', () => {
     const { backgroundGradient: stops, backgroundGradientLocations: at } = theme.colors;
 
@@ -833,6 +846,44 @@ describe('the type scale', () => {
     expect(bleedFor('display', 40)).toMatchObject({ paddingHorizontal: 4 });
     expect(bleedFor('body', 17)).toBeNull();
     expect(bleedFor('caption', 15)).toBeNull();
+  });
+
+  /**
+   * Negative tracking shortens the advance of the last glyph as well as the
+   * ones before it, so the measured box ends inside the final letter's ink.
+   * The allowance has to cover the tightening, not just the side bearing --
+   * this is the assertion that was missing while the 64px reading was losing
+   * the end of its degree sign.
+   */
+  it('widens the allowance by the tracking the variant is set with', () => {
+    const loose = bleedFor('hero', 64, 0) as { paddingHorizontal: number };
+    const tight = bleedFor('hero', 64, -2) as { paddingHorizontal: number };
+
+    expect(tight.paddingHorizontal).toBeGreaterThanOrEqual(loose.paddingHorizontal + 2);
+  });
+
+  /**
+   * And every variant the live scale tightens has to be asking for that room,
+   * rather than the widening being a function nothing calls with a real value.
+   */
+  it('passes the live tracking through for every tightened variant', () => {
+    for (const variant of TEXT_VARIANTS) {
+      const style = variantStyle(variant, THEMES['skyward-day']);
+      const tracking = (style.letterSpacing as number | undefined) ?? 0;
+      if (tracking >= 0) continue;
+
+      const bleed = bleedFor(variant, style.fontSize as number, tracking) as {
+        paddingHorizontal: number;
+      };
+      const untracked = bleedFor(variant, style.fontSize as number) as {
+        paddingHorizontal: number;
+      };
+
+      expect({ variant, ok: bleed.paddingHorizontal > untracked.paddingHorizontal }).toEqual({
+        variant,
+        ok: true,
+      });
+    }
   });
 });
 

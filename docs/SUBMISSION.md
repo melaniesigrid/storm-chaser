@@ -8,9 +8,10 @@
 | **Assessment** | Mobile — React Native (Senior React Native Developer) |
 | **GitHub repository** | https://github.com/melaniesigrid/storm-chaser |
 | **Screen recording** | _[REPLACE WITH GOOGLE DRIVE LINK — set to "anyone with the link"]_ |
+| **Portfolio** | https://melaniesigrid.com |
+| **Email** | melaniesigrid@protonmail.com |
 
-The repository is private, as required. `developer@speer.io` has been invited as a
-collaborator.
+The repository is private, as required, with `developer@speer.io` added as a collaborator.
 
 ---
 
@@ -88,7 +89,7 @@ defining the token for it.
 
 ## Testing
 
-509 unit tests across 24 suites, run under TypeScript strict mode. They target logic
+534 unit tests across 26 suites, run under TypeScript strict mode. They target logic
 rather than pixels: formatting, the severity model, API mapping, the repository and its
 migrations, the theme and typography contracts, WCAG contrast, icon mapping, the community
 layer, storm legends and EXIF date resolution.
@@ -97,9 +98,10 @@ The suite runs in two timezones — the default UTC and, via `npm run test:tz`,
 `America/Toronto` — because a whole class of date bug in this app is invisible under UTC.
 
 ```
-npm test          # 509 tests
+npm test          # 534 tests
 npm run test:tz   # the same suite at a negative UTC offset
 npm run typecheck # tsc --noEmit, clean
+npm run lint      # eslint, clean
 ```
 
 ---
@@ -152,3 +154,10 @@ in [`docs/TIME_LOG.md`](TIME_LOG.md).
 
 Where git history can bound a session, it does, and the log says so. Session one landed as
 a single commit and its figures are estimates.
+
+---
+
+## Contact
+
+**Melanie Baratto**
+[melaniesigrid.com](https://melaniesigrid.com) · [melaniesigrid@protonmail.com](mailto:melaniesigrid@protonmail.com)
