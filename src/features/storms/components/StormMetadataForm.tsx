@@ -61,7 +61,7 @@ export function StormMetadataForm({
         accessibilityIgnoresInvertColors
       />
 
-      <Panel label="Classification">
+      <Panel tone="classification" label="Classification">
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
           {STORM_TYPES.map((type) => (
             <Chip
@@ -94,7 +94,7 @@ export function StormMetadataForm({
         </Text>
       ) : null}
 
-      <Panel label="Field notes">
+      <Panel tone="field-notes" label="Field notes">
         <TextInput
           value={notes}
           onChangeText={setNotes}
@@ -118,7 +118,7 @@ export function StormMetadataForm({
         </Text>
       </Panel>
 
-      <Panel label="Captured automatically">
+      <Panel tone="captured" label="Captured automatically">
         <Row label="Source" value={photoSource === 'camera' ? 'Camera' : 'Imported'} />
         <Row
           label={photoSource === 'camera' ? 'Time' : 'Photo taken'}

@@ -11,7 +11,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { useAppTheme } from '@/core/theme/useAppTheme';
-import { Text } from '@/core/ui/Text';
+import { leadingFor, Text } from '@/core/ui/Text';
 
 export interface WordmarkProps {
   /** Cap size of one line. The whole lockup is derived from it. */
@@ -74,7 +74,27 @@ export function Wordmark({
   }));
 
   const rayHeight = Math.max(4, Math.round(size * 0.125));
-  const lineHeight = Math.round(size * 0.94);
+
+  /**
+   * The stack the lockup is drawn on: two lines closer together than either
+   * one is tall, which is what makes `storm` and `chaser` read as one mark
+   * rather than two words.
+   *
+   * It is 0.94 of the cap size, and no face can draw itself in that. Anton
+   * needs 1.505, so at the 22px this is set to on the profile screen the
+   * lockup was asking for a 21px box to hold 34px of letter, and Broadcast
+   * lost the tops and tails of both words. Skyward and Field Card were losing
+   * less, but losing.
+   *
+   * `Text` will not accept a box under the face any more, so the tight stack
+   * is bought back the other way: the line box gets everything the font needs
+   * and the surplus is handed back to layout as a negative margin. The letters
+   * are drawn whole, the two words sit exactly where they were designed to,
+   * and the neighbours above and below do not move -- which is the same trade
+   * the horizontal bleed makes, in the other axis.
+   */
+  const stack = Math.round(size * 0.94);
+  const pullFor = (family: string) => -Math.round((leadingFor(family, size, stack) - stack) / 2);
 
   return (
     <View
@@ -88,7 +108,8 @@ export function Wordmark({
         style={{
           fontFamily: theme.type.displayLight,
           fontSize: size,
-          lineHeight,
+          lineHeight: stack,
+          marginVertical: pullFor(theme.type.displayLight),
           letterSpacing: -size * 0.036 * theme.type.displayTracking,
           textAlign: align,
         }}
@@ -99,7 +120,8 @@ export function Wordmark({
         variant="display"
         style={{
           fontSize: size,
-          lineHeight,
+          lineHeight: stack,
+          marginVertical: pullFor(theme.type.display),
           letterSpacing: -size * 0.036 * theme.type.displayTracking,
           textAlign: align,
         }}

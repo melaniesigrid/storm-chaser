@@ -32,11 +32,23 @@ All notable changes to this project are documented here. Dates are YYYY-MM-DD.
 - **Stars in the dark themes.** A seeded, static field between the gradient and
   the content, denser and brighter towards the top where the sky is darkest.
   Draws nothing in the daylight themes.
-- **Field Card prints each report on its own stock.** Six tints of hues the
-  theme already owns, chosen by a hash of the report id so a card keeps its
-  colour for life. Every tint carries the theme's ink at AA, which is asserted.
+- **Field Card prints every card on its own stock.** Twelve tints of hues the
+  theme already owns, chosen by a hash of a stable name so a card keeps its
+  colour for life — a report's id in the field log, a `tone` for the fixed
+  panels on Conditions, capture and the profile. Every tint carries the theme's
+  ink at AA, which is asserted, and the recesses inside a card (a meter track,
+  an instrument well) are now mixed against the stock they sit on rather than
+  against a white the card no longer is. A test pins the six tones of the
+  Conditions column to six different stocks.
 
 ### Fixed
+
+- **`npm run lint` and `npm run typecheck` both run again.** `tsc` was exiting
+  on a deprecated `baseUrl` before it checked a line, and could no longer find
+  Jest's globals; the flat ESLint config was crawling the repo checkouts under
+  `.claude/worktrees` and parsing the ES-module capture scripts as CommonJS.
+  Both commands are now clean, as is `jest`, whose duplicate-manual-mock
+  warning came from the same worktrees.
 
 - **The back button said `(tabs)`.** iOS labels a back button with the previous
   screen's title, and the tab group's header is hidden, so its title fell back

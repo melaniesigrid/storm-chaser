@@ -7,11 +7,12 @@
 | **Candidate** | Melanie Baratto |
 | **Assessment** | Mobile — React Native (Senior React Native Developer) |
 | **GitHub repository** | https://github.com/melaniesigrid/storm-chaser |
-| **Screen recording** | _[REPLACE WITH GOOGLE DRIVE LINK — set to "anyone with the link"]_ |
+| **Screen recording** | https://drive.google.com/file/d/1hHfLGWvkn_EwCxRvGiozFD_H-ZrF_eAD/view?usp=sharing |
 | **Portfolio** | https://melaniesigrid.com |
 | **Email** | melaniesigrid@protonmail.com |
 
-The repository is private, as required, with `developer@speer.io` added as a collaborator.
+The repository is private, as required, and `developer@speer.io` has been granted
+collaborator access.
 
 ---
 
@@ -89,7 +90,7 @@ defining the token for it.
 
 ## Testing
 
-534 unit tests across 26 suites, run under TypeScript strict mode. They target logic
+560 unit tests across 28 suites, run under TypeScript strict mode. They target logic
 rather than pixels: formatting, the severity model, API mapping, the repository and its
 migrations, the theme and typography contracts, WCAG contrast, icon mapping, the community
 layer, storm legends and EXIF date resolution.
@@ -98,7 +99,7 @@ The suite runs in two timezones — the default UTC and, via `npm run test:tz`,
 `America/Toronto` — because a whole class of date bug in this app is invisible under UTC.
 
 ```
-npm test          # 534 tests
+npm test          # 560 tests
 npm run test:tz   # the same suite at a negative UTC offset
 npm run typecheck # tsc --noEmit, clean
 npm run lint      # eslint, clean

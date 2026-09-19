@@ -2,7 +2,7 @@ export { Button } from './Button';
 export { Chip } from './Chip';
 export { Confetti } from './Confetti';
 export { EmptyState } from './EmptyState';
-export { Panel } from './Panel';
+export { Panel, PanelSurface, usePanelStock, usePanelSurface, type PanelStock } from './Panel';
 export { Screen } from './Screen';
 export { Skeleton } from './Skeleton';
 export { StatusBanner } from './StatusBanner';

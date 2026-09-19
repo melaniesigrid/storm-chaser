@@ -80,7 +80,7 @@ export default function ProfileScreen() {
           </Text>
         </View>
 
-        <Panel label="Call sign">
+        <Panel tone="call-sign" label="Call sign">
           {/*
             Mounted only once the stored profile has been read, so the field
             seeds itself from the saved name instead of being reset under
@@ -126,7 +126,7 @@ export default function ProfileScreen() {
           style={{ marginTop: 4 }}
         />
 
-        <Panel label="Following" style={{ marginTop: 4 }}>
+        <Panel tone="following" label="Following" style={{ marginTop: 4 }}>
           <Text variant="body">
             {isAuto
               ? isAwaitingPosition
@@ -153,7 +153,7 @@ export default function ProfileScreen() {
           close: this is the phone forgetting the chaser entirely, which is
           what the confirmation says in as many words.
         */}
-        <Panel label="Account" style={{ marginTop: 4 }}>
+        <Panel tone="account-actions" label="Account" style={{ marginTop: 4 }}>
           <Text variant="body">
             Everything Storm Chaser knows about you is on this phone. Deleting your
             account erases your call sign, your whole field log and its photos.

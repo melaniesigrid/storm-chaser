@@ -6,32 +6,12 @@ closed them.
 
 ## Submission
 
-### Screen recording link is a placeholder
-**Priority:** P0
-**Files:** `landing/index.html` (deliverable 4), `docs/` 
-Deliverable 4 in the submission section renders "Link pending" on the live page.
-The recording has to be made on a real device or simulator. There IS a web target
-(`react-native-web` is installed, and `npm run screenshots` exports it), but the
-map renders as a device-only stand-in on web (`src/core/maps/react-native-maps.web.tsx`),
-so a headless capture would show a flow with no map in it. Record on a device,
-host it, replace the placeholder.
-
 ### Time log figures need a human check
 **Priority:** P2
 **Files:** `docs/TIME_LOG.md`, `landing/index.html`
 Session two and three totals are bounded by commit spans. Session one landed as a
 single initial commit, so its 7 h 45 m is an estimate with nothing to check it
 against. Confirm or correct before the assessor reads it.
-
-## Tooling
-
-### `npm run lint` does not run
-**Priority:** P1
-**Files:** `eslint.config.js`, `package.json`
-`eslint.config.js` is flat config but neither `eslint` nor `eslint-config-expo` is
-a declared dependency, so `npx expo lint` fails with "requires ESLint version
-8.57.0 or greater". Either install the pair and make lint pass, or delete the
-config. Shipping a lint script that errors is worse than having none.
 
 ## Manual QA — first run
 
@@ -89,6 +69,21 @@ passthrough that used it was removed as dead config. Either delete it or note wh
 it stays.
 
 ## Completed
+
+### Screen recording link was a placeholder
+**Completed:** v1.3.0 (2026-09-19)
+Recorded on a device, hosted on Google Drive, and linked from the README header,
+a new Walkthrough section, `docs/SUBMISSION.md` and deliverable 4 on the landing
+page. The landing page's `.pending` badge style went with it.
+
+
+### `npm run lint` and `npm run typecheck` both failed to run
+**Completed:** v1.3.0 (2026-09-19)
+The dependencies were declared after all; the configs were the problem.
+`tsconfig.json` kept a `baseUrl` TypeScript 6 refuses, and no longer picked up
+`@types/jest` as a transitive package. `eslint.config.js` had no ignores, so it
+linted the repo checkouts under `.claude/worktrees` as well as the repo.
+
 
 ### Storm legends, community reports, chart layer, brand identity
 **Completed:** v1.2.0 (2026-09-18)

@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import { WeatherIcon } from '@/core/icons/WeatherIcon';
 import type { WeatherIconName } from '@/core/icons/names';
 import { useAppTheme } from '@/core/theme/useAppTheme';
-import { Text } from '@/core/ui';
+import { Text, usePanelStock, usePanelSurface } from '@/core/ui';
 
 export interface Metric {
   label: string;
@@ -24,12 +24,20 @@ export interface Metric {
  */
 export function MetricGrid({ metrics }: { metrics: Metric[] }) {
   const { theme } = useAppTheme();
+  const surface = usePanelSurface();
+  // The well is cut into the card this grid was printed on, not into a fixed
+  // token -- see `usePanelStock`.
+  const { sunken } = usePanelStock();
   // The disc is a Skyward device: it belongs to the themes that draw soft
   // shapes over a sky. Field Card's control radius rounded it into a circle
   // and Broadcast's squared it into a box, and in both cases it came out as a
   // second shape competing with the glyph that carries the reading. Signage
   // and print set their icons straight onto the ground.
-  const bare = !theme.name.startsWith('skyward');
+  //
+  // And so does the sky, now that Skyward's panel has no card under it: the
+  // disc was a sunken well cut into a surface, and there is no surface left to
+  // cut it into. Eight cream circles floating on blue are eight holes.
+  const bare = !theme.name.startsWith('skyward') || surface === 'sky';
 
   return (
     <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
@@ -55,7 +63,7 @@ export function MetricGrid({ metrics }: { metrics: Metric[] }) {
                         // control radius rather than inventing a shape of its
                         // own.
                         borderRadius: Math.min(24, theme.radius.control),
-                        backgroundColor: theme.colors.surfaceSunken,
+                        backgroundColor: sunken,
                         borderWidth: theme.borderWidth,
                         borderColor: theme.colors.border,
                       }),

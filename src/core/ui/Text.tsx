@@ -1,4 +1,10 @@
-import { Text as RNText, type StyleProp, type TextProps as RNTextProps, type TextStyle } from 'react-native';
+import {
+  StyleSheet,
+  Text as RNText,
+  type StyleProp,
+  type TextProps as RNTextProps,
+  type TextStyle,
+} from 'react-native';
 
 import { useAppTheme } from '@/core/theme/useAppTheme';
 import type { Theme } from '@/core/theme/themes';
@@ -43,10 +49,14 @@ export const TEXT_VARIANTS: TextVariant[] = [
  *
  * These are measurements, not preferences. Do not round them down to make a
  * layout fit; a face needs what it needs, and the whole point of the floor
- * below is that the scale cannot quietly ask for less. If a theme brings a new
- * face, add it here with its real number -- `leadingFor` throws on a family it
- * has never measured rather than guessing a ratio and cropping it in
- * production, which is the failure this table exists to end.
+ * below is that the scale cannot quietly ask for less. A layout that wants to
+ * be tighter than the ink should give the space back with a negative margin,
+ * which moves the neighbours without shrinking the box the letters live in.
+ *
+ * If a theme brings a new face, add it here with its real number. An absent
+ * one falls back to the tallest entry rather than to a guess, so the failure
+ * mode is loose leading and never a crop; a test walks every face the themes
+ * declare so the fallback is never silently load-bearing.
  */
 const FACE_INK: Readonly<Record<string, number>> = {
   Anton_400Regular: 1.505,
@@ -81,17 +91,31 @@ const FACE_INK: Readonly<Record<string, number>> = {
  * pull it back to the floor. This only ever adds room.
  */
 export function leadingFor(fontFamily: string, fontSize: number, designed: number): number {
-  const ink = FACE_INK[fontFamily];
-
-  if (ink === undefined) {
-    throw new Error(
-      `No measured ink height for "${fontFamily}". Add it to FACE_INK in Text.tsx, ` +
-        'measured from the font file, or its glyphs will be cropped at every size.',
-    );
-  }
-
-  return Math.max(designed, Math.ceil(fontSize * ink));
+  return Math.max(designed, Math.ceil(fontSize * inkFor(fontFamily)));
 }
+
+/**
+ * The tallest face in the table, and what an unmeasured one is treated as.
+ *
+ * An unknown family used to throw. That was right for a pure function read by
+ * a test and wrong for the render path, where it turns a mistyped font name
+ * into a crashed screen. Erring tall instead costs some leading and cannot
+ * crop, which is the direction to be wrong in. Drift is caught by a test that
+ * walks every face the four themes declare, not by a runtime failure.
+ */
+const FALLBACK_INK = Math.max(...Object.values(FACE_INK));
+
+export function inkFor(fontFamily: string): number {
+  return FACE_INK[fontFamily] ?? FALLBACK_INK;
+}
+
+/**
+ * The faces that carry a real measurement, so a test can check that every
+ * family the themes actually set is one of them. Without that check the
+ * fallback above becomes load-bearing the first time a theme brings a new
+ * face, and loose leading is the kind of wrong nobody files a bug about.
+ */
+export const MEASURED_FACES: readonly string[] = Object.keys(FACE_INK);
 
 /**
  * The type scale.
@@ -255,15 +279,47 @@ export function Text({
   const { theme } = useAppTheme();
 
   const override = color ?? toneColor(tone, theme);
-  const base = variantStyle(variant, theme);
+
+  /**
+   * Flatten before measuring, because the caller wins.
+   *
+   * The ink floor used to live in `variantStyle` alone, which made it a
+   * suggestion: `style` is applied after the variant, so any caller passing
+   * its own `lineHeight` -- and a dozen of them do, the wordmark and the theme
+   * previews included -- put the line box straight back under the face and
+   * cropped the glyphs again. The wordmark asked for `size * 0.94`, which is
+   * 21px of box for Anton at 22px, where Anton needs 34.
+   *
+   * So the floor is applied here instead, to the style that actually renders,
+   * and it is the LAST thing in the array. A caller can still ask for more
+   * leading and get it; it can no longer ask for less than the face needs.
+   * A component that wants the tight stack back should give the space back to
+   * layout with a negative margin, the way `Wordmark` does, rather than by
+   * shrinking the box the letters are drawn in.
+   */
+  const resolved = StyleSheet.flatten<TextStyle>([
+    variantStyle(variant, theme),
+    override ? { color: override } : null,
+    style,
+  ]);
+
+  const fontSize = resolved.fontSize ?? 17;
 
   return (
     <RNText
       style={[
-        base,
-        bleedFor(variant, base.fontSize ?? 17, base.letterSpacing ?? 0),
-        override ? { color: override } : null,
-        style,
+        // First, so a caller's own margins still override the allowance. Sized
+        // off the resolved size rather than the variant's, for the same reason
+        // the leading is: the caller may have changed it.
+        bleedFor(variant, fontSize, resolved.letterSpacing ?? 0),
+        resolved,
+        {
+          lineHeight: leadingFor(
+            resolved.fontFamily ?? theme.type.body,
+            fontSize,
+            resolved.lineHeight ?? 0,
+          ),
+        },
       ]}
       {...rest}
     />

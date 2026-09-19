@@ -5,7 +5,7 @@ import { RefreshControl, ScrollView } from 'react-native';
 import { WeatherIcon } from '@/core/icons/WeatherIcon';
 import { useAppTheme } from '@/core/theme/useAppTheme';
 import { useNow } from '@/core/utils/useNow';
-import { Button, Panel, Screen, StatusBanner } from '@/core/ui';
+import { Button, Panel, PanelSurface, Screen, StatusBanner } from '@/core/ui';
 import {
   formatBearing,
   formatPercent,
@@ -135,6 +135,12 @@ export default function ConditionsScreen() {
 
   return (
     <Screen edgeToEdge>
+      {/*
+        The one screen whose background is the subject rather than the ground.
+        Every block below says so once, here, instead of each deciding for
+        itself; on the themes that have no sky the wrapper is inert.
+      */}
+      <PanelSurface value={theme.conditionsSurface}>
       <ScrollView
         contentContainerStyle={{ padding: 16, paddingBottom: 48 }}
         refreshControl={
@@ -189,7 +195,7 @@ export default function ConditionsScreen() {
 
             <ChaseIndexPanel chase={snapshot.current.chase} />
 
-            <Panel label="Instruments" icon="barometer" style={{ marginBottom: 12 }}>
+            <Panel tone="instrument-grid" label="Instruments" icon="barometer" style={{ marginBottom: 12 }}>
               <MetricGrid metrics={metrics} />
             </Panel>
 
@@ -207,6 +213,7 @@ export default function ConditionsScreen() {
           </>
         ) : null}
       </ScrollView>
+      </PanelSurface>
     </Screen>
   );
 }

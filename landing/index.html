@@ -142,10 +142,10 @@
   html[data-theme="atmospheric"][data-sky="day"] {
     /* The haze band at stop three is the horizon; without it the sky flattens
        into a two-colour wash, exactly as it does at night. */
-    --bg-1: #8DB0DF;
-    --bg-2: #A9C3E4;
-    --bg-3: #E8E4DA;
-    --bg-4: #F7F4EC;
+    --bg-1: #E0A93A;
+    --bg-2: #EDC266;
+    --bg-3: #F3DEAB;
+    --bg-4: #F7F3E8;
     --page: #F4F1E8;
     --band: #EDEAE0;
     --surface: #FFFFFF;
@@ -758,7 +758,7 @@
   .b-radar .mini-cta { background: #FF5A47; color: #05070B; border-radius: 22px; }
 
   /* B — Skyward */
-  .b-sky { background: linear-gradient(175deg, #8DB0DF 0%, #A9C3E4 42%, #E8E4DA 78%, #F7F4EC 100%); color: #14213A; }
+  .b-sky { background: linear-gradient(175deg, #E0A93A 0%, #EDC266 42%, #F3DEAB 78%, #F7F3E8 100%); color: #14213A; }
   .b-sky .board-tag { color: #14213A; }
   .b-sky .mini-temp, .b-sky .mini-score { font-family: 'Bricolage Grotesque', sans-serif; font-weight: 800; letter-spacing: -0.04em; }
   .b-sky .mini-score { color: #FF5A47; }
@@ -805,7 +805,7 @@
     box-shadow: 0 22px 50px rgba(20, 33, 58, 0.22);
   }
 
-  .phone--day   { background: linear-gradient(170deg, #8DB0DF, #A9C3E4 42%, #E8E4DA 80%, #F7F4EC); color: #14213A; }
+  .phone--day   { background: linear-gradient(170deg, #E0A93A, #EDC266 42%, #F3DEAB 80%, #F7F3E8); color: #14213A; }
   .phone--night { background: linear-gradient(170deg, #0B1026, #1B2347 55%, #2A2140); color: #EDF1FA; }
   .phone--card  { background: #FFF8EC; border: 3px solid #14140F; color: #14140F; }
 
@@ -915,18 +915,6 @@
   .sub-item .v { font-size: 19px; font-weight: 600; line-height: 1.4; word-break: break-word; }
   .sub-item .v a { text-decoration: none; }
   .sub-item .v a:hover { text-decoration: underline; }
-
-  .pending {
-    display: inline-block;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 13px;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    padding: 6px 12px;
-    border-radius: var(--radius-pill);
-    background: var(--t-active);
-    color: #14140F;
-  }
 
   table.timelog { width: 100%; border-collapse: collapse; margin-top: 18px; }
   table.timelog th, table.timelog td { text-align: left; padding: 12px 10px; border-bottom: 1px solid var(--line); font-size: 16px; }
@@ -1608,7 +1596,7 @@
       <span><b>React Native</b> Expo SDK 57</span>
       <span><b>TypeScript</b> strict</span>
       <span><b>Open-Meteo</b> keyless</span>
-      <span><b>413</b> unit tests</span>
+      <span><b>560</b> unit tests</span>
     </div>
   </div>
 </header>
@@ -1944,7 +1932,7 @@
 
       <div class="sub-item">
         <div class="k">4 · Screen recording</div>
-        <div class="v"><span class="pending">Link pending</span></div>
+        <div class="v"><a href="https://drive.google.com/file/d/1hHfLGWvkn_EwCxRvGiozFD_H-ZrF_eAD/view?usp=sharing" rel="noopener">Watch the walkthrough on Google Drive</a></div>
       </div>
     </div>
 

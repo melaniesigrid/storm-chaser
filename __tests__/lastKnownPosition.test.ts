@@ -17,6 +17,9 @@ type Module = typeof import('@/features/location/lastKnownPosition');
 function freshModule(): Module {
   let mod!: Module;
   jest.isolateModules(() => {
+    // `require` is the point: the module has to be re-evaluated inside the
+    // isolation, which a hoisted `import` cannot be.
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     mod = require('@/features/location/lastKnownPosition') as Module;
   });
   return mod;
@@ -136,7 +139,7 @@ describe('lastKnownPosition', () => {
 describe('useLastKnownPosition', () => {
   /** Renders the hook and records every value it saw, newest last. */
   function mountProbe() {
-    const seen: Array<Coordinates | null> = [];
+    const seen: (Coordinates | null)[] = [];
 
     function Probe() {
       seen.push(useLastKnownPosition());
@@ -151,7 +154,7 @@ describe('useLastKnownPosition', () => {
     return { seen, unmount: () => act(() => tree.unmount()) };
   }
 
-  const latest = (seen: Array<Coordinates | null>) => seen[seen.length - 1];
+  const latest = (seen: (Coordinates | null)[]) => seen[seen.length - 1];
 
   it('reads the fix that was already published before it mounted', () => {
     publishLastKnownPosition(TORONTO);

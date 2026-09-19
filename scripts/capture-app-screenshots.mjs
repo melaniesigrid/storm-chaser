@@ -1,5 +1,5 @@
 /**
- * Screenshots of the real app, at three viewports, straight from the source.
+ * Screenshots of the real app, at phone size, straight from the source.
  *
  *   npm run screenshots
  *
@@ -42,10 +42,13 @@ const GEO = {
   longitude: Number(process.env.CAPTURE_LON ?? -79.3832),
 };
 
+/**
+ * One viewport. Storm Chaser is a phone app -- it ships as an APK, its layout
+ * is a single column and its tab bar is at the bottom -- so a 1440px capture
+ * of it was only ever the same screen with more empty margin either side.
+ */
 const VIEWPORTS = {
   mobile: { width: 390, height: 844 },
-  tablet: { width: 820, height: 1180 },
-  desktop: { width: 1440, height: 900 },
 };
 
 /**
@@ -53,7 +56,20 @@ const VIEWPORTS = {
  * the only way to capture it: the app writes the flag the moment it finishes.
  */
 const SHOTS = [
-  { name: 'app-conditions', path: '/', viewports: ['mobile', 'tablet', 'desktop'], settle: 7000 },
+  { name: 'app-conditions', path: '/', viewports: ['mobile'], settle: 7000 },
+  /*
+   * The same screen on Field Card, which is the one theme that prints each
+   * card on its own stock. Two captures of Conditions is not a duplicate: it
+   * is the only way a still shows that the themes are whole designs rather
+   * than a palette swap.
+   */
+  {
+    name: 'app-conditions-field-card',
+    path: '/',
+    viewports: ['mobile'],
+    settle: 7000,
+    theme: 'field-card',
+  },
   { name: 'app-log', path: '/log', viewports: ['mobile'], settle: 5000 },
   { name: 'app-settings', path: '/settings', viewports: ['mobile'], settle: 5000 },
   { name: 'app-onboarding', path: '/', viewports: ['mobile'], settle: 4000, onboarded: false },
@@ -153,6 +169,15 @@ for (const shot of SHOTS) {
     if (shot.onboarded !== false) {
       // Skip the welcome flow for every screen but the one that is the flow.
       await page.addInitScript(() => localStorage.setItem('storm-chaser.onboarding.v1', 'done'));
+    }
+
+    if (shot.theme) {
+      // Same key the Appearance screen writes, so this is the app's own
+      // preference rather than a capture-only override.
+      await page.addInitScript(
+        (name) => localStorage.setItem('storm-chaser.theme.v1', name),
+        shot.theme,
+      );
     }
 
     await page.goto(`http://localhost:${PORT}${shot.path}`, { waitUntil: 'networkidle' });

@@ -14,12 +14,14 @@
   <img src="https://img.shields.io/badge/Expo_SDK-57-000020?style=flat-square&logo=expo&logoColor=white" alt="Expo SDK 57" />
   <img src="https://img.shields.io/badge/React_Native-0.86-61DAFB?style=flat-square&logo=react&logoColor=black" alt="React Native 0.86" />
   <img src="https://img.shields.io/badge/TypeScript-strict-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript strict" />
-  <img src="https://img.shields.io/badge/tests-534_passing-4FD1C5?style=flat-square" alt="534 tests passing" />
+  <img src="https://img.shields.io/badge/tests-560_passing-4FD1C5?style=flat-square" alt="560 tests passing" />
   <img src="https://img.shields.io/badge/API_keys-none_required-F5C242?style=flat-square" alt="No API keys required" />
   <img src="https://img.shields.io/badge/platforms-iOS_%7C_Android-14213A?style=flat-square" alt="iOS and Android" />
 </p>
 
 <h4>
+    <a href="https://drive.google.com/file/d/1hHfLGWvkn_EwCxRvGiozFD_H-ZrF_eAD/view?usp=sharing">Watch the Walkthrough</a>
+  <span> · </span>
     <a href="https://stormchaser-field.vercel.app">View Showcase</a>
   <span> · </span>
     <a href="docs/ARCHITECTURE.md">Documentation</a>
@@ -39,6 +41,7 @@
 # :notebook_with_decorative_cover: Table of Contents
 
 - [About the Project](#star2-about-the-project)
+  * [Walkthrough](#clapper-walkthrough)
   * [Screenshots](#camera-screenshots)
   * [Tech Stack](#space_invader-tech-stack)
   * [Features](#dart-features)
@@ -75,6 +78,17 @@ that works with no signal and no account.
 
 It is a judgement aid, not a forecast product, and it says so in the UI.
 
+<!-- Walkthrough -->
+### :clapper: Walkthrough
+
+**[Watch the screen recording (Google Drive)](https://drive.google.com/file/d/1hHfLGWvkn_EwCxRvGiozFD_H-ZrF_eAD/view?usp=sharing)**
+
+Recorded on a device, which is the only place the map tab is real: `react-native-maps`
+is native only, so the web export the stills below come from draws a stand-in in its
+place. The recording covers first launch and the location primer, live conditions and
+the Chase Index, the camera capture flow through to a saved report, the field log and
+the map, and the four themes.
+
 <!-- Screenshots -->
 ### :camera: Screenshots
 
@@ -83,7 +97,7 @@ Regenerate everything below with:
   npm run screenshots        the app itself, from source (scripts/capture-app-screenshots.mjs)
   npm run screenshots:site   the showcase site (scripts/capture-screenshots.mjs)
 Prerequisite: npx playwright install chromium
-App captures at 390x844, 820x1180 and 1440x900, device scale factor 2.
+App captures at 390x844, device scale factor 2 — Storm Chaser is a phone app.
 CAPTURE_LAT / CAPTURE_LON move the capture position; the weather is live.
 -->
 
@@ -93,15 +107,17 @@ images below cannot drift from the code — change a screen, run the script, the
 updates. The weather is live too: the Chase Index you see is whatever the atmosphere over
 the capture position was doing at the time.
 
-**Conditions** — 43.653° N, 79.383° W
+**Conditions** — 43.653° N, 79.383° W, on two of the four themes
 
-| Mobile — 390 × 844 | Tablet — 820 × 1180 |
+Storm Chaser ships as a phone app, so every capture is a phone: 390 × 844 at 2x. The two
+below are the same screen a second apart. Skyward Day generates its background from the
+observation and floats frosted panes in front of it; Field Card is printed stock, and
+gives every card its own colour off a twelve-stock palette so a column reads as a handful
+of collected cards rather than one long white sheet.
+
+| Skyward Day | Field Card |
 | :---: | :---: |
-| <img src="docs/screenshots/app-conditions-mobile.png" alt="Conditions tab on a phone: 17 degrees and overcast over a sky gradient, a Chase Index of 3 reading Nothing to chase, and the instruments grid" width="300" /> | <img src="docs/screenshots/app-conditions-tablet.png" alt="Conditions tab at tablet width, the same panels on a wider column with the instruments grid in two columns" width="380" /> |
-
-<div align="center">
-  <img src="docs/screenshots/app-conditions-desktop.png" alt="Conditions tab at 1440 by 900, panels stretched full width with the tab bar along the bottom" width="100%" />
-</div>
+| <img src="docs/screenshots/app-conditions-mobile.png" alt="Conditions tab on Skyward Day: the temperature and condition over a live sky gradient, with the Chase Index and instruments on frosted panes" width="300" /> | <img src="docs/screenshots/app-conditions-field-card-mobile.png" alt="The same Conditions tab on Field Card: cream paper, heavy ink outlines and hard offset shadows, each card printed on a different pale stock" width="300" /> |
 
 <details>
   <summary><b>More screens</b> — onboarding, the field log empty state, the theme picker</summary>
@@ -182,7 +198,7 @@ the capture position was doing at the time.
 <details>
   <summary>Tooling</summary>
   <ul>
-    <li><a href="https://jestjs.io/">Jest</a> via <a href="https://www.npmjs.com/package/jest-expo">jest-expo</a> — 534 tests, no renderer, no mocking framework</li>
+    <li><a href="https://jestjs.io/">Jest</a> via <a href="https://www.npmjs.com/package/jest-expo">jest-expo</a> — 560 tests, mostly pure functions, no mocking framework</li>
     <li><a href="https://github.com/kristerkari/react-native-svg-transformer">react-native-svg-transformer</a> so Meteocons import as components</li>
     <li><a href="https://playwright.dev/">Playwright</a> + <a href="https://necolas.github.io/react-native-web/">react-native-web</a> — the screenshot pipeline renders the real app in a browser</li>
     <li><a href="https://vercel.com/">Vercel</a> for the static showcase site in <code>landing/</code></li>
@@ -538,7 +554,7 @@ npx expo install --fix
 npm test
 ```
 
-534 tests across formatting, severity, mapping, the repository, the theme contract, the
+560 tests across formatting, severity, mapping, the repository, the theme contract, the
 icon mapping, the community layer and the storm legends. No renderer, no device, no
 mocking framework.
 
@@ -650,7 +666,7 @@ src/services/              Cross cutting: query client, network probe, cloud syn
 landing/                   The static showcase site. One HTML file, no build step.
 scripts/                   Screenshot capture: the app itself, and the showcase site.
 docs/                      Architecture notes, AI disclosure, time log, screenshots.
-__tests__/                 534 tests. Domain, data and theme layers.
+__tests__/                 560 tests. Domain, data and theme layers.
 ```
 
 `model/` never imports from `hooks/` or `components/`. That is what makes the interesting
@@ -700,7 +716,7 @@ The snapshot is copied onto the record at capture time rather than referenced.
 | Skeleton screens | Layout matched skeletons on both data screens |
 | Pull to refresh | Conditions and field log |
 | Cloud integration | Upload client plus a community feed; no keys, sample-backed unless configured |
-| Unit tests | 534, across formatting, severity, mapping, the repository, the theme contract, the icon mapping, the community layer, the storm legends and EXIF date resolution |
+| Unit tests | 560, across formatting, severity, mapping, the repository, the theme contract, the icon mapping, the community layer, the storm legends and EXIF date resolution |
 
 ### Known limits
 
@@ -709,8 +725,10 @@ The snapshot is copied onto the record at capture time rather than referenced.
   configured sync target exists.
 - **The network probe polls every 15 seconds** rather than subscribing to an event stream.
   A production build would use NetInfo and TanStack Query's `onlineManager`.
-- **No component rendering tests.** The suite has no renderer, which is why contrast and
-  icon mapping are asserted as pure functions instead. That is where the next hour goes.
+- **Component rendering is tested thinly.** Most of the suite asserts pure functions --
+  contrast, severity, mapping, the theme contract -- and only the text primitive and the
+  web map shim are mounted through a renderer. Broader screen-level rendering tests are
+  where the next hour goes.
 - **Community reports resolve from a bundled sample set**, because the brief asks for cloud
   integration code with no backend and no keys. They travel the same
   `fetchCommunityReports` signature and the same `Result` boundary a configured build would

@@ -127,7 +127,7 @@ next save.
 
 ## Testing approach
 
-534 tests over 26 suites, all targeting logic rather than pixels:
+560 tests over 28 suites, all targeting logic rather than pixels:
 
 - `format.test.ts` covers every readout the user sees, including negative zero,
   compass wrapping and missing values.

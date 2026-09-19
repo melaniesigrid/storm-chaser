@@ -1,32 +1,32 @@
 import type { ComponentType } from 'react';
 import type { SvgProps } from 'react-native-svg';
 
-import Barometer from '@meteocons/svg-static/fill/barometer.svg';
-import ClearDay from '@meteocons/svg-static/fill/clear-day.svg';
-import ClearNight from '@meteocons/svg-static/fill/clear-night.svg';
-import CodeYellow from '@meteocons/svg-static/fill/code-yellow.svg';
-import Compass from '@meteocons/svg-static/fill/compass.svg';
-import Drizzle from '@meteocons/svg-static/fill/drizzle.svg';
-import FogDay from '@meteocons/svg-static/fill/fog-day.svg';
-import FogNight from '@meteocons/svg-static/fill/fog-night.svg';
-import Hail from '@meteocons/svg-static/fill/hail.svg';
-import LightningBolt from '@meteocons/svg-static/fill/lightning-bolt.svg';
-import NotAvailable from '@meteocons/svg-static/fill/not-available.svg';
-import OvercastDay from '@meteocons/svg-static/fill/overcast-day.svg';
-import OvercastNight from '@meteocons/svg-static/fill/overcast-night.svg';
-import PartlyCloudyDay from '@meteocons/svg-static/fill/partly-cloudy-day.svg';
-import PartlyCloudyNight from '@meteocons/svg-static/fill/partly-cloudy-night.svg';
-import Rain from '@meteocons/svg-static/fill/rain.svg';
-import Raindrops from '@meteocons/svg-static/fill/raindrops.svg';
-import Sleet from '@meteocons/svg-static/fill/sleet.svg';
-import Snow from '@meteocons/svg-static/fill/snow.svg';
-import StarryNight from '@meteocons/svg-static/fill/starry-night.svg';
-import ThermometerCelsius from '@meteocons/svg-static/fill/thermometer-celsius.svg';
-import ThunderstormsDayRain from '@meteocons/svg-static/fill/thunderstorms-day-rain.svg';
-import ThunderstormsExtremeRain from '@meteocons/svg-static/fill/thunderstorms-extreme-rain.svg';
-import ThunderstormsNightRain from '@meteocons/svg-static/fill/thunderstorms-night-rain.svg';
-import Tornado from '@meteocons/svg-static/fill/tornado.svg';
-import Windsock from '@meteocons/svg-static/fill/windsock.svg';
+import Barometer from '@meteocons/svg-static/flat/barometer.svg';
+import ClearDay from '@meteocons/svg-static/flat/clear-day.svg';
+import ClearNight from '@meteocons/svg-static/flat/clear-night.svg';
+import CodeYellow from '@meteocons/svg-static/flat/code-yellow.svg';
+import Compass from '@meteocons/svg-static/flat/compass.svg';
+import Drizzle from '@meteocons/svg-static/flat/drizzle.svg';
+import FogDay from '@meteocons/svg-static/flat/fog-day.svg';
+import FogNight from '@meteocons/svg-static/flat/fog-night.svg';
+import Hail from '@meteocons/svg-static/flat/hail.svg';
+import LightningBolt from '@meteocons/svg-static/flat/lightning-bolt.svg';
+import NotAvailable from '@meteocons/svg-static/flat/not-available.svg';
+import OvercastDay from '@meteocons/svg-static/flat/overcast-day.svg';
+import OvercastNight from '@meteocons/svg-static/flat/overcast-night.svg';
+import PartlyCloudyDay from '@meteocons/svg-static/flat/partly-cloudy-day.svg';
+import PartlyCloudyNight from '@meteocons/svg-static/flat/partly-cloudy-night.svg';
+import Rain from '@meteocons/svg-static/flat/rain.svg';
+import Raindrops from '@meteocons/svg-static/flat/raindrops.svg';
+import Sleet from '@meteocons/svg-static/flat/sleet.svg';
+import Snow from '@meteocons/svg-static/flat/snow.svg';
+import StarryNight from '@meteocons/svg-static/flat/starry-night.svg';
+import ThermometerCelsius from '@meteocons/svg-static/flat/thermometer-celsius.svg';
+import ThunderstormsDayRain from '@meteocons/svg-static/flat/thunderstorms-day-rain.svg';
+import ThunderstormsExtremeRain from '@meteocons/svg-static/flat/thunderstorms-extreme-rain.svg';
+import ThunderstormsNightRain from '@meteocons/svg-static/flat/thunderstorms-night-rain.svg';
+import Tornado from '@meteocons/svg-static/flat/tornado.svg';
+import Windsock from '@meteocons/svg-static/flat/windsock.svg';
 
 import type { WeatherIconName } from './names';
 
@@ -38,17 +38,17 @@ import type { WeatherIconName } from './names';
  * those files render as static icons at a larger payload. Motion on the hero
  * condition comes from Lottie instead.
  *
- * Fill rather than flat. Flat draws a cloud as two solid pale shapes -- white
- * and #E6EFFC -- with no outline, which is invisible on anything light: on
- * Skyward Day the frosted pane composites to about #E1EAF7 and a 150px
- * overcast icon simply was not there. Fill draws the same cloud shaded from
- * #94A3B8 to #F3F7FE and strokes it in the slate, so it carries its own edge
- * onto a white card, a cream stock and a blue sky alike.
+ * Flat rather than fill because flat carries no gradients, which keeps these
+ * crisp at 28px in the forecast strip where a gradient would turn to mud.
  *
- * The flat set was originally chosen to stay crisp at 28px in the forecast
- * strip. Nothing in the app is drawn at 28px any more -- the strip is at 46 and
- * the smallest icon anywhere is the 30px bolt on a button -- so the gradient
- * has room to read rather than to muddy.
+ * The fill set was tried as an answer to pale clouds disappearing into pale
+ * cards and rejected: it lifts a cloud, which is drawn in white and #E6EFFC,
+ * by shading it to #94A3B8 and giving it an outline -- but it does the reverse
+ * to the instruments. Flat draws a barometer face in solid near-black; fill
+ * draws the same face in white with a thin rule around it, and the dial that
+ * was the strongest mark in the grid became the weakest. The clouds were fixed
+ * by taking the pale card out from behind them instead, which is a surface
+ * decision rather than an icon one -- see `conditionsSurface`.
  */
 const REGISTRY: Record<WeatherIconName, ComponentType<SvgProps>> = {
   'clear-day': ClearDay,

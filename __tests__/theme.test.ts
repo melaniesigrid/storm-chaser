@@ -25,7 +25,7 @@ import {
   THEME_STORAGE_KEY,
 } from '@/core/theme/themeStore';
 import { bleedFor, TEXT_VARIANTS, variantStyle } from '@/core/ui/Text';
-import { cardTint } from '@/features/storms/model/cardTint';
+import { cardTint } from '@/core/theme/cardTint';
 import { createMemoryStore, type KeyValueStore } from '@/core/storage/KeyValueStore';
 import type { ChaseLevel } from '@/features/weather/model/types';
 
@@ -280,13 +280,14 @@ describe.each(THEME_NAMES)('%s', (name) => {
   });
 
   /**
-   * The conditions hero drops its card only where there is a sky to drop it
-   * onto. The two are one decision -- a hero with no card over Broadcast's flat
-   * near-black is not a poster, it is a heading that lost its panel -- so they
-   * are pinned to each other rather than each set by hand and trusted to agree.
+   * The conditions screen drops its cards only where there is a sky to drop
+   * them onto. The two are one decision -- a readout with no cards over
+   * Broadcast's flat near-black is not a poster, it is a screen that lost its
+   * panels -- so they are pinned to each other rather than each set by hand and
+   * trusted to agree.
    */
-  it('puts the hero on the sky only where the theme generates one', () => {
-    expect({ name, sky: theme.heroSurface === 'sky' }).toEqual({
+  it('takes the cards away only where the theme generates a sky', () => {
+    expect({ name, sky: theme.conditionsSurface === 'sky' }).toEqual({
       name,
       sky: theme.atmosphere.kind !== 'none',
     });
@@ -919,6 +920,30 @@ describe('card stocks', () => {
     expect(cardTint('storm_abc', tints)).toBe(cardTint('storm_abc', tints));
     expect(cardTint('storm_abc', undefined)).toBeUndefined();
     expect(cardTint('storm_abc', [])).toBeUndefined();
+  });
+
+  /*
+   * The Conditions column is the one place a reader sees six Field Card stocks
+   * at once, and the point of the palette is lost the moment two adjacent
+   * cards land on the same one. The tones are fixed strings, so this is a
+   * property of the build rather than of the data -- which means it can be
+   * asserted here and will fail the day someone renames a tone into a
+   * collision.
+   */
+  it('prints the Conditions column on six different stocks', () => {
+    const tints = THEMES['field-card'].colors.cardTints;
+    const column = [
+      'conditions-hero',
+      'chase-index',
+      'instrument-grid',
+      'hourly',
+      'outlook',
+      'storm-lore',
+    ];
+    const stocks = column.map((tone) => cardTint(tone, tints));
+
+    expect(stocks.every((stock) => typeof stock === 'string')).toBe(true);
+    expect(new Set(stocks).size).toBe(column.length);
   });
 
   it('spreads ids across the whole palette rather than favouring one', () => {

@@ -11,7 +11,7 @@ import Animated, {
 
 import type { WeatherIconName } from '@/core/icons/names';
 import { useAppTheme } from '@/core/theme/useAppTheme';
-import { Panel, Text } from '@/core/ui';
+import { Panel, Text, usePanelStock, usePanelSurface } from '@/core/ui';
 
 import type { ChaseIndex, ChaseLevel } from '../model/types';
 
@@ -45,7 +45,12 @@ export function ChaseIndexPanel({ chase }: { chase: ChaseIndex }) {
   const tint = theme.colors.tier[chase.level];
 
   return (
-    <Panel label="Chase index" icon={LEVEL_ICON[chase.level]} style={{ marginBottom: 12 }}>
+    <Panel
+      tone="chase-index"
+      label="Chase index"
+      icon={LEVEL_ICON[chase.level]}
+      style={{ marginBottom: 12 }}
+    >
       <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 14 }}>
         <Text variant="score" color={theme.colors.tierText[chase.level]}>
           {String(chase.score)}
@@ -62,7 +67,6 @@ export function ChaseIndexPanel({ chase }: { chase: ChaseIndex }) {
             index={index}
             filled={chase.score >= (index + 1) * (100 / SEGMENTS)}
             tint={tint}
-            track={theme.colors.surfaceSunken}
           />
         ))}
       </View>
@@ -93,13 +97,28 @@ function Segment({
   index,
   filled,
   tint,
-  track,
 }: {
   index: number;
   filled: boolean;
   tint: string;
-  track: string;
 }) {
+  const { theme } = useAppTheme();
+
+  /**
+   * The empty half of the meter, resolved in here rather than in the panel
+   * above, because the answer is a property of the card this segment was
+   * printed on and only a child of the Panel can ask it.
+   *
+   * On a card it is that card's own recess -- the familiar cream on white, and
+   * a wash of the theme's ink on any of Field Card's other eleven stocks, so a
+   * cream tab never turns up on lilac. On the sky it cannot be a recess at
+   * all: an unlit segment has to read as the sky with a shadow over it, so it
+   * takes the shaded edge the glass is built from -- ink at a tenth in
+   * daylight, near-black at four in ten after dark.
+   */
+  const stock = usePanelStock();
+  const track = usePanelSurface() === 'sky' ? theme.glass.shade : stock.sunken;
+
   const reduceMotion = useReducedMotion();
   const progress = useSharedValue(filled && reduceMotion ? 1 : 0);
 

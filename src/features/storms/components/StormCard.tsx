@@ -5,7 +5,7 @@ import { useAppTheme } from '@/core/theme/useAppTheme';
 import { Text } from '@/core/ui';
 import { formatCoordinates, formatRelativeTime, formatSpeed } from '@/core/utils/format';
 
-import { cardTint } from '../model/cardTint';
+import { cardTint } from '@/core/theme/cardTint';
 import { chaseLevelForTier, describeStormType, iconForStormType } from '../model/stormTypes';
 import type { StormReport } from '../model/types';
 

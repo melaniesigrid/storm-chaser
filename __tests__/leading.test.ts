@@ -1,5 +1,5 @@
 import { THEMES, THEME_NAMES } from '@/core/theme/themes';
-import { TEXT_VARIANTS, leadingFor, variantStyle } from '@/core/ui/Text';
+import { MEASURED_FACES, TEXT_VARIANTS, inkFor, leadingFor, variantStyle } from '@/core/ui/Text';
 
 /**
  * The ink heights, restated here from the font files rather than imported
@@ -86,11 +86,34 @@ describe('vertical leading', () => {
   });
 
   /**
-   * A new theme bringing an unmeasured face is the way this regression comes
-   * back. Guessing a ratio would crop it silently at every size, so it throws.
+   * An unmeasured face errs tall rather than cropping. Getting this backwards
+   * -- falling back to something typical, or to the font size -- would crop
+   * silently at every size, which is the failure the table exists to end.
    */
-  it('refuses a face it has never measured rather than guessing', () => {
-    expect(() => leadingFor('SomeNewFace_400Regular', 24, 30)).toThrow(/FACE_INK/);
+  it('gives an unmeasured face the tallest ink it knows, never a crop', () => {
+    const tallest = Math.max(...MEASURED_FACES.map((face) => inkFor(face)));
+
+    expect(inkFor('SomeNewFace_400Regular')).toBe(tallest);
+    expect(leadingFor('SomeNewFace_400Regular', 24, 30)).toBe(Math.ceil(24 * tallest));
+  });
+
+  /**
+   * The fallback must never be load-bearing. Every family the four themes
+   * actually set has to carry a real measurement, or a face silently renders
+   * on Anton's metrics and nobody files a bug about leading being too loose.
+   */
+  it('has a real measurement for every face the themes set', () => {
+    const declared = new Set<string>();
+
+    for (const name of THEME_NAMES) {
+      for (const face of Object.values(THEMES[name].type)) {
+        if (typeof face === 'string') declared.add(face);
+      }
+    }
+
+    expect([...declared].sort()).toEqual(
+      [...declared].filter((face) => MEASURED_FACES.includes(face)).sort(),
+    );
   });
 
   /** Integer line heights: a fractional line box rounds against the glyph. */

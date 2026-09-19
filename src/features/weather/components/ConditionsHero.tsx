@@ -1,4 +1,4 @@
-import { View, type TextStyle } from 'react-native';
+import { type TextStyle } from 'react-native';
 
 import { WeatherIcon } from '@/core/icons/WeatherIcon';
 import { useAppTheme } from '@/core/theme/useAppTheme';
@@ -30,12 +30,12 @@ export interface ConditionsHeroProps {
  * which is the shape the marketing page uses and the reason it looks like a
  * poster rather than a table.
  *
- * What it is drawn ON is the theme's call -- see `heroSurface`. On Skyward
- * there is no card: Meteocons are mostly white and pale blue, the frosted pane
- * composites to near-white in daylight, and the result was a hero with an
- * invisible picture in it. The themes that generate their own sky put the
- * weather straight onto the sky instead, where a white cloud has somewhere to
- * be. Broadcast and Field Card keep the Panel.
+ * It is a Panel like every other block on the screen, and whether that Panel
+ * draws a surface is the theme's call -- see `conditionsSurface` and the
+ * `PanelSurface` the screen wraps its column in. On Skyward there is no card:
+ * Meteocons are mostly white and #E6EFFC, the frosted pane composites to
+ * near-white in daylight, and the result was a hero with an invisible picture
+ * in it.
  *
  * Every line is stretched to the full column and centred inside it rather than
  * shrink-wrapped by `alignItems: 'center'`. A shrink-wrapped box is measured
@@ -47,7 +47,7 @@ export interface ConditionsHeroProps {
  */
 export function ConditionsHero({ snapshot, place, coordinates }: ConditionsHeroProps) {
   const { theme } = useAppTheme();
-  const onSky = theme.heroSurface === 'sky';
+  const onSky = theme.conditionsSurface === 'sky';
 
   /**
    * On a card the supporting lines are muted, which is the right weight
@@ -107,18 +107,18 @@ export function ConditionsHero({ snapshot, place, coordinates }: ConditionsHeroP
     </>
   );
 
-  if (!onSky) {
-    return <Panel style={{ marginBottom: 12, alignItems: 'center' }}>{body}</Panel>;
-  }
-
-  /**
-   * The same padding the Panel would have applied, so the hero keeps its
-   * rhythm with the cards under it and Volt still overhangs the right edge by
-   * the same few points he always did.
-   */
   return (
-    <View style={{ padding: 16, paddingBottom: 24, marginBottom: 12, alignItems: 'center' }}>
+    <Panel
+      tone="conditions-hero"
+      style={{
+        marginBottom: 12,
+        alignItems: 'center',
+        // With no edge under it the hero needs the extra air itself, or the
+        // caption sits straight on top of the first panel head.
+        ...(onSky ? { paddingBottom: 24 } : null),
+      }}
+    >
       {body}
-    </View>
+    </Panel>
   );
 }

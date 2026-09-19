@@ -38,9 +38,9 @@
     "expo-image-picker": "~57.0.19",
     "expo-linear-gradient": "~57.0.2",
     "expo-linking": "~57.0.10",
-    "expo-location": "~57.0.18",
+    "expo-location": "~57.0.19",
     "expo-network": "~57.0.2",
-    "expo-router": "~57.0.21",
+    "expo-router": "~57.0.22",
     "expo-splash-screen": "~57.0.9",
     "expo-status-bar": "~57.0.1",
     "lottie-react-native": "~7.3.8",
@@ -70,6 +70,6 @@
     "react-native-svg-transformer": "^1.5.3",
     "react-test-renderer": "19.2.3",
     "sharp": "^0.35.4",
-    "typescript": "~5.9.2"
+    "typescript": "~6.0.3"
   }
 }

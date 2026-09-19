@@ -66,11 +66,13 @@ export interface ThemeColors {
    * Optional palette for cards that want to differ from one another rather than
    * repeat one surface.
    *
-   * Only Field Card defines it. That theme's argument is that a report is a
-   * collectible card, and a run of identical white rectangles is the one place
-   * the argument visibly failed. Every other theme leaves it undefined and gets
-   * `surface`, so this is an opt-in a theme makes rather than a behaviour
-   * components have to switch on a theme name to avoid.
+   * Only Field Card defines it. That theme's argument is that these are
+   * collected cards, and a run of identical white rectangles is the one place
+   * the argument visibly failed -- first in the field log, and just as plainly
+   * down the Conditions column. A report takes its stock from its id; a fixed
+   * panel takes its stock from its `tone`. Every other theme leaves this
+   * undefined and gets `surface`, so it is an opt-in a theme makes rather than
+   * a behaviour components have to switch on a theme name to avoid.
    *
    * Values must carry `text` at AA; the theme test asserts it.
    */
@@ -315,24 +317,26 @@ export interface ThemeGlass {
 }
 
 /**
- * Where the conditions hero is drawn.
+ * What a reading is drawn on.
  *
- * `card` puts it on a Panel like every other block on the screen. `sky` drops
- * the card and sets the place, the condition icon and the reading straight
- * onto the background.
+ * `card` is the column of panels every screen has always been: a surface per
+ * block, separated by its own fill and edge. `sky` takes the surfaces away and
+ * lets the background do that job, so the blocks are separated by air and by
+ * the weather moving between them.
  *
- * This is here rather than in the screen because it is a material decision,
- * not a layout one. Meteocons draw weather in white and pale blue, which is
- * most of a cloud's ink; on Skyward Day the frosted pane composites to roughly
- * #E1EAF7, so a 150px overcast icon was white on near-white and the hero
- * effectively had no picture in it. The themes whose background IS weather can
- * simply not put a pane between the two, and the same icon lands on blue.
+ * This is a theme decision rather than a screen one because it only works
+ * where the background is worth showing. Meteocons draw weather in white and
+ * #E6EFFC, which is most of a cloud's ink; Skyward Day's frosted pane
+ * composites to roughly #E1EAF7, so a 150px overcast icon was white on
+ * near-white and the hero had no picture in it at all -- and the same was true
+ * of every cloud in the panel heads under it. Taking the pane out puts all of
+ * them back on blue.
  *
- * Broadcast and Field Card keep the card: their grounds are flat near-black
- * and cream, the icon reads on both, and a hero with no card is a different
- * design from the lower third and the printed stock they are each modelled on.
+ * Broadcast and Field Card stay on cards. Their grounds are flat near-black
+ * and flat cream, so there is nothing behind the card to reveal, and both are
+ * modelled on things that ARE cards: a lower third and a printed stock.
  */
-export type ThemeHeroSurface = 'card' | 'sky';
+export type ThemeSurface = 'card' | 'sky';
 
 export interface Theme {
   name: ThemeName;
@@ -344,7 +348,11 @@ export interface Theme {
   brand: ThemeBrand;
   atmosphere: ThemeAtmosphere;
   glass: ThemeGlass;
-  heroSurface: ThemeHeroSurface;
+  /**
+   * The conditions screen honours this; the screens that are lists of records
+   * rather than a readout of the sky do not, because a record IS a card.
+   */
+  conditionsSurface: ThemeSurface;
   motion: ThemeMotion;
   radius: { panel: number; control: number };
   /** Field Card draws hard 3px outlines; Skyward draws hairlines or none. */
@@ -468,8 +476,23 @@ const skywardDay: Theme = {
   description: 'Bright, atmospheric',
   isDark: false,
   colors: {
-    background: '#F2F0E8',
-    backgroundGradient: ['#8DB0DF', '#A9C3E4', '#E8E4DA', '#F7F4EC'],
+    background: '#F4F0E4',
+    /**
+     * Golden hour rather than midday blue, and that is a contrast decision
+     * before it is a mood one.
+     *
+     * The old sky ran #8DB0DF at the top, which carried `textMuted` at 4.65:1 --
+     * a tenth over the AA floor, and the ceiling on how dark the blue could get
+     * without taking captions under it. Warm light buys the whole scale room:
+     * the same muted token reads at 5.3:1 on the gold and the ink at 7.5:1, so
+     * every line on the screen gained contrast by the sky changing colour
+     * rather than by the type getting heavier.
+     *
+     * It is also the ground the weather is drawn ON. Meteocons are cool --
+     * white cloud, #B0BCCD shadow, #E6EFFC fill -- and a cool cloud on a warm
+     * sky separates by hue, which is a channel a blue sky was not using at all.
+     */
+    backgroundGradient: ['#E0A93A', '#EDC266', '#F3DEAB', '#F7F3E8'],
     backgroundGradientLocations: [0, 0.42, 0.78, 1],
     surface: '#FFFFFF',
     surfaceSunken: '#EDEAE0',
@@ -522,7 +545,7 @@ const skywardDay: Theme = {
   atmosphere: {
     kind: 'sun',
     layers: [{ speed: 0.06, angle: 28, opacity: 0.12, scale: 160 }],
-    layerTint: '#FFF4D6',
+    layerTint: '#FFFBF0',
     lightning: { enabled: false, minGapMs: 0, maxGapMs: 0, bloom: '#FFFFFF' },
     clouds: { count: 2, speed: 0.04, blur: 28, tint: '#FFFFFF' },
     shimmer: { enabled: true, amplitude: 3, periodMs: 5200 },
@@ -543,7 +566,7 @@ const skywardDay: Theme = {
     rim: 'rgba(255, 255, 255, 0.92)',
     shade: 'rgba(20, 33, 58, 0.10)',
   },
-  heroSurface: 'sky',
+  conditionsSurface: 'sky',
   motion: SKYWARD_MOTION,
   radius: { panel: 24, control: 29 },
   borderWidth: 0,
@@ -643,7 +666,7 @@ const skywardNight: Theme = {
     rim: 'rgba(186, 209, 255, 0.34)',
     shade: 'rgba(5, 7, 14, 0.42)',
   },
-  heroSurface: 'sky',
+  conditionsSurface: 'sky',
   motion: SKYWARD_MOTION,
   radius: { panel: 24, control: 29 },
   borderWidth: 1,
@@ -739,7 +762,7 @@ const broadcast: Theme = {
     rim: '#FFFFFF',
     shade: '#000000',
   },
-  heroSurface: 'card',
+  conditionsSurface: 'card',
   motion: BROADCAST_MOTION,
   radius: { panel: 0, control: 0 },
   borderWidth: 4,
@@ -851,7 +874,7 @@ const fieldCard: Theme = {
     rim: '#14140F',
     shade: '#14140F',
   },
-  heroSurface: 'card',
+  conditionsSurface: 'card',
   motion: FIELD_CARD_MOTION,
   radius: { panel: 20, control: 28 },
   borderWidth: 3,
