@@ -281,5 +281,3 @@ and every legend photograph is public domain, CC0, CC BY or CC BY-SA, credited i
 ## Author
 
 **Melanie Arellano Baratto** — [@melaniesigrid](https://github.com/melaniesigrid)
-
-Built for the Speer Technologies mobile assessment.
